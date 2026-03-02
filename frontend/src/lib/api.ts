@@ -82,13 +82,15 @@ export interface AppRecord {
 }
 
 export interface QualityBreakdown {
-  visual_hierarchy: number;
+  layout_diversity: number;
+  visual_uniqueness: number;
   domain_specificity: number;
-  responsiveness: number;
+  navigation_correctness: number;
   interaction_richness: number;
-  component_completeness: number;
+  visual_richness: number;
+  component_variety: number;
   brand_cohesion: number;
-  output_format_compliance: number;
+  form_styling: number;
 }
 
 export interface GenerateResult {

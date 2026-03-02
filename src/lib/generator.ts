@@ -1,6 +1,7 @@
 import { prisma } from "./db.js";
 import { runGenerationPipeline } from "./pipeline.js";
 import { generateReactCode } from "./codeGenerator.js";
+import { gatherAppContext } from "./contextResearch.js";
 import type { GenerateResult } from "../types/index.js";
 import type { ProgressCallback } from "./progressEmitter.js";
 import { randomUUID } from "node:crypto";
@@ -14,11 +15,23 @@ export async function generateFromPrompt(
   // Opus is only used if explicitly requested — never auto-selected
   const resolvedModel = model === "opus" ? "opus" : "sonnet";
 
-  onProgress?.({ type: "status", message: "Scaffolding project..." });
+  onProgress?.({ type: "status", message: "Researching your idea..." });
+
+  // Step 0: Context research — understand the domain, competitors, terminology
+  let contextBrief = null;
+  try {
+    contextBrief = await gatherAppContext(prompt);
+    if (contextBrief) {
+      console.log("Context research complete:", contextBrief.must_have_features?.length, "features identified");
+      onProgress?.({ type: "status", message: "Research complete — planning your app..." });
+    }
+  } catch (e) {
+    console.warn("Context research failed (non-fatal):", e);
+  }
 
   // Step 1: Run reasoner pipeline (Haiku) to extract structured intent
   console.log("Starting reasoner pipeline...");
-  const { spec, intent } = await runGenerationPipeline(prompt);
+  const { spec, intent } = await runGenerationPipeline(prompt, contextBrief);
 
   // Emit narrative event — AI self-dialogue before the plan
   if (intent.narrative) {
@@ -37,13 +50,13 @@ export async function generateFromPrompt(
       app_name: intent.app_name_hint,
       domain: intent.domain,
       design: intent.design_philosophy,
-      tabs: intent.nav_tabs.map((t: { label: string; icon: string }) => t.label),
+      tabs: (intent.nav_items ?? intent.nav_tabs ?? []).map((t: { label: string; icon: string }) => t.label),
       features: intent.premium_features ?? [],
       feature_details: intent.feature_details ?? [],
     },
   });
 
-  onProgress?.({ type: "status", message: "Compiling components..." });
+  onProgress?.({ type: "status", message: "Generating application code..." });
 
   // Step 2: Generate real React code using the intent + context
   // onProgress is threaded through so code gen emits real-time "writing" events
@@ -58,7 +71,7 @@ export async function generateFromPrompt(
   let pipelineArtifact: unknown = null;
 
   try {
-    const codeResult = await generateReactCode(intent, prompt, resolvedModel, onProgress);
+    const codeResult = await generateReactCode(intent, prompt, resolvedModel, onProgress, contextBrief);
     if (codeResult) {
       generated_code = codeResult.generated_code;
       theme_color = codeResult.primary_color;
@@ -84,7 +97,7 @@ export async function generateFromPrompt(
   await prisma.app.deleteMany();
 
   // Step 4: Store in DB
-  onProgress?.({ type: "status", message: "Deploying to preview..." });
+  onProgress?.({ type: "status", message: "Saving your app..." });
   const app = await prisma.app.create({
     data: {
       name: spec.name,

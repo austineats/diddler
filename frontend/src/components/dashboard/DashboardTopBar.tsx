@@ -45,6 +45,9 @@ export function DashboardTopBar({
       </div>
 
       <div className="dash-topbar-right">
+        <Link to="/" className="dash-topbar-btn" style={{ textDecoration: 'none' }}>
+          + New
+        </Link>
         <button className="dash-topbar-btn" onClick={onShare}>
           {shareCopied ? 'Copied!' : 'Share'}
         </button>

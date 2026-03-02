@@ -57,7 +57,7 @@ export function GalleryPage() {
             {apps.map((app) => (
               <Link
                 key={app.id}
-                to={`/app/${app.id}`}
+                to={`/?app=${app.id}`}
                 className="gallery-card"
                 style={app.theme_color ? { '--card-accent': app.theme_color } as React.CSSProperties : undefined}
               >

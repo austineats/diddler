@@ -1,91 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Copy, Check, Download, Code, FileCode, FolderOpen } from 'lucide-react';
+import { parseVirtualFiles, buildFolderTree } from '../../../lib/codeParser';
 
 interface CodeSectionProps {
   code: string | undefined;
   appName: string;
-}
-
-interface VirtualFile {
-  path: string;
-  name: string;
-  folder: string;
-  code: string;
-}
-
-function classifyComponent(name: string): string {
-  if (name === 'App') return 'src/pages';
-  if (/Nav|Header|Footer|Sidebar|Layout|TopBar/i.test(name)) return 'src/components/layout';
-  if (/Card|List|Grid|Item|Badge|Tag|Chip|Row|Cell/i.test(name)) return 'src/components/ui';
-  if (/Modal|Dialog|Popup|Drawer|Sheet|Toast/i.test(name)) return 'src/components/overlay';
-  if (/Score|Ring|Chart|Graph|Meter|Gauge/i.test(name)) return 'src/components/data';
-  return 'src/components';
-}
-
-function parseVirtualFiles(code: string): VirtualFile[] {
-  const files: VirtualFile[] = [];
-  const lines = code.split('\n');
-
-  // Find all top-level function/const component declarations
-  const componentStarts: { name: string; lineIndex: number }[] = [];
-  const fnPattern = /^function\s+([A-Z][A-Za-z0-9]+)\s*\(/;
-  const constPattern = /^const\s+([A-Z][A-Za-z0-9]+)\s*=\s*(?:\(|function)/;
-
-  for (let i = 0; i < lines.length; i++) {
-    const fnMatch = lines[i].match(fnPattern);
-    const constMatch = lines[i].match(constPattern);
-    const match = fnMatch || constMatch;
-    if (match) {
-      componentStarts.push({ name: match[1], lineIndex: i });
-    }
-  }
-
-  if (componentStarts.length === 0) {
-    return [{ path: 'src/App.jsx', name: 'App.jsx', folder: 'src', code }];
-  }
-
-  // Everything before first component is "lib/utils.jsx"
-  if (componentStarts[0].lineIndex > 0) {
-    const utilsCode = lines.slice(0, componentStarts[0].lineIndex).join('\n').trim();
-    if (utilsCode) {
-      files.push({ path: 'src/lib/utils.jsx', name: 'utils.jsx', folder: 'src/lib', code: utilsCode });
-    }
-  }
-
-  // Each component gets its own virtual file
-  for (let i = 0; i < componentStarts.length; i++) {
-    const start = componentStarts[i].lineIndex;
-    const end = i < componentStarts.length - 1 ? componentStarts[i + 1].lineIndex : lines.length;
-    const name = componentStarts[i].name;
-
-    // Skip the ReactDOM.createRoot line — attach it to the App file
-    let componentCode = lines.slice(start, end).join('\n').trim();
-    const lastLine = lines[end - 1]?.trim() ?? '';
-    if (lastLine.startsWith('ReactDOM.createRoot') && i < componentStarts.length - 1) {
-      componentCode = lines.slice(start, end - 1).join('\n').trim();
-    }
-
-    const folder = classifyComponent(name);
-    files.push({ path: `${folder}/${name}.jsx`, name: `${name}.jsx`, folder, code: componentCode });
-  }
-
-  // Attach the ReactDOM.createRoot to the last file if present
-  const lastLine = lines[lines.length - 1]?.trim() ?? '';
-  if (lastLine.startsWith('ReactDOM.createRoot') && files.length > 0) {
-    files[files.length - 1].code += '\n\n' + lastLine;
-  }
-
-  return files;
-}
-
-function buildFolderTree(files: VirtualFile[]): Map<string, VirtualFile[]> {
-  const tree = new Map<string, VirtualFile[]>();
-  for (const f of files) {
-    const existing = tree.get(f.folder) ?? [];
-    existing.push(f);
-    tree.set(f.folder, existing);
-  }
-  return tree;
 }
 
 export function CodeSection({ code, appName }: CodeSectionProps) {
