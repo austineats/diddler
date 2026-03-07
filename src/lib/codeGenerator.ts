@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { randomUUID } from "node:crypto";
 import { appendFileSync } from "node:fs";
 import type { ReasonedIntent } from "./reasoner.js";
@@ -894,6 +893,7 @@ function emitVirtualBuildOperations(intent: ReasonedIntent, onProgress?: Progres
 // File-based diagnostic log (temporary) — writes to codegen-debug.log so we can inspect
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getUnifiedClient } from "./unifiedClient.js";
 const __diag_dir = dirname(fileURLToPath(import.meta.url));
 const DIAG_LOG = __diag_dir + "/../../codegen-debug.log";
 const DIAG_FILE_ENABLED = !!process.env.STARTBOX_DIAG_LOG;
@@ -1371,14 +1371,7 @@ export async function generateReactCode(
   onProgress?: ProgressCallback,
   contextBrief?: AppContextBrief | null,
 ): Promise<CodeGenerationResult | null> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
-
-  const client = new Anthropic({
-    apiKey,
-    maxRetries: 3,
-    ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-  });
+  const client = getUnifiedClient();
   const modelId = resolveModel("standard");
   const fastModelId = resolveModel("fast");
 

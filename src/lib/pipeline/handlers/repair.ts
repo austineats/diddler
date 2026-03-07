@@ -1,9 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { PipelineContext, StateTransition } from "../types.js";
 import { repairGeneratedCode } from "../../codeGenerator.js";
 import { scoreGeneratedCode, generateRetryFeedback, scoreFactoryDimensions } from "../../qualityScorer.js";
 import { runAllFixAgents } from "./fixAgents.js";
 import { resolveModel } from "../../modelResolver.js";
+import { getUnifiedClient } from "../../unifiedClient.js";
 
 /**
  * REPAIRING state: run specialized fix agents (deterministic regex-based fixes)
@@ -105,14 +105,10 @@ export async function handleRepair(ctx: PipelineContext): Promise<StateTransitio
 
   // Phase 2: LLM repair pass for issues that need creative judgment
   let candidateCode = agentFixedCode;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.KIMI_API_KEY;
   if (apiKey) {
-    const client = new Anthropic({
-      apiKey,
-      maxRetries: 3,
-      ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-    });
-    const modelId = resolveModel("standard");
+    const client = getUnifiedClient();
+    const modelId = resolveModel("fast");
 
     const qualityFeedback = generateRetryFeedback(
       ctx.qualityBreakdown,

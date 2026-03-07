@@ -1,8 +1,8 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { withTimeout } from "./llmTimeout.js";
 import { resolveModel } from "./modelResolver.js";
 import { extractJSON, extractTextFromResponse, llmLog } from "./llmCompat.js";
+import { getUnifiedClient } from "./unifiedClient.js";
 
 export const orchestrateInputSchema = z.object({
   prompt: z.string().min(1).max(4000),
@@ -141,16 +141,8 @@ export async function orchestrateChatInstruction(input: OrchestrateInput): Promi
   if (process.env.STARTBOX_ORCHESTRATOR_USE_LLM !== "true") {
     return deterministicFastOrchestrate(input);
   }
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return fallbackOrchestrate(input);
-
   try {
-    const client = new Anthropic({
-      apiKey,
-      maxRetries: 2,
-      ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-    });
+    const client = getUnifiedClient();
 
     const modelId = resolveModel("fast");
     llmLog("chatOrchestrator", { model: modelId, has_app: input.has_app, mode: input.workbench_mode ?? "none" });

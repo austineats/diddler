@@ -8,7 +8,7 @@ import { detectCapabilities, type LLMCapabilities } from "./llmCompat.js";
 export type ModelTier = "fast" | "standard" | "premium";
 
 const KIMI_DEFAULTS: Record<ModelTier, string> = {
-  fast: "kimi-k2.5",
+  fast: "moonshot-v1-128k",
   standard: "kimi-k2.5",
   premium: "kimi-k2.5",
 };

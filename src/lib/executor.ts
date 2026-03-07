@@ -1,6 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "./db.js";
 import type { AppSpec, RunResult } from "../types/index.js";
+import { getUnifiedClient } from "./unifiedClient.js";
 
 function sanitizeInput(value: string, maxLength = 10000): string {
   return value.replace(/\u0000/g, "").slice(0, maxLength);
@@ -49,7 +49,7 @@ export async function executeApp(
     });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.KIMI_API_KEY;
   const startTime = Date.now();
 
   let outputText: string;
@@ -60,13 +60,13 @@ export async function executeApp(
     const fieldSummary = Object.entries(inputs)
       .map(([k, v]) => `**${k}:** ${v}`)
       .join("\n\n");
-    outputText = `**[Mock Mode — No API Key]**\n\nThis is a placeholder response. Add \`ANTHROPIC_API_KEY\` to your \`.env\` to get real AI output.\n\n---\n\n${fieldSummary}`;
+    outputText = `**[Mock Mode — No API Key]**\n\nThis is a placeholder response. Add \`KIMI_API_KEY\` to your \`.env\` to get real AI output.\n\n---\n\n${fieldSummary}`;
     tokensUsed = 0;
   } else {
-    const client = new Anthropic({ apiKey, maxRetries: 0, ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}) });
+    const client = getUnifiedClient();
 
     const response = await client.messages.create({
-      model: process.env.AI_MODEL_FAST || "claude-haiku-4-5-20251001",
+      model: process.env.AI_MODEL_FAST || "moonshot-v1-128k",
       max_tokens: Math.min(screen.ai_logic.max_tokens, 2000),
       temperature: Math.min(screen.ai_logic.temperature, 0.9),
       system: screen.ai_logic.system_prompt,

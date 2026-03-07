@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { withTimeout } from "./llmTimeout.js";
 import { recordSpend } from "./costTracker.js";
+import { getUnifiedClient } from "./unifiedClient.js";
 
 const competitorSchema = z.object({
   name: z.string(),
@@ -223,16 +223,13 @@ const toolInputSchema = {
 };
 
 export async function gatherAppContext(prompt: string): Promise<AppContextBrief | null> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
-
-  const client = new Anthropic({ apiKey, maxRetries: 0, ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}) });
+  const client = getUnifiedClient();
   const timeoutMs = Number(process.env.STARTBOX_CONTEXT_TIMEOUT_MS ?? 45000);
 
   try {
     const response = await withTimeout(
       (signal) => client.messages.create({
-        model: process.env.AI_MODEL_FAST || "claude-haiku-4-5-20251001",
+        model: process.env.AI_MODEL_FAST || "moonshot-v1-128k",
         max_tokens: 3072,
         system: [
           {

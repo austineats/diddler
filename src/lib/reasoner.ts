@@ -1,10 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import type { AppContextBrief } from "./contextResearch.js";
 import { withTimeout } from "./llmTimeout.js";
 import { recordSpend, calculateCost } from "./costTracker.js";
 import { resolveModel, supportsToolUse, supportsCacheControl } from "./modelResolver.js";
 import { extractJSON, extractTextFromResponse, llmLog } from "./llmCompat.js";
+import { getUnifiedClient } from "./unifiedClient.js";
 
 const reasonedIntentSchema = z.object({
   normalized_prompt: z.string().min(1),
@@ -722,12 +722,7 @@ async function runReasoner(
   prompt: string,
   contextBrief?: AppContextBrief | null,
 ): Promise<ReasonedIntent | null> {
-  const apiKey = process.env.ANTHROPIC_API_KEY!;
-  const client = new Anthropic({
-    apiKey,
-    maxRetries: 3,
-    ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-  });
+  const client = getUnifiedClient();
   // Kimi K2.5 thinking models take ~90-120s — 30s default was causing timeouts
   const timeoutMs = Number(process.env.STARTBOX_REASONER_TIMEOUT_MS ?? 150000);
   const contextSection = buildContextSection(contextBrief);
@@ -753,7 +748,7 @@ export async function translateEnglishPromptWithReasoning(
   prompt: string,
   contextBrief?: AppContextBrief | null,
 ): Promise<ReasonedIntent | null> {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
+  if (!process.env.KIMI_API_KEY) return null;
 
   try {
     console.log("Starting reasoner pipeline...");

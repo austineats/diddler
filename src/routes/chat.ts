@@ -1,8 +1,8 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "../lib/db.js";
 import { z } from "zod";
+import { getUnifiedClient } from "../lib/unifiedClient.js";
 
 export const chatRouter = Router();
 
@@ -33,16 +33,12 @@ chatRouter.post("/:id/chat", chatRateLimiter, async (req, res) => {
   } catch {
     return res.status(400).json({ message: "Invalid request body" });
   }
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(503).json({ message: "AI service unavailable" });
-
-  const client = new Anthropic({ apiKey, maxRetries: 0, ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}) });
+  const client = getUnifiedClient();
   const startTime = Date.now();
 
   try {
     const response = await client.messages.create({
-      model: process.env.AI_MODEL_FAST || "claude-haiku-4-5-20251001",
+      model: process.env.AI_MODEL_FAST || "moonshot-v1-128k",
       max_tokens: 1500,
       system: body.system,
       messages: [{ role: "user", content: body.message }],

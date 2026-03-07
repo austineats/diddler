@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { PipelineContext, StateTransition } from "../types.js";
 import { gatherAppContext } from "../../contextResearch.js";
 import { resolveModel } from "../../modelResolver.js";
+import { getUnifiedClient } from "../../unifiedClient.js";
 
 /**
  * RESEARCHING state: gather competitive context and competitor visuals.
@@ -28,13 +28,9 @@ export async function handleResearch(ctx: PipelineContext): Promise<StateTransit
     try {
       ctx.onProgress?.({ type: "status", message: "Analyzing competitor interfaces..." });
       const { scrapeCompetitorVisuals } = await import("../../competitorScraper.js");
-      const apiKey = process.env.ANTHROPIC_API_KEY;
+      const apiKey = process.env.KIMI_API_KEY;
       if (apiKey) {
-        const visionClient = new Anthropic({
-          apiKey,
-          maxRetries: 3,
-          ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-        });
+        const visionClient = getUnifiedClient();
         const visuals = await scrapeCompetitorVisuals(
           ctx.contextBrief.competitive_landscape.slice(0, 3).map(c => ({ name: c.name })),
           visionClient,

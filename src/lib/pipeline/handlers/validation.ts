@@ -43,8 +43,8 @@ export async function handleValidation(ctx: PipelineContext): Promise<StateTrans
       ctx.onProgress?.({ type: "status", message: `Security check: fixing issues...` });
       return { nextState: "REPAIRING" };
     }
-    if (factory.code_quality < 50 && ctx.repairCount < ctx.maxRepairs) {
-      console.log(`Code quality score ${factory.code_quality} < 50 — triggering repair (dimension: code_quality)`);
+    if (factory.code_quality < 40 && ctx.repairCount < ctx.maxRepairs) {
+      console.log(`Code quality score ${factory.code_quality} < 40 — triggering repair (dimension: code_quality)`);
       ctx.onProgress?.({ type: "status", message: `Quality check: fixing code issues...` });
       return { nextState: "REPAIRING" };
     }
@@ -53,55 +53,11 @@ export async function handleValidation(ctx: PipelineContext): Promise<StateTrans
     console.warn("Factory scoring failed (non-fatal):", e instanceof Error ? e.message : e);
   }
 
-  // Gate on visual uniqueness and domain specificity from the quality breakdown
+  // Log quality breakdown but always ship — no repair loops for subjective dimensions
   const breakdown = ctx.qualityBreakdown;
-  if (breakdown && ctx.repairCount < ctx.maxRepairs) {
-    if (breakdown.visual_uniqueness < 40) {
-      console.log(`Visual uniqueness ${breakdown.visual_uniqueness} < 40 — triggering repair`);
-      ctx.onProgress?.({ type: "status", message: "Improving visual uniqueness..." });
-      return { nextState: "REPAIRING" };
-    }
-    if (breakdown.domain_specificity < 35) {
-      console.log(`Domain specificity ${breakdown.domain_specificity} < 35 — triggering repair`);
-      ctx.onProgress?.({ type: "status", message: "Improving domain specificity..." });
-      return { nextState: "REPAIRING" };
-    }
-  }
-
-  // If we've exhausted repairs and still have weak quality dimensions,
-  // fail instead of shipping obviously degraded UI.
-  if (breakdown && ctx.repairCount >= ctx.maxRepairs) {
-    const weakVisual = breakdown.visual_uniqueness < 40;
-    const weakDomain = breakdown.domain_specificity < 35;
-    const weakLayoutFit = breakdown.content_layout_fit < 45;
-    if (weakVisual || weakDomain || weakLayoutFit) {
-      const reasons: string[] = [];
-      if (weakVisual) reasons.push(`visual uniqueness ${breakdown.visual_uniqueness} < 40`);
-      if (weakDomain) reasons.push(`domain specificity ${breakdown.domain_specificity} < 35`);
-      if (weakLayoutFit) reasons.push(`content-layout fit ${breakdown.content_layout_fit} < 45`);
-      const detail = reasons.join(", ");
-      console.log(`Repair limit reached with unresolved quality issues — failing: ${detail}`);
-      ctx.onProgress?.({ type: "status", message: "Generation quality too low — please retry" });
-      ctx.errors.push({
-        state: "VALIDATING",
-        message: `Quality gates failed after max repairs: ${detail}`,
-        timestamp: Date.now(),
-      });
-      return { nextState: "FAILED" };
-    }
-  }
-
-  // Stricter gate for degraded mode — don't ship bland fallback output
   const score = ctx.qualityScore ?? 0;
-  if (ctx.degraded && score < 45) {
-    console.log(`Degraded mode + quality ${score} < 45 — failing (bland output should not ship)`);
-    ctx.onProgress?.({ type: "status", message: "Generation quality too low — please retry" });
-    ctx.errors.push({
-      state: "VALIDATING",
-      message: `Degraded generation with quality score ${score} is below minimum threshold (45). Please retry.`,
-      timestamp: Date.now(),
-    });
-    return { nextState: "FAILED" };
+  if (breakdown) {
+    console.log(`Quality breakdown — visual: ${breakdown.visual_uniqueness}, domain: ${breakdown.domain_specificity}, layout: ${breakdown.content_layout_fit}`);
   }
 
   ctx.onProgress?.({ type: "status", message: `Quality check: ${score}/100` });

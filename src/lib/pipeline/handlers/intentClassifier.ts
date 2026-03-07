@@ -1,5 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { recordSpend, calculateCost } from "../../costTracker.js";
+import { getUnifiedClient } from "../../unifiedClient.js";
 
 export type IntentClass = "build_new" | "modify_existing" | "ambiguous" | "out_of_scope";
 
@@ -40,18 +40,8 @@ Only use "ambiguous" for truly meaningless prompts (1-2 generic words).
 Only use "out_of_scope" for clearly non-app requests.`;
 
 export async function classifyIntent(prompt: string): Promise<ClassifiedIntent> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    // No API key — assume build_new
-    return { classification: "build_new", confidence: 0.5, constraints: [] };
-  }
-
-  const modelId = process.env.AI_MODEL_FAST || "claude-haiku-4-5-20251001";
-  const client = new Anthropic({
-    apiKey,
-    maxRetries: 0,
-    ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-  });
+  const modelId = process.env.AI_MODEL_FAST || "kimi-k2.5";
+  const client = getUnifiedClient();
 
   try {
     const response = await client.messages.create({

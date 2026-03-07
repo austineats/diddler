@@ -1,5 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { recordSpend } from "./costTracker.js";
+import { getUnifiedClient } from "./unifiedClient.js";
 
 export interface ClarifyResult {
   clear: boolean;
@@ -52,17 +52,11 @@ IMPORTANT:
 - Always respond with valid JSON only. No markdown, no explanation.`;
 
 export async function clarifyPrompt(prompt: string): Promise<ClarifyResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    // No API key — just pass through
-    return { clear: true };
-  }
-
-  const client = new Anthropic({ apiKey, maxRetries: 0, ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}) });
+  const client = getUnifiedClient();
 
   try {
     const response = await client.messages.create({
-      model: process.env.AI_MODEL_FAST || "claude-haiku-4-5-20251001",
+      model: process.env.AI_MODEL_FAST || "moonshot-v1-128k",
       max_tokens: 500,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],

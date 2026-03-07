@@ -1,9 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { PipelineV2Context, StateTransition } from "../types.js";
 import { repairGeneratedCode } from "../../codeGenerator.js";
 import { generateRetryFeedback, scoreFactoryDimensions, scoreGeneratedCode } from "../../qualityScorer.js";
 import { runAllFixAgents } from "../../pipeline/handlers/fixAgents.js";
 import { resolveModel } from "../../modelResolver.js";
+import { getUnifiedClient } from "../../unifiedClient.js";
 
 export async function handleRepair(ctx: PipelineV2Context): Promise<StateTransition> {
   if (!ctx.generatedCode || !ctx.intent || !ctx.qualityBreakdown) {
@@ -58,14 +58,10 @@ export async function handleRepair(ctx: PipelineV2Context): Promise<StateTransit
   }
 
   let candidateCode = agentFixedCode;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.KIMI_API_KEY;
   if (apiKey) {
-    const client = new Anthropic({
-      apiKey,
-      maxRetries: 3,
-      ...(process.env.ANTHROPIC_BASE_URL ? { baseURL: process.env.ANTHROPIC_BASE_URL } : {}),
-    });
-    const modelId = resolveModel("standard");
+    const client = getUnifiedClient();
+    const modelId = resolveModel("fast");
 
     const repairFeedback = generateRetryFeedback(
       ctx.qualityBreakdown,

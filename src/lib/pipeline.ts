@@ -25,10 +25,27 @@ function randomColor(): string {
   return FALLBACK_COLORS[Math.floor(Math.random() * FALLBACK_COLORS.length)];
 }
 
+const VALID_LAYOUTS = ["tool", "analyzer", "generator", "dashboard", "planner"] as const;
+type ValidLayout = typeof VALID_LAYOUTS[number];
+
+function sanitizeLayout(layout: string): ValidLayout {
+  if (VALID_LAYOUTS.includes(layout as ValidLayout)) return layout as ValidLayout;
+  // Map common LLM-generated layouts to closest valid one
+  const mapping: Record<string, ValidLayout> = {
+    browse: "dashboard", list: "dashboard", feed: "dashboard",
+    form: "tool", settings: "tool", profile: "tool", editor: "tool",
+    tracker: "analyzer", calendar: "planner", timeline: "planner",
+    chart: "analyzer", stats: "analyzer", analytics: "analyzer",
+    create: "generator", builder: "generator", compose: "generator",
+    schedule: "planner", plan: "planner", kanban: "planner",
+  };
+  return mapping[layout.toLowerCase()] ?? "dashboard";
+}
+
 function buildDeterministicAppSpec(intent: ReasonedIntent, originalPrompt: string): AppSpec {
   const screens = intent.nav_tabs.map((tab, i) => ({
     nav_id: sanitizeNavId(tab.id),
-    layout: tab.layout,
+    layout: sanitizeLayout(tab.layout),
     hero: {
       title: i === 0 ? intent.primary_goal.slice(0, 60) : tab.purpose.slice(0, 60),
       subtitle: i === 0 ? `Powered by AI for ${intent.domain}` : tab.purpose.slice(0, 120),
