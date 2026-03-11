@@ -1701,6 +1701,7 @@ export async function generateReactCode(
   model: "kimi" = "kimi",
   onProgress?: ProgressCallback,
   contextBrief?: AppContextBrief | null,
+  liveComponents?: Array<{ name: string; category: string; description: string; codeHint: string }> | null,
 ): Promise<CodeGenerationResult | null> {
   const client = getUnifiedClient();
   const modelId = resolveModel("standard");
@@ -1710,7 +1711,17 @@ export async function generateReactCode(
   // Select UI patterns once and use across both design architect and code gen
   const selectedUIPatterns = selectUIPatterns(4);
   console.log(`Selected UI patterns: ${selectedUIPatterns.map(p => p.name).join(', ')}`);
-  const systemPrompt = buildCodeGenSystemPrompt(themeStyle, selectedUIPatterns);
+  let systemPrompt = buildCodeGenSystemPrompt(themeStyle, selectedUIPatterns);
+
+  // Inject live 21st.dev components if available
+  if (liveComponents && liveComponents.length > 0) {
+    const { format21stDevComponents } = await import("./twentyFirstDevSearch.js");
+    const section = format21stDevComponents(liveComponents as any);
+    if (section) {
+      systemPrompt += `\n\n${section}`;
+      console.log(`[21st.dev] Injected ${liveComponents.length} live components into system prompt`);
+    }
+  }
 
   /* ---------------------------------------------------------------- */
   /*  Phase 1: Parallel Planning Agents (Design Architect + Content)   */

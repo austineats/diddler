@@ -33,6 +33,7 @@ export async function handleGeneration(ctx: PipelineContext): Promise<StateTrans
       ctx.model,
       ctx.onProgress,
       ctx.contextBrief,
+      ctx.twentyFirstDevComponents,
     );
 
     if (codeResult) {

@@ -202,5 +202,105 @@ export async function handleResearch(ctx: PipelineContext): Promise<StateTransit
     console.log(`Visual agent complete — ${allVisuals.length} total scraped, ${analyzed} visually analyzed`);
   }
 
+  // Step 3: Live search — Figma Community template + 21st.dev components (parallel)
+  // Falls back to built-in library if live search fails.
+  ctx.onProgress?.({ type: "status", message: "Sourcing design templates..." });
+
+  const { buildFigmaSearchQuery, searchFigmaCommunity } = await import("../../figmaCommunitySearch.js");
+  const { build21stDevSearchQuery, search21stDev } = await import("../../twentyFirstDevSearch.js");
+
+  const figmaQuery = buildFigmaSearchQuery(ctx.prompt);
+  const componentQuery = build21stDevSearchQuery(ctx.prompt);
+
+  // Run both searches in parallel (both are fail-safe)
+  const [figmaResult, components21st] = await Promise.all([
+    // Figma: use explicit key if provided, otherwise search community
+    ctx.figmaTemplateKey
+      ? (async () => {
+          try {
+            const { getTemplateAsContext } = await import("../../figmaTemplateCache.js");
+            const overlay = await getTemplateAsContext(ctx.figmaTemplateKey!);
+            if (overlay) return { contextOverlay: overlay, source: `cached: ${ctx.figmaTemplateKey}` };
+          } catch (e) {
+            console.warn("[Figma] Cached template lookup failed:", e);
+          }
+          return null;
+        })()
+      : searchFigmaCommunity(figmaQuery).then(
+          (r) => r ? { contextOverlay: r.contextOverlay, source: `community: ${r.template.file_name}` } : null,
+          (e) => { console.warn("[Figma Search] Error:", e); return null; },
+        ),
+    // 21st.dev component search
+    search21stDev(componentQuery).catch((e) => {
+      console.warn("[21st.dev] Search error:", e);
+      return [] as import("../../twentyFirstDevSearch.js").UIComponentResult[];
+    }),
+  ]);
+
+  // Merge Figma template into context (or fall back to built-in library)
+  try {
+    let templateOverlay: Record<string, unknown> | null = null;
+    let templateLabel = "";
+
+    if (figmaResult) {
+      templateOverlay = figmaResult.contextOverlay as Record<string, unknown>;
+      templateLabel = figmaResult.source;
+    }
+
+    if (!templateOverlay) {
+      // Fallback: built-in template library
+      const { matchTemplate, templateToContextOverlay } = await import("../../figmaTemplateLibrary.js");
+      const matched = matchTemplate(ctx.prompt);
+      templateOverlay = templateToContextOverlay(matched) as Record<string, unknown>;
+      templateLabel = `${matched.name} (built-in fallback)`;
+    }
+
+    if (templateOverlay) {
+      if (!ctx.contextBrief) {
+        const { contextBriefSchema } = await import("../../contextResearch.js");
+        const parsed = contextBriefSchema.safeParse(templateOverlay);
+        if (parsed.success) {
+          ctx.contextBrief = parsed.data;
+        } else {
+          console.warn("[Template] Zod validation failed, using overlay directly:", parsed.error.issues.map(i => i.message).join(", "));
+          // Use the overlay as-is — it has useful design data even if not fully schema-compliant
+          ctx.contextBrief = templateOverlay as any;
+        }
+      } else {
+        const overlay = templateOverlay as {
+          design_references?: typeof ctx.contextBrief.design_references;
+          layout_blueprint?: string;
+          ui_component_suggestions?: string[];
+          competitor_visuals?: unknown[];
+        };
+        if (overlay.design_references) {
+          ctx.contextBrief.design_references = overlay.design_references;
+        }
+        if (overlay.layout_blueprint) {
+          ctx.contextBrief.layout_blueprint = overlay.layout_blueprint;
+        }
+        if (overlay.ui_component_suggestions?.length) {
+          ctx.contextBrief.ui_component_suggestions = overlay.ui_component_suggestions;
+        }
+        if (overlay.competitor_visuals?.length) {
+          const existing = (ctx.contextBrief as Record<string, unknown>).competitor_visuals as unknown[] ?? [];
+          (ctx.contextBrief as Record<string, unknown>).competitor_visuals = [
+            ...overlay.competitor_visuals,
+            ...existing,
+          ];
+        }
+      }
+      console.log(`[Template] Merged "${templateLabel}" into context brief`);
+    }
+  } catch (e) {
+    console.warn("[Template] Merge failed (non-fatal):", e);
+  }
+
+  // Store 21st.dev components on context for code gen injection
+  if (components21st.length > 0) {
+    ctx.twentyFirstDevComponents = components21st;
+    console.log(`[21st.dev] ${components21st.length} components ready for code gen: ${components21st.map(c => c.name).join(", ")}`);
+  }
+
   return { nextState: "REASONING" };
 }

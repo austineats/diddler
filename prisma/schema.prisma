@@ -63,6 +63,22 @@ model AppVersion {
   @@map("app_versions")
 }
 
+model FigmaTemplate {
+  id              String   @id @default(uuid())
+  file_key        String   @unique
+  file_name       String
+  thumbnail_url   String?
+  design_tokens   Json
+  page_names      Json     // string[]
+  component_count Int      @default(0)
+  raw_metadata    Json?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@index([file_key])
+  @@map("figma_templates")
+}
+
 model PipelineRun {
   id                String   @id @default(uuid())
   app_id            String

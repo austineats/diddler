@@ -11,7 +11,7 @@ const competitorSchema = z.object({
   pricing_model: z.string(),
 });
 
-const contextBriefSchema = z.object({
+export const contextBriefSchema = z.object({
   competitive_landscape: z.array(competitorSchema).min(1).max(10).default([]),
   target_persona: z.object({
     role: z.string(),

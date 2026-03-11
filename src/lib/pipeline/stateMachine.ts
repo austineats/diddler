@@ -53,6 +53,7 @@ export function createPipelineContext(
   model: "kimi",
   onProgress?: ProgressCallback,
   signal?: AbortSignal,
+  figmaTemplateKey?: string | null,
 ): PipelineContext {
   return {
     runId: randomUUID(),
@@ -60,11 +61,13 @@ export function createPipelineContext(
     model,
     state: "INTAKE",
     stateHistory: [],
+    figmaTemplateKey: figmaTemplateKey ?? null,
     contextBrief: null,
     competitorVisuals: null,
     webSearchContext: null,
     intent: null,
     spec: null,
+    twentyFirstDevComponents: null,
     designBlueprint: null,
     contentMap: null,
     generatedCode: null,

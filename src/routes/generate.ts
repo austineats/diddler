@@ -5,12 +5,15 @@ import { generateRateLimiter, checkContentSafety } from "../lib/safety.js";
 import { canSpend, getDailySpend, getDailyCap } from "../lib/costTracker.js";
 import type { ProgressCallback } from "../lib/progressEmitter.js";
 import { resolveModel } from "../lib/modelResolver.js";
+import { getTemplateAsContext } from "../lib/figmaTemplateCache.js";
+import { parseFigmaUrl } from "../lib/figmaClient.js";
 
 export const generateRouter = Router();
 
 const generateBodySchema = z.object({
   prompt: z.string().min(10).max(4000),
   model: z.enum(["auto", "kimi", "sonnet", "opus"]).optional().default("auto"),
+  figma_template: z.string().max(500).optional(), // Figma file key or URL
 });
 
 function normalizeRequestedModel(model: "auto" | "kimi" | "sonnet" | "opus"): "auto" | "kimi" {
@@ -31,6 +34,11 @@ generateRouter.post("/", generateRateLimiter, async (req, res) => {
         message: `Daily API spend cap reached ($${getDailySpend().toFixed(2)} / $${getDailyCap()} limit). Try again tomorrow or raise STARTBOX_DAILY_SPEND_CAP_USD.`,
       });
     }
+
+    // Resolve Figma template key (if provided)
+    const figmaKey = body.figma_template
+      ? (parseFigmaUrl(body.figma_template) ?? body.figma_template)
+      : undefined;
 
     const wantsSSE = req.headers.accept?.includes("text/event-stream");
 
@@ -67,7 +75,7 @@ generateRouter.post("/", generateRateLimiter, async (req, res) => {
       };
 
       try {
-        const result = await generateFromPrompt(body.prompt, body.model, onProgress, abortController.signal);
+        const result = await generateFromPrompt(body.prompt, body.model, onProgress, abortController.signal, figmaKey);
         // Only emit done if we have actual generated code
         if (!disconnected) {
           if (result.generated_code) {
@@ -110,7 +118,7 @@ generateRouter.post("/", generateRateLimiter, async (req, res) => {
       // ── Standard JSON mode (backwards compatible) ──
       const routeTimeoutMs = Number(process.env.STARTBOX_ROUTE_TIMEOUT_MS ?? 300000);
       const result = await Promise.race([
-        generateFromPrompt(body.prompt, body.model),
+        generateFromPrompt(body.prompt, body.model, undefined, undefined, figmaKey),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error(`Generation timed out after ${routeTimeoutMs}ms`)), routeTimeoutMs),
         ),

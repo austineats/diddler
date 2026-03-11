@@ -2,6 +2,7 @@ import type { ReasonedIntent } from "../reasoner.js";
 import type { AppContextBrief } from "../contextResearch.js";
 import type { QualityBreakdown, PipelineRunArtifact, GenerateResult } from "../../types/index.js";
 import type { ProgressCallback } from "../progressEmitter.js";
+import type { UIComponentResult } from "../twentyFirstDevSearch.js";
 
 /* ------------------------------------------------------------------ */
 /*  Pipeline States                                                     */
@@ -39,6 +40,9 @@ export interface PipelineContext {
   state: PipelineState;
   stateHistory: StateEntry[];
 
+  // Figma template (optional — pre-cached design tokens)
+  figmaTemplateKey: string | null;
+
   // Artifacts accumulated across states
   contextBrief: AppContextBrief | null;
   competitorVisuals: unknown[] | null;
@@ -47,6 +51,9 @@ export interface PipelineContext {
   webSearchContext: string | null;
   intent: ReasonedIntent | null;
   spec: import("../../types/index.js").AppSpec | null;
+
+  // Live search results (Figma Community + 21st.dev)
+  twentyFirstDevComponents: UIComponentResult[] | null;
 
   // Design planning artifacts
   designBlueprint: unknown | null;

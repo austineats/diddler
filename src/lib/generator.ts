@@ -7,13 +7,14 @@ export async function generateFromPrompt(
   model: "auto" | "kimi" | "sonnet" | "opus" = "auto",
   onProgress?: ProgressCallback,
   signal?: AbortSignal,
+  figmaTemplateKey?: string | null,
 ): Promise<GenerateResult> {
   // Legacy aliases ("sonnet", "opus") are accepted for backward compatibility,
   // but generation is now always routed through the Kimi path.
   const resolvedModel: "kimi" = "kimi";
 
   // Create pipeline context and run through the state machine
-  const ctx = createPipelineContext(prompt, resolvedModel, onProgress, signal);
+  const ctx = createPipelineContext(prompt, resolvedModel, onProgress, signal, figmaTemplateKey);
   const result = await runStateMachine(ctx);
 
   if (result.state === "FAILED" || !result.result) {

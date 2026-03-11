@@ -11,6 +11,7 @@ import { shareRouter } from "./routes/share.js";
 import { chatRouter } from "./routes/chat.js";
 import { refineRouter } from "./routes/refine.js";
 import { clarifyRouter } from "./routes/clarify.js";
+import { figmaRouter } from "./routes/figma.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
@@ -30,6 +31,7 @@ app.use("/api/apps", chatRouter);
 app.use("/api/apps", refineRouter);
 app.use("/api/clarify", clarifyRouter);
 app.use("/api/share", shareRouter);
+app.use("/api/figma", figmaRouter);
 
 app.get("/health", async (_req, res) => {
   try {
