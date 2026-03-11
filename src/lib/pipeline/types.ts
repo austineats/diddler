@@ -42,6 +42,9 @@ export interface PipelineContext {
   // Artifacts accumulated across states
   contextBrief: AppContextBrief | null;
   competitorVisuals: unknown[] | null;
+
+  // Web search context — discovered product info for "like X" references
+  webSearchContext: string | null;
   intent: ReasonedIntent | null;
   spec: import("../../types/index.js").AppSpec | null;
 

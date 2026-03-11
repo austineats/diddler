@@ -8,7 +8,14 @@ import { runGenerationPipeline } from "../../pipeline.js";
 export async function handleReasoning(ctx: PipelineContext): Promise<StateTransition> {
   ctx.onProgress?.({ type: "status", message: "Scaffolding project..." });
 
-  const { spec, intent, degraded } = await runGenerationPipeline(ctx.prompt, ctx.contextBrief);
+  // Augment prompt with web search context so the reasoner knows what
+  // referenced products actually are (e.g., "Ditto AI" → dating app)
+  let reasonerPrompt = ctx.prompt;
+  if (ctx.webSearchContext) {
+    reasonerPrompt += ctx.webSearchContext;
+  }
+
+  const { spec, intent, degraded } = await runGenerationPipeline(reasonerPrompt, ctx.contextBrief);
 
   ctx.intent = intent;
   ctx.spec = spec;

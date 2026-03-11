@@ -62,6 +62,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     } else {
       window.react = window.React;
       window['react-dom'] = window.ReactDOM;
+      window['react/jsx-runtime'] = window.React;
     }
   </script>
   <script crossorigin src="https://cdn.jsdelivr.net/npm/lucide-react@0.575.0/dist/umd/lucide-react.js"></script>
@@ -268,7 +269,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     .hover\\:text-red-500:hover { color: #ef4444; }
     .hover\\:text-gray-700:hover { color: #374151; }
     .focus\\:outline-none:focus { outline: none; }
-    .focus\\:ring-2:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.3); }
+    .focus\\:ring-2:focus { box-shadow: 0 0 0 2px var(--sb-primary-glow, rgba(59,130,246,0.3)); }
     .relative { position: relative; }
     .absolute { position: absolute; }
     .fixed { position: fixed; }
@@ -289,7 +290,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     .bg-gradient-to-t { background-image: linear-gradient(to top, var(--tw-gradient-stops)); }
     .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
     .bg-gradient-to-bl { background-image: linear-gradient(to bottom left, var(--tw-gradient-stops)); }
-    .from-indigo-500 { --tw-gradient-from: #6366f1; --tw-gradient-to: rgba(99,102,241,0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+    .from-indigo-500 { --tw-gradient-from: #6366f1; --tw-gradient-to: rgba(59,130,246,0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
     .from-emerald-500 { --tw-gradient-from: #10b981; --tw-gradient-to: rgba(16,185,129,0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
     .from-green-500 { --tw-gradient-from: #22c55e; --tw-gradient-to: rgba(34,197,94,0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
     .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-to: rgba(59,130,246,0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
@@ -324,12 +325,12 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
 
     /* ── Per-archetype visual fingerprints (set via data-archetype on root div) ── */
     [data-archetype="marketplace"] { --sb-radius: 0.625rem; --sb-card-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06); }
-    [data-archetype="health_tracker"] { --sb-radius: 1rem; --sb-card-shadow: 0 4px 20px var(--sb-primary-glow, rgba(99,102,241,0.18)), 0 2px 6px rgba(0,0,0,0.06); }
+    [data-archetype="health_tracker"] { --sb-radius: 1rem; --sb-card-shadow: 0 4px 20px var(--sb-primary-glow, rgba(59,130,246,0.18)), 0 2px 6px rgba(0,0,0,0.06); }
     [data-archetype="finance_dashboard"] { --sb-radius: 0.5rem; --sb-card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); }
-    [data-archetype="social_feed"] { --sb-radius: 1rem; --sb-card-shadow: 0 4px 16px var(--sb-primary-glow, rgba(99,102,241,0.14)), 0 2px 6px rgba(0,0,0,0.06); }
+    [data-archetype="social_feed"] { --sb-radius: 1rem; --sb-card-shadow: 0 4px 16px var(--sb-primary-glow, rgba(59,130,246,0.14)), 0 2px 6px rgba(0,0,0,0.06); }
     [data-archetype="productivity_suite"] { --sb-radius: 0.625rem; --sb-card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06); }
     [data-archetype="learning_platform"] { --sb-radius: 0.75rem; --sb-card-shadow: 0 2px 10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
-    [data-archetype="creative_studio"] { --sb-radius: 0.75rem; --sb-card-shadow: 0 4px 16px var(--sb-primary-glow, rgba(99,102,241,0.15)), 0 2px 6px rgba(0,0,0,0.06); }
+    [data-archetype="creative_studio"] { --sb-radius: 0.75rem; --sb-card-shadow: 0 4px 16px var(--sb-primary-glow, rgba(59,130,246,0.15)), 0 2px 6px rgba(0,0,0,0.06); }
     [data-archetype="content_tool"] { --sb-radius: 0.625rem; --sb-card-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06); }
 
     /* ── Animation keyframes ── */
@@ -343,7 +344,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     @keyframes ringFill { from { stroke-dashoffset: var(--ring-circumference, 377); } to { stroke-dashoffset: var(--ring-offset, 0); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes glow { 0%, 100% { box-shadow: 0 0 20px var(--sb-primary-glow, rgba(99,102,241,0.15)); } 50% { box-shadow: 0 0 40px var(--sb-primary-glow, rgba(99,102,241,0.25)); } }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 20px var(--sb-primary-glow, rgba(59,130,246,0.15)); } 50% { box-shadow: 0 0 40px var(--sb-primary-glow, rgba(59,130,246,0.25)); } }
     @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     @keyframes borderGlow { 0%,100% { border-color: var(--sb-primary-glow); } 50% { border-color: var(--sb-primary); } }
@@ -354,19 +355,19 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
 
     /* ── Extended CSS variables (set by generated code) ── */
     :root {
-      --sb-secondary: var(--sb-primary, #8b5cf6);
+      --sb-secondary: var(--sb-primary, #3b82f6);
       --sb-accent: #f59e0b;
       --sb-surface: #ffffff;
       --sb-surface-elevated: #ffffff;
       --sb-text: #111827;
       --sb-text-secondary: #6b7280;
-      --sb-secondary-glow: rgba(139,92,246,0.15);
+      --sb-secondary-glow: var(--sb-primary-glow, rgba(59,130,246,0.15));
     }
 
     /* ── Gradient utilities ── */
     .sb-gradient { background: linear-gradient(135deg, var(--sb-primary), var(--sb-secondary)); color: white; }
-    .sb-gradient-subtle { background: linear-gradient(135deg, var(--sb-primary-bg, rgba(99,102,241,0.08)), transparent); }
-    .sb-gradient-radial { background: radial-gradient(ellipse at top, var(--sb-primary-bg, rgba(99,102,241,0.08)), transparent 70%); }
+    .sb-gradient-subtle { background: linear-gradient(135deg, var(--sb-primary-bg, rgba(59,130,246,0.08)), transparent); }
+    .sb-gradient-radial { background: radial-gradient(ellipse at top, var(--sb-primary-bg, rgba(59,130,246,0.08)), transparent 70%); }
     .sb-gradient-text { background: linear-gradient(135deg, var(--sb-primary), var(--sb-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .sb-gradient-border { border: 2px solid transparent; background-clip: padding-box; position: relative; }
     .sb-gradient-animated { background-size: 200% 200%; animation: gradientShift 3s ease infinite; }
@@ -374,7 +375,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     /* ── Glow effects ── */
     .sb-glow { box-shadow: 0 0 20px var(--sb-primary-glow), 0 0 60px var(--sb-primary-glow); }
     .sb-glow-sm { box-shadow: 0 0 10px var(--sb-primary-glow); }
-    .sb-glow-lg { box-shadow: 0 0 30px var(--sb-primary-glow), 0 0 80px var(--sb-primary-glow), 0 0 120px rgba(99,102,241,0.05); }
+    .sb-glow-lg { box-shadow: 0 0 30px var(--sb-primary-glow), 0 0 80px var(--sb-primary-glow), 0 0 120px var(--sb-primary-glow); }
     .sb-glow-pulse { animation: glow 2s ease-in-out infinite; }
 
     /* ── Dark theme surfaces ── */
@@ -436,7 +437,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       display: flex; align-items: center; justify-content: center;
       width: 48px; height: 48px; min-width: 48px;
       border-radius: 0.75rem;
-      background: var(--sb-primary-bg, rgba(99,102,241,0.08));
+      background: var(--sb-primary-bg, rgba(59,130,246,0.08));
     }
     .sb-icon-box-gradient {
       display: flex; align-items: center; justify-content: center;
@@ -476,7 +477,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       transition: border-color 150ms ease, box-shadow 150ms ease;
     }
     .glass-input::placeholder { color: rgba(0,0,0,0.35); }
-    .glass-input:focus { border-color: var(--sb-primary, #6366f1); outline: none; box-shadow: 0 0 0 3px var(--sb-primary-glow, rgba(99,102,241,0.15)); }
+    .glass-input:focus { border-color: var(--sb-primary, #3b82f6); outline: none; box-shadow: 0 0 0 3px var(--sb-primary-glow, rgba(59,130,246,0.15)); }
     textarea.glass-input { min-height: 100px; resize: vertical; }
 
     /* ── Design system: buttons ── */
@@ -487,13 +488,13 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       border: none; cursor: pointer; transition: all 150ms ease;
       white-space: nowrap;
     }
-    .glass-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--sb-surface, #fff), 0 0 0 4px var(--sb-primary, #6366f1); }
+    .glass-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--sb-surface, #fff), 0 0 0 4px var(--sb-primary, #3b82f6); }
     .glass-btn:active { transform: scale(0.97); }
     .glass-btn-primary {
-      background: var(--sb-primary, #6366f1); color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 0 20px var(--sb-primary-glow, rgba(99,102,241,0.2));
+      background: var(--sb-primary, #3b82f6); color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 0 20px var(--sb-primary-glow, rgba(59,130,246,0.2));
     }
-    .glass-btn-primary:hover { filter: brightness(1.1); box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 0 30px var(--sb-primary-glow, rgba(99,102,241,0.3)); transform: translateY(-1px); }
+    .glass-btn-primary:hover { filter: brightness(1.1); box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 0 30px var(--sb-primary-glow, rgba(59,130,246,0.3)); transform: translateY(-1px); }
     .glass-btn-primary:active { transform: scale(0.98) translateY(0); }
     .glass-btn-secondary {
       background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.1); color: rgba(0,0,0,0.7);
@@ -530,7 +531,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       font-size: 0.6875rem; font-weight: 500;
       background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.6);
     }
-    .sb-badge-primary { background: var(--sb-primary-bg, rgba(99,102,241,0.1)); color: var(--sb-primary, #6366f1); }
+    .sb-badge-primary { background: var(--sb-primary-bg, rgba(59,130,246,0.1)); color: var(--sb-primary, #3b82f6); }
 
     /* ── Design system: navigation ── */
     .sb-nav {
@@ -557,7 +558,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       cursor: pointer; transition: all 0.15s; border: none; background: none;
     }
     .sb-nav-tab:hover { color: rgba(0,0,0,0.7); background: rgba(0,0,0,0.04); }
-    .sb-nav-tab.active { color: var(--sb-primary, #111); background: var(--sb-primary-bg, rgba(99,102,241,0.1)); font-weight: 600; }
+    .sb-nav-tab.active { color: var(--sb-primary, #111); background: var(--sb-primary-bg, rgba(59,130,246,0.1)); font-weight: 600; }
 
     /* ── Nav layout variants ── */
     .sb-nav-centered {
@@ -673,7 +674,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     }
     .sb-progress-fill {
       height: 100%; border-radius: 9999px;
-      background: var(--sb-primary, #6366f1);
+      background: var(--sb-primary, #3b82f6);
       transition: width 0.6s ease-out;
     }
 
@@ -704,7 +705,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       background: white; transition: transform 0.2s;
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-    .sb-toggle.on { background: var(--sb-primary, #6366f1); }
+    .sb-toggle.on { background: var(--sb-primary, #3b82f6); }
     .sb-toggle.on::after { transform: translateX(18px); }
 
     /* ── Design system: tags ── */
@@ -717,7 +718,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     .sb-tag-success { background: #ecfdf5; color: #059669; }
     .sb-tag-warning { background: #fffbeb; color: #d97706; }
     .sb-tag-error { background: #fef2f2; color: #dc2626; }
-    .sb-tag-primary { background: var(--sb-primary-bg, rgba(99,102,241,0.1)); color: var(--sb-primary, #6366f1); }
+    .sb-tag-primary { background: var(--sb-primary-bg, rgba(59,130,246,0.1)); color: var(--sb-primary, #3b82f6); }
 
     /* ── Design system: table ── */
     .sb-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
@@ -766,13 +767,13 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       gap: 0.75rem; padding: 2.5rem 1.5rem;
       border: 2px dashed rgba(0,0,0,0.12);
       border-radius: 0.75rem;
-      background: var(--sb-primary-bg, rgba(99,102,241,0.04));
+      background: var(--sb-primary-bg, rgba(59,130,246,0.04));
       cursor: pointer; transition: all 0.2s ease;
       text-align: center; color: var(--sb-text-secondary, #6b7280);
       font-size: 0.875rem;
     }
     .sb-upload-zone:hover {
-      border-color: var(--sb-primary); background: var(--sb-primary-bg, rgba(99,102,241,0.08));
+      border-color: var(--sb-primary); background: var(--sb-primary-bg, rgba(59,130,246,0.08));
     }
 
     /* ── Compact inline stat ── */
@@ -796,16 +797,16 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     }
     .sb-chip:hover { background: rgba(0,0,0,0.09); border-color: rgba(0,0,0,0.15); }
     .sb-chip.active {
-      background: var(--sb-primary-bg, rgba(99,102,241,0.1));
-      color: var(--sb-primary, #6366f1);
-      border-color: var(--sb-primary, #6366f1);
+      background: var(--sb-primary-bg, rgba(59,130,246,0.1));
+      color: var(--sb-primary, #3b82f6);
+      border-color: var(--sb-primary, #3b82f6);
     }
 
     /* ── Result highlight card ── */
     .sb-result-highlight {
       display: flex; align-items: center; gap: 1.5rem;
       padding: 1.5rem;
-      background: linear-gradient(135deg, var(--sb-primary-bg, rgba(99,102,241,0.06)), transparent);
+      background: linear-gradient(135deg, var(--sb-primary-bg, rgba(59,130,246,0.06)), transparent);
       border: 1px solid rgba(0,0,0,0.06);
       border-radius: var(--sb-radius, 0.75rem);
     }
@@ -832,7 +833,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
     .sb-image-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.1); transform: translateY(-2px); }
     .sb-image-card-img {
       width: 100%; height: 0; padding-bottom: 60%;
-      background: linear-gradient(135deg, var(--sb-primary-bg, rgba(99,102,241,0.12)), rgba(0,0,0,0.03));
+      background: linear-gradient(135deg, var(--sb-primary-bg, rgba(59,130,246,0.12)), rgba(0,0,0,0.03));
       position: relative; display: flex; align-items: center; justify-content: center;
       overflow: hidden;
     }
@@ -914,7 +915,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       padding: 0.375rem; border-radius: 0.5rem; font-size: 0.8125rem;
       min-height: 44px; cursor: pointer; transition: background 150ms ease;
     }
-    .sb-calendar-cell:hover { background: var(--sb-primary-bg, rgba(99,102,241,0.08)); }
+    .sb-calendar-cell:hover { background: var(--sb-primary-bg, rgba(59,130,246,0.08)); }
     .sb-calendar-cell.active { background: var(--sb-primary); color: white; border-radius: 50%; }
     .sb-calendar-cell.has-event::after {
       content: ''; width: 4px; height: 4px; border-radius: 50%;
@@ -1038,7 +1039,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
   <div id="root">
     <div style="display:flex;align-items:center;justify-content:center;height:100vh">
       <div style="text-align:center;color:rgba(0,0,0,0.4)">
-        <div style="width:28px;height:28px;border:2px solid rgba(0,0,0,0.08);border-top-color:var(--sb-primary,#6366f1);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 0.75rem"></div>
+        <div style="width:28px;height:28px;border:2px solid rgba(0,0,0,0.08);border-top-color:var(--sb-primary,#3b82f6);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 0.75rem"></div>
         <div style="font-size:0.8125rem;font-family:system-ui,sans-serif">Loading app...</div>
       </div>
     </div>
@@ -1091,6 +1092,7 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
       }
     });
     window.lucideReact = window.LucideReact;
+    window['lucide-react'] = window.LucideReact;
 
     // Global error handler — only replaces DOM for pre-render crashes
     window.__sbRenderComplete = false;
@@ -1180,12 +1182,18 @@ function buildIframeHtml(code: string, appId: string, mobile: boolean): string {
         }
         return r.join(' ');
       },
-      // Image helper — real images via picsum.photos (seed-based, deterministic)
+      // Image placeholder — returns a data URI SVG with a "+" icon instead of fetching external images
       img: function(keyword, width, height) {
         var w = width || 400;
         var h = height || 300;
-        var seed = String(keyword || 'placeholder').toLowerCase().replace(/[^a-z0-9]/g, '-');
-        return 'https://picsum.photos/seed/' + seed + '/' + w + '/' + h;
+        var label = String(keyword || '').slice(0, 20);
+        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+          '<rect width="100%" height="100%" fill="' + (document.documentElement.style.getPropertyValue('--sb-primary-bg') || 'rgba(0,0,0,0.04)') + '"/>' +
+          '<line x1="' + (w/2) + '" y1="' + (h/2-16) + '" x2="' + (w/2) + '" y2="' + (h/2+16) + '" stroke="rgba(0,0,0,0.2)" stroke-width="2" stroke-linecap="round"/>' +
+          '<line x1="' + (w/2-16) + '" y1="' + (h/2) + '" x2="' + (w/2+16) + '" y2="' + (h/2) + '" stroke="rgba(0,0,0,0.2)" stroke-width="2" stroke-linecap="round"/>' +
+          (label ? '<text x="' + (w/2) + '" y="' + (h/2+36) + '" text-anchor="middle" fill="rgba(0,0,0,0.25)" font-family="system-ui" font-size="11">' + label + '</text>' : '') +
+          '</svg>';
+        return 'data:image/svg+xml,' + encodeURIComponent(svg);
       },
     };
 

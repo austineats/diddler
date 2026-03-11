@@ -27,7 +27,7 @@ export const screenSchema = z.object({
   }),
   input_fields: z.array(inputFieldSchema).min(1).max(6),
   ai_logic: aiLogicSchema,
-  output_format: z.enum(["markdown", "cards", "score_card", "report", "list", "plain"]),
+  output_format: z.enum(["markdown", "cards", "grid_cards", "score_card", "report", "list", "plain"]),
   output_label: z.string().min(1).max(60),
 });
 

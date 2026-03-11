@@ -18,8 +18,8 @@ function generateFallbackName(): string {
   return `${adj}${noun.toLowerCase()}`;
 }
 
-// Random color from a broad palette — not domain-mapped
-const FALLBACK_COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f97316", "#22c55e", "#0ea5e9", "#eab308", "#14b8a6", "#f43f5e", "#a855f7"];
+// Random color from a broad palette — no indigo/purple bias
+const FALLBACK_COLORS = ["#3b82f6", "#10b981", "#f97316", "#0ea5e9", "#ec4899", "#14b8a6", "#eab308", "#ef4444", "#06b6d4", "#84cc16"];
 
 function randomColor(): string {
   return FALLBACK_COLORS[Math.floor(Math.random() * FALLBACK_COLORS.length)];

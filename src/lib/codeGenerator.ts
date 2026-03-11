@@ -69,35 +69,312 @@ export interface CodeGenerationResult {
 /* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
+/*  21st.dev / Aceternity-inspired UI pattern library                    */
+/*  Each generation randomly selects patterns to ensure visual variety   */
+/* ------------------------------------------------------------------ */
+
+/** A self-contained UI pattern that can be built with CSS/Tailwind + React (no imports). */
+interface UIPattern {
+  name: string;
+  category: 'hero' | 'card' | 'background' | 'text' | 'interaction' | 'layout' | 'navigation';
+  description: string;
+  /** CSS/Tailwind implementation hint for the LLM */
+  implementation: string;
+}
+
+const UI_PATTERN_LIBRARY: UIPattern[] = [
+  // === HERO PATTERNS ===
+  {
+    name: "Gradient Mesh Hero",
+    category: "hero",
+    description: "Hero with overlapping radial gradient backgrounds creating a colorful mesh",
+    implementation: "Use 2-3 absolute-positioned divs with large radial-gradient backgrounds at different positions, blur-3xl, opacity-20. Static or animated via useEffect cycling through positions with inline style transitions. Content sits above with relative z-10.",
+  },
+  {
+    name: "Spotlight Hero",
+    category: "hero",
+    description: "Dark hero with a glowing radial light effect",
+    implementation: "Dark bg (#09090b). Large absolute div with radial-gradient(circle at center, rgba(primary,0.15), transparent 70%) and blur-2xl. Use Tailwind bg-clip-text text-transparent bg-gradient-to-r for gradient headline text. Content is relative z-10.",
+  },
+  {
+    name: "Aurora Hero",
+    category: "hero",
+    description: "Soft aurora-style colored blobs floating behind hero content",
+    implementation: "3 absolute divs with rounded-full, blur-3xl, opacity-20, different sizes and colors. Use useEffect + setInterval to slowly toggle translate-y values via inline style with transition: transform 8s ease. Container overflow-hidden.",
+  },
+  {
+    name: "Grid Dot Hero",
+    category: "hero",
+    description: "Clean hero with a subtle dot grid pattern background and radial fade",
+    implementation: "Background div with style={{ backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)', backgroundSize: '24px 24px' }}. Overlay div with radial-gradient(circle, white 40%, transparent) to fade edges. No animation needed.",
+  },
+  {
+    name: "Typewriter Hero",
+    category: "hero",
+    description: "Hero headline that types out character by character",
+    implementation: "useState for displayedText, useEffect with setInterval that adds one char from full string every 50ms. Render a blinking cursor span with opacity toggled via another setInterval (530ms). Clean, no CSS keyframes needed.",
+  },
+  {
+    name: "Split Panel Hero",
+    category: "hero",
+    description: "Two-column hero: content on one side, interactive preview/demo on the other",
+    implementation: "grid grid-cols-1 lg:grid-cols-2 gap-0. Left: text content with generous padding. Right: a live interactive mini-demo or feature preview with a subtle bg tint. No static images.",
+  },
+
+  // === CARD PATTERNS ===
+  {
+    name: "3D Tilt Cards",
+    category: "card",
+    description: "Cards that subtly tilt in 3D on hover using perspective transforms",
+    implementation: "Wrapper div with style={{ perspective: 800 }}. Card uses onMouseMove to get e.nativeEvent.offsetX/Y, compute rotateX = (y - h/2) / 20, rotateY = (x - w/2) / -20. Apply via inline style transform with transition: transform 0.15s. Reset on onMouseLeave.",
+  },
+  {
+    name: "Glassmorphism Cards",
+    category: "card",
+    description: "Frosted glass cards with backdrop-blur and semi-transparent backgrounds",
+    implementation: "Tailwind classes: bg-white/70 backdrop-blur-lg border border-white/50 rounded-2xl shadow-lg. For dark mode: bg-white/10 backdrop-blur-xl border-white/20. Pure Tailwind, no CSS needed.",
+  },
+  {
+    name: "Gradient Border Cards",
+    category: "card",
+    description: "Cards with colorful gradient borders using a wrapper technique",
+    implementation: "Outer div with p-[1px] rounded-xl style={{ background: 'linear-gradient(135deg, primaryColor, secondaryColor)' }}. Inner div with bg-white rounded-xl p-6 for the actual card content. Simple, no animation.",
+  },
+  {
+    name: "Spotlight Hover Cards",
+    category: "card",
+    description: "Cards that show a radial glow at the cursor position on hover",
+    implementation: "Track mouse with onMouseMove storing {x, y} in state. Render overlay div: style={{ background: `radial-gradient(circle at ${x}px ${y}px, rgba(primary,0.1), transparent 70%)`, opacity: isHovered ? 1 : 0, transition: 'opacity 0.2s' }}. Pointer-events-none on overlay.",
+  },
+  {
+    name: "Bento Grid Cards",
+    category: "card",
+    description: "Varied-size cards in a bento grid where featured items span 2 columns or rows",
+    implementation: "CSS grid with Tailwind: grid grid-cols-2 md:grid-cols-3 gap-4. First card uses md:col-span-2 md:row-span-2 for featured emphasis. Each card has different content density and bg tints.",
+  },
+  {
+    name: "Layered Cards",
+    category: "card",
+    description: "Cards with decorative offset layers behind them showing depth",
+    implementation: "relative wrapper. Two absolute divs behind the card: top-1 left-1 bg-primary/5 rounded-xl and top-2 left-2 bg-primary/3 rounded-xl with -z-10. Hover: use inline style transition to spread the layers further apart.",
+  },
+
+  // === BACKGROUND PATTERNS ===
+  {
+    name: "Animated Gradient Background",
+    category: "background",
+    description: "Slow-cycling gradient background for a section",
+    implementation: "useState for gradientAngle, useEffect with setInterval incrementing angle by 1 every 50ms. Apply style={{ background: `linear-gradient(${angle}deg, color1, color2, color3)` }}. Smooth infinite rotation.",
+  },
+  {
+    name: "Noise Texture Overlay",
+    category: "background",
+    description: "Subtle noise/grain texture overlay for tactile depth",
+    implementation: "Absolute overlay div with opacity-[0.03] pointer-events-none with style={{ backgroundImage: `url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")` }}.",
+  },
+  {
+    name: "Grid Lines Background",
+    category: "background",
+    description: "Clean engineering-style grid lines behind content, fading at edges",
+    implementation: "Absolute div with style={{ backgroundImage: 'linear-gradient(to right, #e5e7eb 1px, transparent 1px), linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)', backgroundSize: '40px 40px' }}. Overlay a radial-gradient div to fade edges.",
+  },
+  {
+    name: "Radial Glow Background",
+    category: "background",
+    description: "A soft radial glow behind the main content area",
+    implementation: "Absolute centered div with w-[600px] h-[600px] rounded-full, style={{ background: 'radial-gradient(circle, rgba(primary,0.12), transparent 70%)' }}, blur-3xl, -z-10. No animation, just ambient glow.",
+  },
+
+  // === TEXT EFFECTS ===
+  {
+    name: "Gradient Text",
+    category: "text",
+    description: "Key headlines with gradient-filled text",
+    implementation: "Tailwind only: text-transparent bg-clip-text bg-gradient-to-r from-[primary] to-[secondary]. Use inline style={{ backgroundImage: `linear-gradient(to right, ${P}, ${secondary})`, WebkitBackgroundClip: 'text', color: 'transparent' }} if dynamic colors.",
+  },
+  {
+    name: "Text Shimmer",
+    category: "text",
+    description: "A shimmer/shine sweep across headline text",
+    implementation: "useState for shimmerPos (0 to 200), useEffect with setInterval advancing pos by 2 every 30ms, reset to 0 at 200. Style: backgroundImage linear-gradient(90deg, currentColor 40%, rgba(255,255,255,0.7) ${pos}%, currentColor 60%), WebkitBackgroundClip: 'text', color: 'transparent'. backgroundSize: '200%'.",
+  },
+  {
+    name: "Counting Numbers",
+    category: "text",
+    description: "Stats that count up from 0 on mount",
+    implementation: "useState for displayed value, useEffect with requestAnimationFrame loop. Progress = Math.min(1, elapsed/1500). Use easeOut: 1 - Math.pow(1-progress, 3). Set displayed = Math.round(target * eased). Show with toLocaleString().",
+  },
+
+  // === INTERACTION PATTERNS ===
+  {
+    name: "Hover Scale Cards",
+    category: "interaction",
+    description: "Cards that gently lift and scale on hover",
+    implementation: "Tailwind only: hover:-translate-y-1 hover:shadow-xl transition-all duration-200. Add hover:border-primary/20 for subtle color shift. Simple, reliable, no JS.",
+  },
+  {
+    name: "Staggered List Entry",
+    category: "interaction",
+    description: "Items fade and slide up with staggered delays on mount",
+    implementation: "useState for mounted (false), useEffect sets mounted=true after 50ms. Each item div: style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: `all 0.4s ease ${index * 60}ms` }}.",
+  },
+  {
+    name: "Smooth Tab Indicator",
+    category: "interaction",
+    description: "Animated underline or pill that slides to the active tab",
+    implementation: "Array of useRef for tab elements. On tab change, read getBoundingClientRect() to get left + width. Render absolute div at bottom with style={{ left: tabLeft, width: tabWidth, transition: 'all 0.3s ease' }} and bg-primary h-0.5.",
+  },
+  {
+    name: "Scroll Progress Bar",
+    category: "interaction",
+    description: "Thin progress bar at top showing scroll position",
+    implementation: "useState for scrollPercent. useEffect adding scroll listener: percent = (scrollY / (document.body.scrollHeight - innerHeight)) * 100. Fixed div at top-0 left-0 with style={{ width: `${percent}%` }}, h-[2px], bg-primary, z-50.",
+  },
+
+  // === LAYOUT PATTERNS ===
+  {
+    name: "Floating Dock Navigation",
+    category: "navigation",
+    description: "macOS-style dock at bottom with icons that scale on hover",
+    implementation: "fixed bottom-4 left-1/2 -translate-x-1/2 z-50. Flex row inside bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg px-2 py-1.5. Each icon button: hover:scale-125 transition-transform duration-150. Active dot: absolute w-1 h-1 rounded-full bg-primary.",
+  },
+  {
+    name: "Side Panel Detail View",
+    category: "layout",
+    description: "List on left, detail panel slides in on right when item selected",
+    implementation: "Flex layout. Left list takes flex-1. Right panel: style={{ width: selectedItem ? 400 : 0, overflow: 'hidden', transition: 'width 0.3s ease' }}. Content inside with min-w-[400px] so it doesn't reflow.",
+  },
+  {
+    name: "Kanban Board Layout",
+    category: "layout",
+    description: "Horizontal scrolling columns with movable cards",
+    implementation: "flex flex-row gap-4 overflow-x-auto pb-4. Each column: min-w-[280px] flex-shrink-0 bg-gray-50 rounded-xl p-4. Cards move between columns via onClick updating a columnId field in state.",
+  },
+  {
+    name: "Infinite Marquee",
+    category: "layout",
+    description: "Auto-scrolling horizontal strip of items",
+    implementation: "Duplicate items array for seamless loop. useState for offset, useEffect with requestAnimationFrame subtracting 0.5 per frame. When offset < -halfWidth, reset to 0. Apply via transform: translateX(${offset}px). overflow-hidden on container.",
+  },
+  {
+    name: "Accordion Sections",
+    category: "layout",
+    description: "Collapsible sections with smooth height transitions",
+    implementation: "useState for openIndex. Content wrapper: style={{ maxHeight: isOpen ? 500 : 0, overflow: 'hidden', transition: 'max-height 0.3s ease' }}. Toggle icon rotates: style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}.",
+  },
+  {
+    name: "Tabbed Content Panels",
+    category: "layout",
+    description: "Tab switching with fade-in content transitions",
+    implementation: "useState for activeTab and fadeKey. On tab change, increment fadeKey. Content wrapper: key={fadeKey} with style={{ animation: 'none' }} but use opacity transition — start opacity-0, useEffect sets opacity-1 after 10ms via state.",
+  },
+];
+
+/**
+ * Select a random subset of UI patterns for a generation run.
+ * Picks one from each category to ensure variety without overwhelming.
+ */
+function selectUIPatterns(count: number = 4): UIPattern[] {
+  const categories = Array.from(new Set(UI_PATTERN_LIBRARY.map(p => p.category)));
+  const shuffled = categories.sort(() => Math.random() - 0.5);
+  const selected: UIPattern[] = [];
+
+  for (const cat of shuffled.slice(0, count)) {
+    const candidates = UI_PATTERN_LIBRARY.filter(p => p.category === cat);
+    selected.push(candidates[Math.floor(Math.random() * candidates.length)]);
+  }
+
+  // Always include one hero and one card pattern if not already present
+  if (!selected.some(p => p.category === 'hero')) {
+    const heroes = UI_PATTERN_LIBRARY.filter(p => p.category === 'hero');
+    selected[0] = heroes[Math.floor(Math.random() * heroes.length)];
+  }
+  if (!selected.some(p => p.category === 'card')) {
+    const cards = UI_PATTERN_LIBRARY.filter(p => p.category === 'card');
+    if (selected.length < count) {
+      selected.push(cards[Math.floor(Math.random() * cards.length)]);
+    } else {
+      selected[selected.length - 1] = cards[Math.floor(Math.random() * cards.length)];
+    }
+  }
+
+  return selected;
+}
+
+/** Format selected patterns into a prompt section for the LLM */
+function formatUIPatternPrompt(patterns: UIPattern[]): string {
+  return patterns.map((p, i) => [
+    `${i + 1}. **${p.name}** (${p.category})`,
+    `   ${p.description}`,
+    `   HOW: ${p.implementation}`,
+  ].join('\n')).join('\n\n');
+}
+
+/* ------------------------------------------------------------------ */
 /*  Randomized style seeds — injected per generation for variety        */
 /* ------------------------------------------------------------------ */
 
-export function buildCodeGenSystemPrompt(themeStyle: string): string {
+export function buildCodeGenSystemPrompt(themeStyle: string, uiPatterns?: UIPattern[]): string {
   const isDark = themeStyle === 'dark';
   const isVibrant = themeStyle === 'vibrant';
   const darkMode = isDark || isVibrant;
 
-  return `You generate COMPLETE, WORKING single-file React apps that look polished and functional.
-Your goal is to create something that looks UNIQUE — not templated, not generic. Every app should feel like it was custom-designed for its specific purpose.
+  // Select random UI patterns if none provided
+  const patterns = uiPatterns ?? selectUIPatterns(4);
+  const patternSection = `
+=== UI PATTERN LIBRARY (use these specific techniques to make this app look unique) ===
+You MUST incorporate at least 2-3 of these UI patterns into the app. These are CSS/Tailwind-only techniques — no external libraries needed.
+
+${formatUIPatternPrompt(patterns)}
+
+CRITICAL: All animations must use React state + inline style transitions OR Tailwind transition/hover utilities.
+NEVER write raw CSS @keyframes blocks, @property rules, or <style> tags — they break the in-browser Babel compiler.
+For animations, use: useState + useEffect + setInterval/requestAnimationFrame to update inline style values with CSS transition properties.
+No framer-motion or external animation libraries.
+`;
+
+  return `You generate COMPLETE, WORKING single-file React apps that look professionally designed and functional.
+Your goal is to create something that looks like a REAL product — not AI-generated, not templated, not generic startup aesthetic. Think Stripe, Linear, or Apple in design quality.
 
 === DESIGN PHILOSOPHY ===
-- BE CREATIVE. There is no single "right" layout. Choose what fits the CONTENT and domain, not a formula.
+- EDITORIAL, NOT GENERIC: Design like a professional studio, not a template marketplace. Avoid generic startup aesthetics, purple gradients, default Tailwind/shadcn looks, and stock imagery patterns.
+- INTENTIONAL DESIGN: Every visual choice should have a reason. No decorative gradients, no floating blobs, no generic hero sections with oversized headings and meaningless subtext.
 - WORKING FEATURES: Every button, card, and input must DO something. Build real interactivity, not static displays.
 - APP NAME: Use the app_name from the request. NEVER copy real brand names.
 - Let the domain and content guide your visual choices. A fitness app might use progress rings; a recipe app might use large food imagery frames; a finance app might use charts.
 - REFERENCE APPS: When the user says "like [Product]" or "similar to [Product]", use YOUR knowledge of that product. You know what Cal.ai, Notion, Spotify, Robinhood etc. are — build something in the SAME domain with the SAME core features. The user's original prompt is the PRIMARY source of truth.
 
-=== TYPOGRAPHY & VISUAL QUALITY ===
-Use typography that fits the domain and content hierarchy.
-- Do not default to one specific family for every app.
-- Mixing serif/display/sans is optional; choose only when it improves readability and brand tone.
-- Create clear text size hierarchy: large headings, medium section headers, readable body text.
+=== TYPOGRAPHY (CRITICAL — 2 FONTS MAX) ===
+- Use at most 2 font families per app. One for headings, one for body — or a single family for both.
+- Build a clear typographic hierarchy: display (hero), h1, h2, h3, body, caption — each with distinct size, weight, and spacing.
+- Choose fonts that fit the domain tone: geometric sans for tech/SaaS, humanist sans for consumer apps, serif for editorial/luxury.
+- Use letter-spacing (tracking) intentionally: tighter for large display text, normal for body.
+- NEVER use more than 3 font weights across the entire app.
 
-=== VISUAL DESIGN ===
-- Choose backgrounds, colors, and spacing that fit the app's domain and content
-- Make the first screen immediately useful — show the core experience, not a splash page
-- Use generous spacing between sections for readability
-- Ensure clear visual hierarchy through size, weight, and color contrast
+=== VISUAL DESIGN — EDITORIAL STYLE ===
+- LIMITED COLOR PALETTE: Use 3–4 colors maximum. Apply the 60-30-10 rule — 60% dominant (backgrounds), 30% secondary (surfaces/cards), 10% accent (CTAs, highlights).
+- Make the first screen immediately useful — show the core experience, not a splash page.
+- Use a clean grid layout with consistent spacing. Pick a spacing scale (e.g. 4/8/16/24/32/48/64) and stick to it.
+- Create custom-feeling components — not obvious default shadcn/Tailwind UI patterns. Adjust border-radius, padding, shadows, and proportions to feel bespoke.
+- SUBTLE INTERACTIONS ONLY: hover states with gentle opacity/color shifts, smooth transitions (150-200ms). No bouncing, no dramatic scaling, no gratuitous animations.
+- Use whitespace generously — let content breathe. Dense ≠ professional.
+- Prefer flat or very subtle shadows over heavy drop shadows or glowing borders.
+
+=== COLOR DIVERSITY (CRITICAL) ===
+NEVER default to indigo/purple for every app. Pick a unique primary color that fits the domain:
+  Health/Fitness → emerald (#10b981), teal (#14b8a6)
+  Finance/Business → blue (#3b82f6), slate (#475569)
+  Food/Recipe → orange (#f97316), amber (#f59e0b)
+  Social/Community → rose (#f43f5e), pink (#ec4899)
+  Education/Learning → violet (#8b5cf6), cyan (#06b6d4)
+  Productivity/Tools → sky (#0ea5e9), lime (#84cc16)
+  Gaming/Entertainment → fuchsia (#d946ef), red (#ef4444)
+  Travel/Lifestyle → teal (#14b8a6), amber (#f59e0b)
+  Music/Audio → purple (#a855f7), pink (#ec4899)
+  E-commerce/Shopping → orange (#f97316), emerald (#10b981)
+These are suggestions — be creative and pick what feels RIGHT for the specific app concept.
+The primary color should feel native to the domain, not generic.
+Apply the primary color SPARINGLY as the 10% accent — buttons, active states, key highlights. Never flood the UI with it.
 
 === ENVIRONMENT (pre-loaded globals — NEVER import/export/require) ===
 Globals: React, ReactDOM, window.LucideReact (icons), window.__sb (SDK), Tailwind CSS v3
@@ -134,13 +411,14 @@ Use var(--sb-primary) and window.__sb.color(P, opacity) for brand color consiste
 5. onClick must be a function reference: onClick={() => fn()}, NOT onClick={fn()}
 6. ALL hooks at TOP of component — never inside if/loop/ternary/handler
 7. Hook count must be identical on every render — no conditional hooks
-8. For images: if real images are unavailable, use clean placeholders; do not auto-fetch random photos unless explicitly requested.
+8. NEVER use external image URLs (no picsum.photos, unsplash, placeholder.com, or any other image service). For image placeholders, use a colored div with a Lucide "Plus" icon centered inside (e.g. <div className="flex items-center justify-center bg-gray-100 rounded-lg" style={{height:200}}><Plus size={24} className="text-gray-400" /></div>). This creates clean, consistent placeholder areas.
+9. NEVER use <style> tags, @keyframes, @property, or any raw CSS blocks — they crash the in-browser Babel compiler. ALL animations must use inline styles with CSS transition property + React state changes, or Tailwind transition/hover utilities.
 
 === THEME: ${themeStyle.toUpperCase()} ===
 ${darkMode
 ? `Dark mode is preferred for this concept. Choose contrast-safe surfaces and readable text.`
 : `Light mode is preferred for this concept. Use depth and hierarchy without forcing a single visual motif.`}
-
+${patternSection}
 ZERO emoji. ZERO markdown fences. Output ONLY the JSX code.`;
 }
 
@@ -209,26 +487,37 @@ function sanitizeIconDestructuring(code: string): string {
 /*  Agent Swarm: Design Architect                                      */
 /* ------------------------------------------------------------------ */
 
-const DESIGN_ARCHITECT_PROMPT = `You are an elite UI/UX architect. Given an app concept, produce a UNIQUE design blueprint.
+const DESIGN_ARCHITECT_PROMPT = `You are an elite UI/UX architect who designs like Stripe, Linear, and Apple — not like a template marketplace. Given an app concept, produce a UNIQUE design blueprint.
 
-YOUR GOAL: Design something that feels custom-built for the specific domain. The same app type can look completely different depending on your design choices.
+YOUR GOAL: Design something that looks professionally built by a design studio. It should feel INTENTIONAL and PREMIUM — not AI-generated, not generic startup aesthetic.
 
-Typography should be domain-appropriate and readable. Do not force one family across all apps.
+=== EDITORIAL DESIGN PRINCIPLES ===
+- LIMITED COLOR PALETTE: Use 3–4 colors maximum. Apply 60-30-10 rule — 60% dominant neutral, 30% secondary, 10% accent.
+- 2 FONTS MAX: One for headings, one for body (or a single family). Build hierarchy through size/weight, not font variety.
+- CLEAN GRID: Pick a consistent spacing scale (4/8/16/24/32/48/64px) and stick to it across all sections.
+- CUSTOM COMPONENTS: Don't use obvious default shadcn/Tailwind UI patterns. Adjust border-radius, padding, shadows, and proportions to feel bespoke.
+- SUBTLE INTERACTIONS: Hover states with gentle opacity/color shifts, smooth transitions (150-200ms). No bouncing, no dramatic scaling.
+- WHITESPACE: Let content breathe. Generous padding creates a premium feel.
 
-You can use Tailwind utilities and sb-* helper classes, but do not force a repeated template style.
-
-KEY PRINCIPLES:
-- DOMAIN-DRIVEN: let the content and purpose determine layout, density, typography, and color intensity. A data dashboard should feel different from a recipe browser.
-- UNIQUE: don't default to the same pattern for every app. Consider sidebars, split panels, masonry, bento grids, carousels, full-bleed sections, kanban boards — whatever fits the content.
-- VISUAL HIERARCHY: create clear focal points through size, weight, and spacing contrast.
-- SPACIOUS: generous padding and whitespace for readability.
+=== DOMAIN-DRIVEN CHOICES ===
+- Let the content and purpose determine layout, density, and color intensity. A data dashboard should feel different from a recipe browser.
+- Consider sidebars, split panels, masonry, bento grids, carousels, full-bleed sections, kanban boards — whatever fits the content.
 - For collection/browse apps: use enough sample items to fill the layout (6-10 items).
 - For tool/analyzer apps: focus on the input/output workflow, not item grids.
 
-COLOR APPLICATION:
-- Apply primary color strategically to text, borders, backgrounds — not just icons/buttons
+=== COLOR APPLICATION ===
+- NEVER default to indigo or purple — choose a primary color that fits the specific app domain
+- Apply primary color SPARINGLY as the 10% accent — CTAs, active states, key highlights
 - Use primary color tints (window.__sb.color(P, 0.08)) for subtle section backgrounds
-- Vary card styling where it creates meaningful visual distinction
+- Prefer flat or very subtle shadows over heavy drop shadows or glowing borders
+- Avoid gradient-heavy backgrounds — use solid colors or very subtle gradients
+
+=== TYPOGRAPHY ===
+- Choose fonts that match domain tone: geometric sans for tech, humanist for consumer, serif for editorial
+- Use letter-spacing intentionally: tighter for display text, normal for body
+- No more than 3 font weights across the entire app
+
+You can use Tailwind utilities and sb-* helper classes, but the result must NOT look like default Tailwind UI.
 
 Every section must specify: background class, card type, grid layout, spacing, and purpose.
 The interaction_map must describe what every button and clickable element does.
@@ -332,6 +621,12 @@ export async function planDesign(
     ];
     const designHint = DESIGN_VARIATIONS[Math.floor(Math.random() * DESIGN_VARIATIONS.length)];
 
+    // Select random UI patterns from the 21st.dev-inspired library for this generation
+    const selectedPatterns = selectUIPatterns(4);
+    const patternHints = selectedPatterns.map(p =>
+      `  - ${p.name}: ${p.description} (${p.implementation.slice(0, 120)}...)`
+    ).join('\n');
+
     const userMessage = [
       `Design a premium UI blueprint for: "${intent.primary_goal}"`,
       ...(intent.reference_app ? [`REFERENCE PRODUCT: "${intent.reference_app}" — Design the UI to match what users expect from this type of product.`] : []),
@@ -342,6 +637,9 @@ export async function planDesign(
       `Visual style: ${(intent.visual_style_keywords ?? []).join(', ')}`,
       ``,
       designHint,
+      ``,
+      `UI PATTERNS TO INCORPORATE (pick 2-3 that fit the domain):`,
+      patternHints,
       ``,
       `PAGES:`,
       ...intent.nav_tabs.map(t => `  ${t.id}: "${t.label}" (icon: ${t.icon}, layout: ${t.layout}) — ${t.purpose}`),
@@ -426,19 +724,25 @@ export async function planDesign(
 /* ------------------------------------------------------------------ */
 
 const CONTENT_STRATEGIST_PROMPT = `You are an elite SaaS copywriter and content strategist.
-Given an app concept, produce ALL the text content needed for a premium app that looks and reads like a real commercial product.
+Given an app concept, produce ALL the text content needed for a premium app that reads like it was written by a human, not generated by AI.
+
+=== COPY VOICE — CLEAR, HUMAN, NOT MARKETING FLUFF ===
+- Write like a REAL product, not a startup pitch deck. Avoid buzzwords like "revolutionize", "supercharge", "unleash", "game-changing", "next-gen", "seamlessly".
+- Be SPECIFIC and CONCRETE. "Track 30+ nutrients per meal" beats "Powerful nutrition tracking".
+- Use plain, confident language. Short sentences. Active voice. No exclamation marks in headlines.
+- Headlines should describe what the product DOES, not how it makes you feel.
 
 RULES:
-- Hero headlines must be bold, benefit-driven, and under 10 words. Specific to the domain — never generic.
+- Hero headlines: concise, specific, under 10 words. State the value clearly — no hype.
 - Hero headlines should have ONE accent phrase that could be visually emphasized. Structure the headline so one key phrase stands out.
-- Subheadlines expand on the value prop in 10-15 words
-- CTA labels use domain-specific action verbs — NEVER generic "Submit" or "Get Started"
-- Section titles should be descriptive and specific, not generic
-- Sample data: provide 6-10 items with rich fields (name, category, numeric metrics, status, tags). For tool/analyzer apps, provide fewer but more detailed items.
+- Subheadlines: expand on the value prop in 10-15 words. Be concrete, not vague.
+- CTA labels: use domain-specific action verbs — NEVER generic "Submit" or "Get Started". Prefer "Log meal", "Create plan", "View report".
+- Section titles: descriptive and specific. "Your weekly breakdown" not "Powerful Analytics".
+- Sample data: provide 6-10 items with rich, REALISTIC fields (name, category, numeric metrics, status, tags). Data should look like it came from a real user, not a demo. For tool/analyzer apps, provide fewer but more detailed items.
 - Badge labels should use domain terminology
 - Field labels must match what real products in this space use
-- Toast messages should be domain-specific
-- Empty state text should be encouraging and actionable
+- Toast messages should be domain-specific and conversational ("Meal logged" not "Success!")
+- Empty state text should be encouraging, actionable, and specific
 
 Produce COMPLETE content — every piece of text the developer needs. Be specific to the domain.
 ZERO emoji in any text content.`;
@@ -658,6 +962,11 @@ export function cleanGeneratedCode(rawCode: string): string {
   code = code.replace(/^import\s+['"][^'"]+['"];?\s*$/gm, ''); // bare imports like import 'react';
   code = code.replace(/^export\s+(default\s+)?/gm, '');
 
+  // Strip <style> JSX tags and raw CSS blocks — they crash in-browser Babel.
+  // LLMs sometimes emit @keyframes or @property despite being told not to.
+  code = code.replace(/<style[^>]*>\{?[`'"]\s*[\s\S]*?[`'"]\}?\s*<\/style>/g, '');
+  code = code.replace(/<style[^>]*>[\s\S]*?<\/style>/g, '');
+
   // Strip TypeScript syntax — Babel react+env presets can't parse TS.
   // These are common LLM mistakes even when told to output plain JSX.
   // IMPORTANT: Only strip COMPLETE syntactic units to avoid leaving dangling
@@ -683,8 +992,8 @@ export function cleanGeneratedCode(rawCode: string): string {
   code = code.replace(/(?<!\w)(?<!__sb\.)(?<!window\.__sb\.)useStore\s*\(/g, 'window.__sb.useStore(');
   code = code.replace(/(?<!\w)(?<!__sb\.)(?<!window\.__sb\.)toast\s*\(/g, 'window.__sb.toast(');
 
-  // Keep window.__sb.img() usage when generated — replacing all image tags was
-  // forcing generic placeholder UI across otherwise valid layouts.
+  // Strip external image URLs — replace with SDK placeholder helper
+  code = code.replace(/['"]https?:\/\/(?:picsum\.photos|images\.unsplash\.com|via\.placeholder\.com|source\.unsplash\.com)[^'"]*['"]/g, 'window.__sb.img()');
 
   // Ensure React destructuring exists — if imports were stripped, hooks would be undefined.
   // This must come before the render check since it prepends to the code.
@@ -698,19 +1007,40 @@ export function cleanGeneratedCode(rawCode: string): string {
     }
   }
 
-  // Ensure LucideReact destructuring exists — if imports were stripped, icons would be undefined.
+  // Ensure LucideReact destructuring exists AND includes ALL used icon names.
   // The iframe's LucideReact Proxy returns a fallback for any missing icon name, so we just
   // need the destructuring to exist — it doesn't matter which icons are listed.
-  if (code.length > 200 && !code.includes('window.LucideReact') && !code.includes('lucideReact')) {
-    // Extract PascalCase JSX tags that look like icons (not defined as components in the code)
-    const jsxTags = [...new Set((code.match(/<([A-Z][a-zA-Z]+)[\s/>]/g) || []).map(t => t.slice(1, -1)))];
+  if (code.length > 200) {
+    // Extract PascalCase names used as icons — JSX tags + variable references (icon={Plus}, icon: Plus)
+    const jsxTags = [...new Set([
+      ...(code.match(/<([A-Z][a-zA-Z]+)[\s/>]/g) || []).map(t => t.slice(1, -1)),
+      ...(code.match(/[iI]con[=:{]\s*\{?\s*([A-Z][a-zA-Z]+)/g) || []).map(m => m.replace(/^[iI]con[=:{]\s*\{?\s*/, '')),
+    ])];
     const definedComponents = new Set(
       (code.match(/(?:function|const)\s+([A-Z][a-zA-Z]+)/g) || []).map(m => m.split(/\s+/).pop() ?? '')
     );
     const iconNames = jsxTags.filter(t => !definedComponents.has(t) && t !== 'App');
-    if (iconNames.length > 0) {
-      console.warn(`Auto-injecting LucideReact destructuring for: ${iconNames.join(', ')}`);
-      code = `const {${iconNames.join(', ')}} = window.LucideReact || {};\n${code}`;
+
+    if (!code.includes('window.LucideReact') && !code.includes('lucideReact')) {
+      // No destructuring at all — inject one with all detected icons
+      if (iconNames.length > 0) {
+        console.warn(`Auto-injecting LucideReact destructuring for: ${iconNames.join(', ')}`);
+        code = `const {${iconNames.join(', ')}} = window.LucideReact || {};\n${code}`;
+      }
+    } else if (iconNames.length > 0) {
+      // Destructuring exists but may be missing some icons — merge missing ones in
+      const destructMatch = code.match(/const\s*\{([^}]+)\}\s*=\s*window\.LucideReact\s*\|\|\s*\{\};/);
+      if (destructMatch) {
+        const existing = new Set(
+          destructMatch[1].split(',').map((s: string) => s.trim().split(/[\s:]/)[0]).filter(Boolean)
+        );
+        const missing = iconNames.filter(n => !existing.has(n));
+        if (missing.length > 0) {
+          const allIcons = [...existing, ...missing].join(', ');
+          console.warn(`Merging missing icons into LucideReact destructuring: ${missing.join(', ')}`);
+          code = code.replace(destructMatch[0], `const {${allIcons}} = window.LucideReact || {};`);
+        }
+      }
     }
   }
 
@@ -1002,7 +1332,7 @@ async function runTextCodeGeneration(
             generated_code: cleaned,
             app_name: parsed.app_name ?? "App",
             tagline: parsed.tagline ?? "",
-            primary_color: parsed.primary_color ?? "#6366f1",
+            primary_color: parsed.primary_color ?? "#3b82f6",
             icon: parsed.icon ?? "Zap",
             pages: parsed.pages ?? [],
             quality_score: 0,
@@ -1048,7 +1378,7 @@ async function runTextCodeGeneration(
       generated_code: rawCode,
       app_name: "App",
       tagline: "",
-      primary_color: "#6366f1",
+      primary_color: "#3b82f6",
       icon: "Zap",
       pages: [],
       quality_score: 0,
@@ -1266,7 +1596,7 @@ export async function runToolCodeGeneration(
       generated_code: cleanCode,
       app_name: appName,
       tagline: raw.tagline ?? "",
-      primary_color: raw.primary_color ?? "#6366f1",
+      primary_color: raw.primary_color ?? "#3b82f6",
       icon: raw.icon ?? "Zap",
       pages: raw.pages ?? [],
       quality_score: 0,
@@ -1297,6 +1627,7 @@ export async function repairGeneratedCode(
 Return ONLY the complete fixed code. No explanation, no markdown fences.
 Preserve ALL existing functionality and the app's unique design — only fix the specific issues listed.
 The code runs via Babel in-browser — NO imports, NO exports, NO TypeScript. Plain JavaScript/JSX only.
+NEVER use <style> tags, @keyframes, or @property — they crash the Babel compiler. All animations must use inline styles with transition + React state.
 Keep ReactDOM.createRoot(...).render(<App />) as the last line.
 Required first lines: const {useState, useEffect, ...} = React; and const {IconName, ...} = window.LucideReact || {};
 
@@ -1376,7 +1707,10 @@ export async function generateReactCode(
   const fastModelId = resolveModel("fast");
 
   const themeStyle = intent.theme_style ?? 'light';
-  const systemPrompt = buildCodeGenSystemPrompt(themeStyle);
+  // Select UI patterns once and use across both design architect and code gen
+  const selectedUIPatterns = selectUIPatterns(4);
+  console.log(`Selected UI patterns: ${selectedUIPatterns.map(p => p.name).join(', ')}`);
+  const systemPrompt = buildCodeGenSystemPrompt(themeStyle, selectedUIPatterns);
 
   /* ---------------------------------------------------------------- */
   /*  Phase 1: Parallel Planning Agents (Design Architect + Content)   */
@@ -1534,9 +1868,15 @@ export async function generateReactCode(
       `${JSON.stringify(contentMap.sample_data.slice(0, 6), null, 2)}`,
       ``,
     ] : []),
+    // UI pattern hints — same patterns used in system prompt, reinforced here
+    `=== UI PATTERNS TO IMPLEMENT (make this app visually unique) ===`,
+    `Incorporate at least 2 of these specific techniques:`,
+    ...selectedUIPatterns.map(p => `  - ${p.name}: ${p.description}`),
+    `These are CSS-only techniques (no external libraries). See the system prompt for implementation details.`,
+    ``,
     `RULES:`,
     `- Build WORKING FEATURES with real interactivity, not static displays`,
-    `- If images are needed and unavailable, use neutral placeholders that fit the visual system`,
+    `- NEVER use external image URLs. For image placeholders, use a colored div with a centered Plus icon (<Plus size={24} />) — clean and consistent`,
     `- Every button/card must be interactive — onClick that changes state`,
     `- Use window.__sb.useStore() for persistent data, window.__sb.toast() for feedback`,
     `- Show the core experience on first render — the user should immediately see and interact with the main feature`,

@@ -62,6 +62,7 @@ export function createPipelineContext(
     stateHistory: [],
     contextBrief: null,
     competitorVisuals: null,
+    webSearchContext: null,
     intent: null,
     spec: null,
     designBlueprint: null,

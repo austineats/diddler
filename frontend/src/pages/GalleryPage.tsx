@@ -64,7 +64,7 @@ export function GalleryPage() {
                 <div className="gallery-card-top">
                   <div
                     className="gallery-card-color-bar"
-                    style={{ background: app.theme_color ?? '#6366f1' }}
+                    style={{ background: app.theme_color ?? '#3b82f6' }}
                   />
                   <div className="gallery-card-icon">
                     {app.name.charAt(0).toUpperCase()}

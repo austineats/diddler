@@ -69,6 +69,72 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Respons
   }
 }
 
+/**
+ * Capture a specific URL directly (used when the user references a site explicitly).
+ * Unlike captureCompetitor(), this takes a full URL instead of guessing from a name.
+ */
+export async function captureDirectUrl(url: string, label?: string): Promise<RawCapture> {
+  const name = label ?? new URL(url).hostname.replace(/^www\./, "");
+  const result: RawCapture = { name, url, screenshotBase64: null, html: null };
+
+  const screenshotUrl = `https://image.thum.io/get/width/1280/crop/900/${url}`;
+  const [screenshotResult, htmlResult] = await Promise.allSettled([
+    fetchWithTimeout(screenshotUrl, 12000).then(async (res) => {
+      if (!res.ok) return null;
+      const buf = await res.arrayBuffer();
+      return Buffer.from(buf).toString("base64");
+    }),
+    fetchWithTimeout(url, 8000).then(async (res) => {
+      if (!res.ok) return null;
+      const text = await res.text();
+      return text.slice(0, 80000); // Allow more HTML for direct references
+    }),
+  ]);
+
+  if (screenshotResult.status === "fulfilled" && screenshotResult.value) {
+    result.screenshotBase64 = screenshotResult.value;
+  }
+  if (htmlResult.status === "fulfilled" && htmlResult.value) {
+    result.html = htmlResult.value;
+  }
+
+  return result;
+}
+
+/**
+ * Full scrape + vision analysis for a single directly-referenced URL.
+ * Returns a CompetitorVisual with priority analysis data.
+ */
+export async function scrapeReferenceUrl(
+  url: string,
+  label: string,
+  client: Anthropic,
+  modelId: string,
+): Promise<CompetitorVisual | null> {
+  try {
+    const capture = await captureDirectUrl(url, label);
+
+    const htmlMeta = capture.html
+      ? extractHtmlMetadata(capture.html)
+      : { colors: [], og_image: null, layout_signals: [], meta_description: "" };
+
+    let screenshot_analysis: ScreenshotAnalysis | null = null;
+    if (capture.screenshotBase64) {
+      screenshot_analysis = await analyzeScreenshot(client, modelId, label, capture.screenshotBase64);
+    }
+
+    return {
+      name: label,
+      url,
+      screenshot_analysis,
+      ...htmlMeta,
+    };
+  } catch (e) {
+    console.warn(`Reference URL scrape failed for ${url}:`, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
 async function captureCompetitor(name: string): Promise<RawCapture> {
   const url = resolveCompetitorUrl(name);
   const result: RawCapture = { name, url, screenshotBase64: null, html: null };

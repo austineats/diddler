@@ -84,7 +84,16 @@ export type ReasonedIntent = z.infer<typeof reasonedIntentSchema>;
 
 const REASONER_SYSTEM_PROMPT = `You are an elite AI product designer who deeply understands consumer apps, SaaS tools, and AI services.
 
-Your job: analyze a user's app idea and extract PRECISE structured intent for building a polished, functional product.
+Your job: analyze a user's app idea and extract PRECISE structured intent for building a professional, non-AI-looking product. The output should feel like it was designed by a studio like the teams behind Stripe, Linear, or Apple — minimal, editorial, intentional.
+
+=== CORE DESIGN MANDATE ===
+Every app you design must follow these rules:
+- LIMITED COLOR PALETTE: 3–4 colors max. Apply the 60-30-10 rule (60% dominant neutral, 30% secondary, 10% accent).
+- 2 FONTS MAX: One heading family, one body family (or a single family for both). Build hierarchy through size and weight, not font variety.
+- CLEAN GRID: Consistent spacing scale. No arbitrary padding. Everything aligned.
+- EDITORIAL AESTHETIC: Avoid generic startup aesthetics, purple gradients, default Tailwind/shadcn styles. No floating blobs, no gratuitous gradients, no decorative noise.
+- SUBTLE INTERACTIONS: Gentle hover states, smooth transitions. No bouncing or dramatic animations.
+- HUMAN COPY: Clear, specific language. No buzzwords like "revolutionize", "supercharge", or "next-gen".
 
 === UNDERSTANDING THE PROMPT ===
 CRITICAL: When the user says "like [Product Name]" or "similar to [Product Name]", you MUST use your knowledge of that product to determine the correct domain, features, layout, and visual style.
@@ -135,25 +144,32 @@ You may also use any custom format that fits.
 - "minimal" / "clean" / "spacious" — professional tools, productivity
 - "dark" / "moody" / "rich" — developer tools, gaming, media
 - "vibrant" / "energetic" / "bold" — fitness, social, creative
-- "glassmorphic" / "frosted" / "layered" — modern SaaS, dashboards
+- "editorial" / "refined" / "precise" — SaaS, dashboards, professional apps
 - "warm" / "organic" / "earthy" — food, wellness, lifestyle
 - "corporate" / "structured" / "authoritative" — finance, legal
 - "playful" / "rounded" / "friendly" — education, consumer
+Avoid "glassmorphic" / "frosted" unless truly domain-appropriate — these patterns often look AI-generated.
 
 === VISUAL QUALITY GUIDELINES ===
-These are optional recommendations — apply only what fits the domain:
+These are REQUIRED principles for every app — this is what separates professional from template:
 - Generous vertical spacing between sections helps content breathe
-- Interactive elements should have hover/focus states
+- Interactive elements should have subtle hover/focus states (opacity shifts, gentle color changes — not dramatic transforms)
 - Let the domain guide visual choices — a fitness app might use progress rings, a recipe app might use large imagery frames, a data tool might use tables and charts
-- Choose backgrounds appropriate to the theme — gradients, solid colors, or subtle patterns
-- Create visual hierarchy through size and spacing contrast
+- Prefer solid backgrounds or very subtle gradients — avoid heavy gradient backgrounds, glowing borders, or frosted glass unless the domain specifically calls for it
+- Create visual hierarchy through size, weight, and spacing contrast — not through decorative elements
+- Every visual choice must be INTENTIONAL. If you can't explain why a gradient or shadow is there, remove it.
 
 === NAVIGATION ===
 Generate 2-4 tabs. Each tab's "purpose" should describe SPECIFIC UI elements to build.
 Example: "Dashboard showing saved recipes as cards with title, cook time, difficulty. Search bar at top, category filter chips."
 
 === COLOR SELECTION ===
-Choose colors that match the domain. Professional apps often use cooler tones. Health/fitness may use greens and oranges. Creative tools may use purples and vibrant tones. Use your judgment.
+Choose colors that match the domain. Use the 60-30-10 rule:
+- 60% dominant: neutral background (white, off-white, dark slate)
+- 30% secondary: card surfaces, borders, muted text
+- 10% accent: the primary color — CTAs, active states, key highlights
+Professional apps often use cooler tones. Health/fitness may use greens and oranges. Creative tools may use purples and vibrant tones.
+NEVER flood the UI with the primary color. It should be used sparingly for maximum impact.
 
 === LAYOUT BLUEPRINT ===
 Describe the spatial layout pattern. Common patterns include:
@@ -193,10 +209,12 @@ Common styles:
 Choose the style that best matches the domain. Sans-only typography is valid for many domains.
 
 === ANIMATION KEYWORDS (pick 1-3) ===
+Prefer subtle, professional animations. Avoid bouncy/dramatic effects that look AI-generated.
 - Professional: "smooth", "subtle", "precise"
-- Consumer: "bouncy", "playful", "energetic"
+- Consumer: "gentle", "fluid", "responsive"
 - Premium: "elegant", "slow", "refined"
 - Technical: "snappy", "sharp", "minimal"
+Default to "smooth" + "subtle" unless the domain specifically calls for more energy.
 
 === VISUAL REQUIREMENTS ===
 Specify for every app:
@@ -207,15 +225,17 @@ Specify for every app:
 
 === DESIGN TOKENS ===
 Generate a complete set of design tokens for this specific app. These will be used as CSS custom properties.
-Choose colors that match the domain and mood. For example:
-- A dark finance app: dark backgrounds (#0a0a0f), glowing accent colors, subtle surface elevation
-- A bright fitness app: energetic colors with high contrast and clear hierarchy
+REMEMBER: 3-4 colors max, 60-30-10 balance. Choose colors that match the domain and mood. For example:
+- A dark finance app: dark backgrounds (#0a0a0f), subtle surface elevation, accent color used sparingly
+- A bright fitness app: clean white/light backgrounds, one strong accent color for CTAs and progress indicators
 - A warm recipe app: cream/warm backgrounds, earth tones, organic rounded corners
-For headings.font and body.font: choose readable families that match domain tone; avoid forcing one family across all apps.
+For headings.font and body.font: use at most 2 font families. Choose readable families that match domain tone.
 Spacing and border radius should match density: data-heavy apps use tighter spacing and smaller radius.
+Shadows should be flat or very subtle — no heavy drop shadows or glow effects.
 
 === NARRATIVE ===
 Write a 1-2 sentence product description (NOT first person) describing what's being built and why.
+Use clear, specific language — not marketing buzzwords. Describe what the product DOES, not how it "transforms" or "revolutionizes".
 
 === FEATURE DETAILS ===
 For each feature, provide a description explaining what UI component it maps to and how items should be displayed.
@@ -463,7 +483,7 @@ function salvagePartialIntent(raw: unknown, prompt: string): ReasonedIntent | nu
       { id: "main", label: "Main", icon: "Home", layout: "dashboard", purpose: `Core experience for: ${snippet.slice(0, 80)}` },
       { id: "settings", label: "Settings", icon: "Settings", layout: "tool", purpose: "Configuration and preferences" },
     ],
-    primary_color: "#6366f1",
+    primary_color: "#3b82f6",
     theme_style: "light",
     app_icon: "Zap",
     output_format_hint: "markdown",
@@ -586,7 +606,7 @@ const TEXT_REASONER_JSON_TEMPLATE = `{
     {"id": "home", "label": "Home", "icon": "Home", "layout": "dashboard", "purpose": "description of this tab's UI"},
     {"id": "explore", "label": "Explore", "icon": "Search", "layout": "browse", "purpose": "description"}
   ],
-  "primary_color": "#6366f1",
+  "primary_color": "#3b82f6",
   "theme_style": "light",
   "app_icon": "Zap",
   "output_format_hint": "cards",
