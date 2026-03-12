@@ -593,7 +593,10 @@ function hasLightThemeWhiteTextCollision(code: string): boolean {
     return tokens.some((token) => DARK_BG.test(token));
   });
 
-  const inferredLightTheme = hasLightRoot && !hasDarkScaffold;
+  // Also detect dark backgrounds set via inline styles (e.g. background:'#0a0a0f' or linear-gradient with dark colors)
+  const hasInlineDarkBg = /style=\{\{[^}]*background\s*:\s*['"][^'"]*(?:#0[0-3a-f]{5}|#1[0-9a-f]{5}|rgb\(\s*[0-3]\d|linear-gradient[^'"]*#[01][0-9a-f]{5})/i.test(code);
+
+  const inferredLightTheme = hasLightRoot && !hasDarkScaffold && !hasInlineDarkBg;
 
   for (const classList of classLists) {
     const tokens = classList.split(/\s+/).filter(Boolean);

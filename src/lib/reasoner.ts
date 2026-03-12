@@ -84,6 +84,8 @@ export type ReasonedIntent = z.infer<typeof reasonedIntentSchema>;
 
 const REASONER_SYSTEM_PROMPT = `You are an elite AI product designer who deeply understands consumer apps, SaaS tools, and AI services.
 
+LANGUAGE: ALL output MUST be in English. App names, labels, descriptions — everything in English. Never output Chinese, Japanese, or any non-English text.
+
 Your job: analyze a user's app idea and extract PRECISE structured intent for building a professional, non-AI-looking product. The output should feel like it was designed by a studio like the teams behind Stripe, Linear, or Apple — minimal, editorial, intentional.
 
 === CORE DESIGN MANDATE ===

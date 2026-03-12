@@ -60,48 +60,32 @@ interface SearchHit {
   snippet: string;
 }
 
-/**
- * Parse Brave Search HTML results for 21st.dev URLs.
- * Brave structure: <div class="snippet" data-type="web">
- *   <a href="URL" class="... l1"><div class="title ...">TITLE</div></a>
- *   <div class="content ...">DESCRIPTION</div>
- * </div>
- */
 function parseBraveResults(html: string): SearchHit[] {
   const results: SearchHit[] = [];
-
-  // Extract web result snippets from Brave's HTML
   const snippetPattern = /<div class="snippet\s+svelte-[^"]*"\s+data-pos="\d+"\s+data-type="web"[^>]*>([\s\S]*?)(?=<div class="snippet\s|<\/main>|$)/gi;
   let snippetMatch;
 
   while ((snippetMatch = snippetPattern.exec(html)) !== null) {
     const block = snippetMatch[1];
-
-    // Extract URL from the result link
     const urlMatch = block.match(/<a href="(https?:\/\/[^"]+)"[^>]*class="[^"]*l1"/);
     if (!urlMatch) continue;
     const url = urlMatch[1];
     if (!url.includes("21st.dev")) continue;
 
-    // Extract title
     const titleMatch = block.match(/class="title[^"]*"[^>]*>([\s\S]*?)<\/div>/);
     const title = titleMatch
       ? titleMatch[1].replace(/<[^>]+>/g, "").replace(/&#x27;/g, "'").replace(/&amp;/g, "&").trim()
       : "";
 
-    // Extract description
     const descMatch = block.match(/class="content[^"]*"[^>]*>([\s\S]*?)<\/div>/);
     const snippet = descMatch
       ? descMatch[1].replace(/<[^>]+>/g, "").replace(/&#x27;/g, "'").replace(/&amp;/g, "&").trim()
       : "";
 
-    if (url && title) {
-      results.push({ url, title, snippet });
-    }
+    if (url && title) results.push({ url, title, snippet });
     if (results.length >= 6) break;
   }
 
-  // Fallback: extract any 21st.dev URLs from the page
   if (results.length === 0) {
     const urlPattern = /href="(https?:\/\/(?:www\.)?21st\.dev\/[^"]*(?:component|community)[^"]*)"/gi;
     const seen = new Set<string>();
@@ -119,15 +103,9 @@ function parseBraveResults(html: string): SearchHit[] {
   return results;
 }
 
-// ─── Extract real component code from RSC payload ───────────────
+// ─── Extract component code from CDN ───────────────────────────
 
-/**
- * Extract CDN source code URL from 21st.dev RSC payload.
- * Every 21st.dev component stores its source at cdn.21st.dev.
- * The RSC data includes "code":"https://cdn.21st.dev/..." pointing to the .tsx file.
- */
 function extractCdnCodeUrl(html: string): string | null {
-  // Search RSC chunks for the CDN code URL
   const pattern = /self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)/g;
   let match;
   while ((match = pattern.exec(html)) !== null) {
@@ -136,41 +114,29 @@ function extractCdnCodeUrl(html: string): string | null {
       .replace(/\\n/g, '\n')
       .replace(/\\t/g, '\t')
       .replace(/\\\\/g, '\\');
-
-    // Look for "code":"https://cdn.21st.dev/...tsx"
     const cdnMatch = raw.match(/"code":"(https:\/\/cdn\.21st\.dev\/[^"]+\.tsx)"/);
     if (cdnMatch) return cdnMatch[1];
   }
   return null;
 }
 
-/**
- * Fetch component source code from 21st.dev CDN.
- * Returns the .tsx source code, or null if fetch fails.
- */
 async function fetchCdnCode(cdnUrl: string): Promise<string | null> {
   try {
     const res = await fetchWithTimeout(cdnUrl, 5000);
     if (!res.ok) return null;
     const code = await res.text();
     if (code.length < 50) return null;
-    return code.slice(0, 3000); // Cap to avoid prompt bloat
+    return code.slice(0, 3000);
   } catch {
     return null;
   }
 }
 
-/**
- * Try to fetch component code from shadcn/ui registry as fallback.
- * Free API, no key needed. Returns null if component doesn't exist.
- */
 async function fetchShadcnComponent(name: string): Promise<string | null> {
-  // Normalize component name to slug (e.g., "Rich Button" → "button", "Card Hover" → "card")
   const slug = name.toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .split(/[\s-]+/)
-    .pop() ?? name.toLowerCase(); // Use last word as the base component name
-
+    .pop() ?? name.toLowerCase();
   try {
     const res = await fetchWithTimeout(
       `https://ui.shadcn.com/r/styles/new-york/${slug}.json`, 5000
@@ -189,21 +155,17 @@ async function fetchShadcnComponent(name: string): Promise<string | null> {
 // ─── Scrape a 21st.dev component page ──────────────────────────
 
 async function extractComponentInfo(html: string, url: string): Promise<UIComponentResult | null> {
-  // Extract title
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const rawTitle = titleMatch?.[1]?.replace(/<[^>]+>/g, "").trim() ?? "";
-  // Clean title: 21st.dev format is "Name | Community Components - 21st | 21st"
-  // Take everything before the first " | " separator
   const name = rawTitle.split(/\s*\|\s*/)[0]?.trim() ?? rawTitle.trim();
   if (!name || name.length < 3) return null;
 
-  // Extract meta description
   const descMatch =
     html.match(/<meta\s+(?:name|property)="(?:description|og:description)"\s+content="([^"]+)"/i) ??
     html.match(/content="([^"]+)"\s+(?:name|property)="(?:description|og:description)"/i);
   const description = descMatch?.[1]?.slice(0, 300) ?? "";
 
-  // Extract source code CDN URL from RSC payload, then fetch the actual .tsx file
+  // Fetch source code from CDN
   const cdnUrl = extractCdnCodeUrl(html);
   let extractedCode: string | null = null;
   if (cdnUrl) {
@@ -217,7 +179,7 @@ async function extractComponentInfo(html: string, url: string): Promise<UICompon
     console.log(`[21st.dev] No CDN URL found in RSC for "${name}"`);
   }
 
-  // Determine category from URL or title
+  // Determine category
   const lower = (name + " " + description + " " + url).toLowerCase();
   let category = "component";
   if (lower.includes("hero") || lower.includes("landing")) category = "hero";
@@ -227,19 +189,13 @@ async function extractComponentInfo(html: string, url: string): Promise<UICompon
   else if (lower.includes("background") || lower.includes("gradient") || lower.includes("pattern")) category = "background";
   else if (lower.includes("text") || lower.includes("typography") || lower.includes("heading")) category = "text";
   else if (lower.includes("form") || lower.includes("input")) category = "form";
-  else if (lower.includes("chart") || lower.includes("graph") || lower.includes("stat")) category = "data-display";
-  else if (lower.includes("modal") || lower.includes("dialog") || lower.includes("drawer")) category = "overlay";
-  else if (lower.includes("tab") || lower.includes("accordion")) category = "layout";
 
-  // Use CDN code if available, otherwise try shadcn fallback
   let codeHint: string;
   if (extractedCode) {
     codeHint = `Source code:\n\`\`\`tsx\n${extractedCode}\n\`\`\``;
   } else {
-    // Try shadcn/ui as fallback
     const shadcnCode = await fetchShadcnComponent(name).catch(() => null);
     if (shadcnCode) {
-      console.log(`[shadcn] Fallback code for "${name}" (${shadcnCode.length} chars)`);
       codeHint = `Source code (shadcn/ui):\n\`\`\`tsx\n${shadcnCode}\n\`\`\``;
     } else {
       codeHint = `${name} component. Implement with React + Tailwind CSS.`;
@@ -257,14 +213,9 @@ async function extractComponentInfo(html: string, url: string): Promise<UICompon
 
 // ─── Extract component links from listing pages ────────────────
 
-/**
- * When we land on a 21st.dev category/listing page, extract links
- * to individual component pages (e.g., /community/components/author/name).
- */
 function extractComponentLinksFromListing(html: string): string[] {
   const links: string[] = [];
   const seen = new Set<string>();
-  // Match links to individual component pages
   const pattern = /href="(\/community\/components\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)"/gi;
   let match;
   while ((match = pattern.exec(html)) !== null) {
@@ -275,7 +226,6 @@ function extractComponentLinksFromListing(html: string): string[] {
     }
     if (links.length >= 3) break;
   }
-  // Also check RSC payload for component links
   if (links.length === 0) {
     const rscPattern = /\/community\/components\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/g;
     while ((match = rscPattern.exec(html)) !== null) {
@@ -292,13 +242,12 @@ function extractComponentLinksFromListing(html: string): string[] {
 
 // ─── Main: search + scrape ──────────────────────────────────────
 
-// Junk patterns: generic 21st.dev navigation/category pages, not actual components
 const JUNK_NAME_PATTERNS = [
   /^discover\b/i, /community\s*components/i, /community-made/i,
   /^browse\b/i, /^all\s*components/i, /^21st\.dev$/i,
   /^sign\s*in/i, /^log\s*in/i, /^pricing$/i, /^home$/i,
   /^about$/i, /^contact$/i, /^docs$/i,
-  /\bcomponents$/i, // Category page titles like "Hero Components", "Text Components"
+  /\bcomponents$/i,
 ];
 
 function isJunkResult(name: string): boolean {
@@ -309,11 +258,7 @@ function isJunkResult(name: string): boolean {
   );
 }
 
-/**
- * Run a single 21st.dev search query and return scraped components.
- */
 async function searchSingleQuery(query: string): Promise<UIComponentResult[]> {
-  // Check cache
   const cached = componentCache.get(query);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     console.log(`[21st.dev] Cache hit for "${query}": ${cached.results.length} components`);
@@ -336,64 +281,52 @@ async function searchSingleQuery(query: string): Promise<UIComponentResult[]> {
       return [];
     }
 
-    // Separate individual component pages from listing/search pages
     const individualHits: SearchHit[] = [];
     const listingHits: SearchHit[] = [];
 
     for (const hit of hits) {
-      const url = hit.url;
-      if (url.includes('/components/s/') || url.match(/\/s\/[^/]+$/) || url.includes('/docs/')) {
+      if (hit.url.includes('/components/s/') || hit.url.match(/\/s\/[^/]+$/) || hit.url.includes('/docs/')) {
         listingHits.push(hit);
       } else {
         individualHits.push(hit);
       }
     }
 
-    // If we only got listing pages, fetch them and follow links to individual components
     if (individualHits.length === 0 && listingHits.length > 0) {
-      console.log(`[21st.dev] Only got ${listingHits.length} listing pages — following links to individual components...`);
+      console.log(`[21st.dev] Only got ${listingHits.length} listing pages — following links...`);
       for (const listing of listingHits.slice(0, 2)) {
         try {
           const listRes = await fetchWithTimeout(listing.url, 6000);
           if (!listRes.ok) continue;
           const listHtml = (await listRes.text()).slice(0, 200_000);
           const componentLinks = extractComponentLinksFromListing(listHtml);
-          console.log(`[21st.dev] Found ${componentLinks.length} component links from listing: ${listing.url}`);
-          for (const link of componentLinks) {
-            individualHits.push({ url: link, title: "", snippet: "" });
-          }
+          for (const link of componentLinks) individualHits.push({ url: link, title: "", snippet: "" });
           if (individualHits.length >= 4) break;
-        } catch {
-          continue;
-        }
+        } catch { continue; }
       }
     }
 
     if (individualHits.length === 0) {
-      console.log(`[21st.dev] No individual component pages found for "${query}"`);
       componentCache.set(query, { results: [], timestamp: Date.now() });
       return [];
     }
 
-    console.log(`[21st.dev] Found ${hits.length} results for "${query}" (${individualHits.length} individual components), scraping top 4...`);
+    console.log(`[21st.dev] Found ${hits.length} results for "${query}" (${individualHits.length} individual), scraping top 4...`);
 
-    // Scrape top 4 pages in parallel
     const scrapePromises = individualHits.slice(0, 4).map(async (hit) => {
       try {
         const pageRes = await fetchWithTimeout(hit.url, 8000);
         if (!pageRes.ok) return null;
-        // CDN code URL is in RSC data near end of page (~190K+), so read full page
         const pageHtml = await pageRes.text();
         return extractComponentInfo(pageHtml, hit.url);
       } catch {
-        // Use search result data as fallback
         const name = hit.title.replace(/\s*[-|]\s*21st(?:\.dev)?.*/i, "").trim();
         if (isJunkResult(name)) return null;
         return {
           name,
           category: "component",
           description: hit.snippet || hit.title,
-          codeHint: `${hit.title}. Implement with React + Tailwind CSS. No external dependencies.`,
+          codeHint: `${hit.title}. Implement with React + Tailwind CSS.`,
           sourceUrl: hit.url,
         } satisfies UIComponentResult;
       }
@@ -413,19 +346,10 @@ async function searchSingleQuery(query: string): Promise<UIComponentResult[]> {
   }
 }
 
-/**
- * Search 21st.dev for UI components matching the prompt.
- * Runs multiple queries in parallel and merges + dedupes results.
- */
 export async function search21stDev(query: string): Promise<UIComponentResult[]> {
   return searchSingleQuery(query);
 }
 
-/**
- * Run multiple search queries in parallel and merge results.
- * If Brave search yields no components with code, falls back to
- * directly fetching from curated component URL registry.
- */
 export async function search21stDevMulti(queries: string[]): Promise<UIComponentResult[]> {
   const allResults = await Promise.all(queries.map((q) => searchSingleQuery(q)));
   const merged: UIComponentResult[] = [];
@@ -445,61 +369,143 @@ export async function search21stDevMulti(queries: string[]): Promise<UIComponent
   return merged;
 }
 
-// ─── High-impact UI component queries ────────────────────────────
-// Just grab the coolest effects and animations — works for any app type.
-// Each run picks 2 random queries for variety.
+// ─── Effect slots: WHERE in the app each effect type belongs ─────
 
-const STANDOUT_QUERIES = [
-  "animated gradient",
-  "shimmer text",
-  "spotlight card",
-  "glassmorphism hero",
-  "hover card effect",
-  "animated button",
-  "text reveal animation",
-  "bento grid",
-  "gradient border",
-  "card hover 3d",
-  "animated background",
-  "glow effect",
+type EffectSlot = "hero_bg" | "card_hover" | "section_reveal" | "text_effect";
+
+interface SlotConfig {
+  slot: EffectSlot;
+  placement: string; // instruction for LLM on WHERE to use it
+  queries: string[]; // 21st.dev search queries for this slot
+}
+
+const EFFECT_SLOTS: SlotConfig[] = [
+  {
+    slot: "hero_bg",
+    placement: "Apply to the HERO section as a full-screen immersive background",
+    queries: [
+      "aurora background", "particle background", "shader background",
+      "mesh gradient", "3d globe", "animated gradient background",
+      "spotlight hero", "interactive background", "liquid background",
+      "wave background", "orb effect", "nebula background",
+    ],
+  },
+  {
+    slot: "card_hover",
+    placement: "Apply to CARDS — interactive hover effect on each card",
+    queries: [
+      "3d card effect", "holographic card", "spotlight card", "tilt card",
+      "glass card", "neon card", "flip card", "interactive card",
+      "hover card effect", "card animation", "glowing card",
+    ],
+  },
+  {
+    slot: "section_reveal",
+    placement: "Apply to CONTENT SECTIONS — animate elements as user scrolls or interacts",
+    queries: [
+      "scroll animation", "parallax scroll", "staggered animation",
+      "bento grid", "masonry layout", "animated list",
+      "magnetic effect", "cursor effect", "dock navigation",
+    ],
+  },
+  {
+    slot: "text_effect",
+    placement: "Apply to the HERO HEADLINE or key headings for wow factor",
+    queries: [
+      "text animation", "typewriter effect", "gradient text", "glitch text",
+      "text reveal", "morphing text", "scramble text", "3d text",
+      "neon text", "animated text", "text shimmer",
+    ],
+  },
 ];
 
-/**
- * Build search query(s) from the user's prompt.
- * Returns the primary query string. For richer results, use build21stDevSearchQueries().
- */
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export function build21stDevSearchQuery(prompt: string, discoveredCategory?: string | null): string {
   return build21stDevSearchQueries(prompt, discoveredCategory)[0];
 }
 
-/**
- * Pick 2 random high-impact component queries.
- * No domain classification — just grab cool UI effects.
- */
 export function build21stDevSearchQueries(_prompt: string, _discoveredCategory?: string | null): string[] {
-  // Shuffle and pick 2
-  const shuffled = [...STANDOUT_QUERIES].sort(() => Math.random() - 0.5);
-  const queries = shuffled.slice(0, 2);
+  // Pick one query from each of 3 different slots (hero_bg + card_hover + one of the others)
+  const heroQuery = pickRandom(EFFECT_SLOTS[0].queries);
+  const cardQuery = pickRandom(EFFECT_SLOTS[1].queries);
+  const otherSlot = pickRandom(EFFECT_SLOTS.slice(2));
+  const otherQuery = pickRandom(otherSlot.queries);
+  const queries = [heroQuery, cardQuery, otherQuery];
   console.log(`[21st.dev] Search queries: ${queries.join(", ")}`);
   return queries;
 }
 
+// ─── Effect formatting for system prompt ─────────────────────────
+
 /**
- * Format 21st.dev component results into a string for the code gen system prompt.
+ * Classify a component into an effect slot based on name/category/description.
+ */
+function classifySlot(comp: UIComponentResult): { slot: EffectSlot; placement: string } {
+  const lower = (comp.name + " " + comp.category + " " + comp.description).toLowerCase();
+
+  if (lower.includes("background") || lower.includes("aurora") || lower.includes("particle") ||
+      lower.includes("mesh") || lower.includes("hero") || lower.includes("globe") ||
+      lower.includes("wave") || lower.includes("orb") || lower.includes("nebula") ||
+      lower.includes("shader") || lower.includes("liquid")) {
+    return { slot: "hero_bg", placement: EFFECT_SLOTS[0].placement };
+  }
+  if (lower.includes("card") || lower.includes("tilt") || lower.includes("spotlight") ||
+      lower.includes("border") || lower.includes("glow") || lower.includes("glass") ||
+      lower.includes("neon") || lower.includes("holographic") || lower.includes("flip")) {
+    return { slot: "card_hover", placement: EFFECT_SLOTS[1].placement };
+  }
+  if (lower.includes("scroll") || lower.includes("reveal") || lower.includes("parallax") ||
+      lower.includes("stagger") || lower.includes("bento") || lower.includes("masonry") ||
+      lower.includes("magnetic") || lower.includes("cursor") || lower.includes("dock")) {
+    return { slot: "section_reveal", placement: EFFECT_SLOTS[2].placement };
+  }
+  if (lower.includes("text") || lower.includes("shimmer") || lower.includes("typewriter") ||
+      lower.includes("gradient text") || lower.includes("glitch") || lower.includes("morphing") ||
+      lower.includes("scramble") || lower.includes("3d text") || lower.includes("neon text")) {
+    return { slot: "text_effect", placement: EFFECT_SLOTS[3].placement };
+  }
+
+  return { slot: "card_hover", placement: EFFECT_SLOTS[1].placement };
+}
+
+/**
+ * Format 21st.dev components as creative briefs for the code gen system prompt.
+ * No code snippets — just clear descriptions of what to build and where.
+ * The LLM is creative enough to implement these from a description alone.
  */
 export function format21stDevComponents(components: UIComponentResult[]): string {
   if (components.length === 0) return "";
 
+  // Use ALL components (with or without code) — descriptions are what matter
+  const usable = components.filter(c => c.description && c.description.length > 10);
+  if (usable.length === 0) return "";
+
+  // Classify each component into a slot, one per slot
+  const slotMap = new Map<EffectSlot, { comp: UIComponentResult; placement: string }>();
+  for (const comp of usable) {
+    const { slot, placement } = classifySlot(comp);
+    if (!slotMap.has(slot)) {
+      slotMap.set(slot, { comp, placement });
+    }
+  }
+
+  if (slotMap.size === 0) return "";
+
+  // Keep the prompt slim — effects are injected post-generation, not by prompting.
+  // Just pass the creative briefs for domain inspiration.
   const lines = [
-    "=== REAL COMPONENT SOURCE CODE REFERENCES ===",
-    "Below are actual source code implementations from 21st.dev and shadcn/ui.",
-    "Study these patterns and adapt them for the app. Use the same animation techniques, CSS patterns, and component structure. React + Tailwind CSS only (no external imports).\n",
+    "=== 21st.dev COMPONENT INSPIRATION ===",
+    "Use these as creative direction for the app's visual style:\n",
   ];
 
-  for (const comp of components) {
-    lines.push(`### ${comp.name} [${comp.category}]`);
-    if (comp.description) lines.push(comp.description);
-    lines.push(comp.codeHint);
+  for (const [slot, { comp, placement }] of slotMap) {
+    lines.push(`[${slot.toUpperCase()}] ${comp.name}`);
+    lines.push(`  WHERE: ${placement}`);
+    const desc = comp.description.replace(/UI component from 21st\.dev/i, '').trim();
+    if (desc) lines.push(`  WHAT: ${desc}`);
     lines.push("");
   }
 

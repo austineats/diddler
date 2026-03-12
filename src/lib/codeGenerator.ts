@@ -417,7 +417,7 @@ function formatUIPatternPrompt(patterns: UIPattern[]): string {
 /*  Randomized style seeds — injected per generation for variety        */
 /* ------------------------------------------------------------------ */
 
-export function buildCodeGenSystemPrompt(themeStyle: string, uiPatterns?: UIPattern[]): string {
+export function buildCodeGenSystemPrompt(themeStyle: string, uiPatterns?: UIPattern[], primaryColor?: string): string {
   const isDark = themeStyle === 'dark';
   const isVibrant = themeStyle === 'vibrant';
   const darkMode = isDark || isVibrant;
@@ -446,6 +446,8 @@ No framer-motion or external animation libraries.
 
   return `You generate COMPLETE, WORKING single-file React apps that look professionally designed and functional.
 Your goal is to create something that looks like a REAL product — not AI-generated, not templated, not generic startup aesthetic. Think Stripe, Linear, or Apple in design quality.
+
+LANGUAGE: ALL text, labels, headings, and content in the app MUST be in English. Never output Chinese, Japanese, or any non-English text.
 
 === DESIGN PHILOSOPHY ===
 - EDITORIAL, NOT GENERIC: Design like a professional studio, not a template marketplace. Avoid generic startup aesthetics, purple gradients, default Tailwind/shadcn looks, and stock imagery patterns.
@@ -495,7 +497,7 @@ Required first lines:
 const {useState, useEffect, useRef, useCallback, useMemo} = React;
 const {Search, Plus, X, Check, ChevronDown, /* ...icons you need */} = window.LucideReact || {};
 const cn = window.__sb.cn;
-const P = '#HEX'; // primary color
+const P = '${primaryColor || '#6366f1'}'; // primary color — USE THIS for all accent colors
 document.documentElement.style.setProperty('--sb-primary', P);
 document.documentElement.style.setProperty('--sb-primary-glow', window.__sb.color(P, 0.2));
 document.documentElement.style.setProperty('--sb-primary-bg', window.__sb.color(P, 0.12));
@@ -525,53 +527,67 @@ Use var(--sb-primary) and window.__sb.color(P, opacity) for brand color consiste
 8. NEVER use external image URLs (no picsum.photos, unsplash, placeholder.com, or any other image service). For image placeholders, use a colored div with a Lucide "Plus" icon centered inside (e.g. <div className="flex items-center justify-center bg-gray-100 rounded-lg" style={{height:200}}><Plus size={24} className="text-gray-400" /></div>). This creates clean, consistent placeholder areas.
 9. NEVER use <style> tags, @keyframes, @property, or any raw CSS blocks — they crash the in-browser Babel compiler. ALL animations must use inline styles with CSS transition property + React state changes, or Tailwind transition/hover utilities.
 
-=== WORKING APP SKELETON (follow this structure) ===
+=== WORKING APP SKELETON (follow this structure — GO WILD with visual effects) ===
 
-// 1. DATA — define arrays/objects BEFORE components
-const ITEMS = [{id: 1, name: 'Example', category: 'Category', status: 'active', value: 85}, ...]; // 8-15 realistic items
+// 1. DATA
+const ITEMS = [{id:1, name:'Example', desc:'Something cool', value:85}, ...];
 
-// 2. HELPER COMPONENTS — small, reusable
-function StatCard({label, value, icon: Icon}) {
-  return <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-    <span className="text-sm font-semibold text-gray-500 uppercase">{label}</span>
-    <div className="text-3xl font-extrabold text-gray-900 mt-2">{value}</div>
-  </div>;
-}
+// 2. HELPERS — build SmokeBg (canvas with drifting radial gradient orbs), GlassCard (backdrop-blur + glow border on hover), GradientText (WebkitBackgroundClip:'text'), GlowButton (gradient bg + boxShadow glow on hover + scale(1.05)), ShootingStar (absolute div with left transition that flies across hero)
 
-// 3. MAIN APP — MUST define function App()
+// 3. function App()
 function App() {
   const [page, setPage] = useState('home');
   const [items, setItems] = window.__sb.useStore('items', ITEMS);
-  const [search, setSearch] = useState('');
-  const TABS = [{id:'home', label:'Home', icon: Home}, {id:'explore', label:'Explore', icon: Search}];
-  const grad = 'linear-gradient(135deg, ' + P + ', ' + window.__sb.color(P, 0.7) + ')';
+  const TABS = [{id:'home',label:'Home',icon:Home},{id:'explore',label:'Explore',icon:Search},{id:'profile',label:'Profile',icon:User}];
 
-  return <div className="min-h-screen bg-gray-50">
-    {/* NAV — sticky top bar, never bottom tabs */}
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
-      <div className="w-full px-8 h-16 flex items-center">
-        <span className="text-xl font-extrabold text-gray-900 mr-8">AppName</span>
-        <div className="flex gap-2">{TABS.map(t => <button key={t.id} onClick={() => setPage(t.id)} className={cn("px-5 py-2.5 rounded-xl text-sm font-semibold", page===t.id?"text-white shadow-md":"text-gray-500 hover:bg-gray-100")} style={page===t.id?{background:grad}:undefined}><t.icon className="w-4 h-4 inline mr-1.5" />{t.label}</button>)}</div>
-      </div>
-    </nav>
-    {/* CONTENT — full-width desktop layout */}
-    <div className="w-full px-8 py-8">
-      {page === 'home' && <div className="space-y-8">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
-          <StatCard label="Metric" value="128" icon={Star} />
-        </div>
-      </div>}
-    </div>
+  return <div className="min-h-screen text-white" style={{background:'linear-gradient(180deg,#0a0a0f,#1a1a2e,#0a0a0f)'}}>
+    {/* HERO — 90vh, SmokeBg canvas behind, ShootingStars, centered GradientText text-7xl, two GlowButtons */}
+    {/* GLASS NAV — sticky rounded-full pill, backdrop-blur, rgba bg, tabs call setPage() */}
+    {/* PAGES — {page==='home'&&<div>GlassCards grid</div>} {page==='explore'&&<div>...</div>} etc */}
   </div>;
 }
-
-// 4. RENDER — always last line
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 
+=== EFFECT RECIPES (implement these as helper components) ===
+SmokeBg: useRef canvas, useEffect → create 6-8 orbs with {x,y,r:100-300,vx,vy}, animate with requestAnimationFrame, draw each as ctx.createRadialGradient filled with window.__sb.color(P,0.15). Returns <canvas style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none'}}/>
+GlassCard: useState hover → style={{background:'rgba(255,255,255,0.06)',backdropFilter:'blur(20px)',border:'1px solid '+(hover?window.__sb.color(P,0.5):'rgba(255,255,255,0.1)'),boxShadow:hover?'0 0 30px '+window.__sb.color(P,0.2):'none',transition:'all 0.3s'}}
+GradientText: style={{background:'linear-gradient(135deg,'+P+','+window.__sb.color(P,0.6)+',#ff6b6b)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}
+GlowButton: solid→gradient bg + white text + boxShadow glow on hover; outline→transparent bg + white border + scale(1.05) on hover
+ShootingStar: useEffect setInterval → animate left from -100% to 110% with CSS transition, gradient streak trail
+TiltCard: onMouseMove → getBoundingClientRect → setRot({x,y}) → style={{transform:'rotateX('+x+'deg) rotateY('+y+'deg)',perspective:'1200px'}}
+
+=== DESIGN PHILOSOPHY ===
+Think AWARD-WINNING landing page (Awwwards/Dribbble), NOT a flat dashboard:
+- DARK backgrounds ALWAYS — linear-gradient(180deg,#0a0a0f,#1a1a2e). NEVER bg-gray-50/bg-white.
+- HUGE hero (90vh+) with canvas smoke/particles behind, gradient text-7xl headlines, shooting star streaks
+- Glass morphism cards with glow borders on hover, NOT plain bg-white cards
+- Floating glass nav pill (rounded-full, backdrop-blur), NOT boring sticky top bar
+- Radial glow accents behind sections: background:radial-gradient(circle,window.__sb.color(P,0.15),transparent 70%)
+- EVERY hover: scale + glow + border color shift. No static elements.
+
 CRITICAL: You MUST define function App() { ... } and the final render call. Code without function App() is BROKEN and will not render.
-VIEWPORT: DESKTOP (1200px+). Use w-full px-8, grid-cols-2/3/4 with xl: breakpoints. Top horizontal nav bar — never bottom tabs.
+VIEWPORT: DESKTOP (1200px+). Use generous padding and HUGE text.
+NAVIGATION: Define 3-5 TABS. EVERY tab button MUST call onClick={() => setPage('tabId')}. EVERY tab id MUST have a matching {page === 'tabId' && <div>...</div>} block. Use floating glass nav, NOT boring top bar.
+BUTTONS: EVERY <button> MUST have onClick that changes state + a visual hover effect (scale, glow, color shift). NO decorative-only buttons.
 GRADIENTS: Build with concatenation: 'linear-gradient(135deg, ' + P + ', ' + window.__sb.color(P, 0.7) + ')'.
-CODE SIZE: Keep total output under 12,000 characters. Build 3-5 polished sections, not 10+ mediocre ones. Max 6-8 data items. Reuse helper components — never duplicate JSX blocks. Every section tight, no filler.
+CODE SIZE: Keep total output under 15,000 characters. Build 3-5 STUNNING sections, not 10 mediocre ones. Invest characters in visual effects, not more content.
+
+=== COLOR APPLICATION (use P = '${primaryColor || '#6366f1'}') ===
+- Page background: ALWAYS dark/rich — use linear-gradient(180deg, #0a0a0f, #1a1a2e) or similar deep colors. NEVER bg-gray-50/bg-white.
+- Cards: frosted glass (rgba(255,255,255,0.06) + backdropFilter blur). Glow border on hover.
+- Nav: floating glass pill (rounded-full, backdrop-blur, rgba bg). NEVER a boring sticky top bar.
+- CTAs: gradient fill with glow shadow, or outline glass style. Both should scale on hover.
+- Text: white on dark, with gradient text (WebkitBackgroundClip:'text') for headlines.
+- Accents: Use P in radial glows behind sections, button fills, border hovers, and gradient text.
+
+=== LAYOUT STYLE ===
+Think CINEMATIC LANDING PAGE — not a dashboard or admin panel:
+- Hero: Full-viewport (90vh+), centered text, smoke/particle canvas background, shooting star streaks, gradient headline text-7xl+
+- Cards: Glass morphism grid with hover glow effects and tilt transforms
+- Sections: Each with its own radial glow background, large headings, generous spacing
+- Footer: Minimal dark with glass separator
+Domain variations: dating=warm pink smoke + swipe cards, productivity=cool blue nebula + bento grid, food=amber glow + masonry, gaming=neon purple + tilt cards.
+EVERY app must feel like an award-winning Awwwards/Dribbble showcase, NOT a Bootstrap template.
 
 === THEME: ${themeStyle.toUpperCase()} ===
 ${darkMode
@@ -647,6 +663,8 @@ function sanitizeIconDestructuring(code: string): string {
 /* ------------------------------------------------------------------ */
 
 const DESIGN_ARCHITECT_PROMPT = `You are an elite UI/UX architect who designs like Stripe, Linear, and Apple — not like a template marketplace. Given an app concept, produce a UNIQUE design blueprint.
+
+LANGUAGE: ALL output MUST be in English. Never output Chinese, Japanese, or any non-English text.
 
 YOUR GOAL: Design something that looks professionally built by a design studio. It should feel INTENTIONAL and PREMIUM — not AI-generated, not generic startup aesthetic.
 
@@ -887,6 +905,8 @@ export async function planDesign(
 const CONTENT_STRATEGIST_PROMPT = `You are an elite SaaS copywriter and content strategist.
 Given an app concept, produce ALL the text content needed for a premium app that reads like it was written by a human, not generated by AI.
 
+LANGUAGE: ALL text content MUST be in English. Never output Chinese, Japanese, or any non-English text.
+
 === COPY VOICE — CLEAR, HUMAN, NOT MARKETING FLUFF ===
 - Write like a REAL product, not a startup pitch deck. Avoid buzzwords like "revolutionize", "supercharge", "unleash", "game-changing", "next-gen", "seamlessly".
 - Be SPECIFIC and CONCRETE. "Track 30+ nutrients per meal" beats "Powerful nutrition tracking".
@@ -1087,6 +1107,81 @@ export async function planContent(
     console.warn("Content strategist failed (non-fatal):", e instanceof Error ? e.message : e);
     return null;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Post-generation: inject premium 3D/particle effects               */
+/* ------------------------------------------------------------------ */
+
+const TILT_CARD_CODE = `
+function TiltCard({children, className, style}) {
+  const ref = useRef(null);
+  const [rot, setRot] = useState({x:0,y:0});
+  const [glow, setGlow] = useState({x:50,y:50});
+  return <div ref={ref} onMouseMove={e => {
+    const r = ref.current.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+    setRot({x:(py-0.5)*-15, y:(px-0.5)*15});
+    setGlow({x:px*100,y:py*100});
+  }} onMouseLeave={() => {setRot({x:0,y:0});setGlow({x:50,y:50});}} style={{perspective:'1200px'}}>
+    <div className={className} style={{...style, transform:'rotateX('+rot.x+'deg) rotateY('+rot.y+'deg) scale('+(rot.x||rot.y?1.05:1)+')',
+      transition:'transform 0.2s ease-out, box-shadow 0.2s', transformStyle:'preserve-3d',
+      background:'rgba(255,255,255,0.06)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+      border:'1px solid rgba(255,255,255,'+(rot.x||rot.y?'0.2':'0.08')+')',
+      boxShadow:rot.x||rot.y?'0 0 40px '+window.__sb.color(P,0.3)+', inset 0 0 60px '+window.__sb.color(P,0.05):'0 4px 30px rgba(0,0,0,0.2)',
+      backgroundImage:'radial-gradient(circle at '+glow.x+'% '+glow.y+'%, '+window.__sb.color(P,0.12)+', transparent 50%)'
+    }}>{children}</div>
+  </div>;
+}`;
+
+const PARTICLE_BG_CODE = `
+function ParticleBg() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current; if(!c) return;
+    const ctx = c.getContext('2d'); c.width=c.offsetWidth; c.height=c.offsetHeight;
+    const orbs = Array.from({length:8},()=>({x:Math.random()*c.width,y:Math.random()*c.height,
+      r:80+Math.random()*200,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.4,
+      hue:Math.random()*30-15}));
+    let raf; function draw(){ctx.clearRect(0,0,c.width,c.height);
+      orbs.forEach(o=>{o.x+=o.vx;o.y+=o.vy;
+        if(o.x<-o.r)o.x=c.width+o.r;if(o.x>c.width+o.r)o.x=-o.r;
+        if(o.y<-o.r)o.y=c.height+o.r;if(o.y>c.height+o.r)o.y=-o.r;
+        const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+        g.addColorStop(0,window.__sb.color(P,0.18));g.addColorStop(0.5,window.__sb.color(P,0.06));g.addColorStop(1,'transparent');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();});
+      raf=requestAnimationFrame(draw);}draw();return()=>cancelAnimationFrame(raf);
+  },[]); return <canvas ref={ref} style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',opacity:0.8}}/>;
+}`;
+
+
+/**
+ * Inject premium visual effects (3D tilt cards, particle backgrounds) into generated code.
+ * This runs post-generation so we don't rely on the LLM following effect instructions.
+ */
+export function injectPremiumEffects(code: string): string {
+  // Skip if code is too short or already has these effects
+  if (code.length < 500) return code;
+  if (code.includes('TiltCard') || code.includes('ParticleBg')) return code;
+
+  // Find insertion point: before first helper function, or before function App
+  const firstFuncMatch = code.match(/^function\s+(?!App\b)\w+/m);
+  let insertIdx: number;
+  if (firstFuncMatch?.index) {
+    insertIdx = firstFuncMatch.index;
+  } else {
+    const appMatch = code.match(/^function\s+App\b/m);
+    if (!appMatch?.index) return code;
+    insertIdx = appMatch.index;
+  }
+
+  // Inject the effect component definitions only — do NOT modify JSX (too fragile).
+  // The skeleton teaches the LLM to use SmokeBg/canvas effects natively.
+  const effectDefs = `\n// --- Premium Effects (available for use) ---${TILT_CARD_CODE}\n${PARTICLE_BG_CODE}\n\n`;
+  code = code.slice(0, insertIdx) + effectDefs + code.slice(insertIdx);
+
+  console.log(`[effects] Injected TiltCard + ParticleBg definitions`);
+  return code;
 }
 
 export function cleanGeneratedCode(rawCode: string): string {
@@ -1533,6 +1628,24 @@ async function runTextCodeGeneration(
       return null;
     }
 
+    // Detect truncated output: if braces are unbalanced, the model stopped mid-code.
+    // Return null so the pipeline retries instead of shipping broken code.
+    const openBraces = (rawCode.match(/\{/g) || []).length;
+    const closeBraces = (rawCode.match(/\}/g) || []).length;
+    const braceGap = openBraces - closeBraces;
+    if (braceGap > 2) {
+      diagLog(`[text-codegen] TRUNCATED: ${openBraces} open braces vs ${closeBraces} close (gap: ${braceGap}) — returning null to trigger retry`);
+      clearInterval(heartbeat);
+      return null;
+    }
+
+    // Also check for missing render call — means code was cut off before the end
+    if (!rawCode.includes('createRoot') && !rawCode.includes('ReactDOM.render')) {
+      diagLog(`[text-codegen] TRUNCATED: no render call found — returning null to trigger retry`);
+      clearInterval(heartbeat);
+      return null;
+    }
+
     diagLog(`[text-codegen] SUCCESS: returning ${rawCode.length} chars of code`);
     clearInterval(heartbeat);
     return {
@@ -1873,7 +1986,7 @@ export async function generateReactCode(
   // Select UI patterns once and use across both design architect and code gen
   const selectedUIPatterns = selectUIPatterns(6);
   console.log(`Selected UI patterns: ${selectedUIPatterns.map(p => p.name).join(', ')}`);
-  let systemPrompt = buildCodeGenSystemPrompt(themeStyle, selectedUIPatterns);
+  let systemPrompt = buildCodeGenSystemPrompt(themeStyle, selectedUIPatterns, intent.primary_color);
 
   // Inject live 21st.dev components if available
   if (liveComponents && liveComponents.length > 0) {
@@ -1885,13 +1998,14 @@ export async function generateReactCode(
     }
   }
 
-  // Inject template HTML structure if available (from Webflow/Vercel/Netlify scraping)
+  // Inject layout reference code if available (from shadcn/ui blocks)
   if (templateHtmlStructure && templateHtmlStructure.length > 100) {
-    systemPrompt += `\n\n=== TEMPLATE STRUCTURE REFERENCE ===
-Adapt this HTML structure into React + Tailwind. Do NOT copy verbatim —
-use it as a structural guide for layout, sections, and component hierarchy.
-Strip any Webflow-specific classes and replace with Tailwind utilities.\n\n${templateHtmlStructure}`;
-    console.log(`[Template HTML] Injected ${templateHtmlStructure.length} chars of structural HTML into system prompt`);
+    systemPrompt += `\n\n=== LAYOUT STRUCTURE REFERENCE ===
+Study these React layout patterns for structural guidance — sidebar organization,
+dashboard grids, form layouts, navigation patterns. Adapt the STRUCTURE and
+COMPONENT HIERARCHY (not the imports or shadcn primitives) into your self-contained
+JSX output. Use Tailwind utilities, not shadcn component imports.\n\n${templateHtmlStructure}`;
+    console.log(`[Layout Ref] Injected ${templateHtmlStructure.length} chars of layout reference into system prompt`);
   }
 
   /* ---------------------------------------------------------------- */
@@ -2123,6 +2237,9 @@ Strip any Webflow-specific classes and replace with Tailwind utilities.\n\n${tem
         `$1${intent.app_name_hint}$1`,
       );
     }
+
+    // Inject premium 3D/particle effects into the generated code
+    candidate.generated_code = injectPremiumEffects(candidate.generated_code);
 
     onProgress?.({ type: 'status', message: 'Running quality checks...' });
 
