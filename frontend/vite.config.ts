@@ -15,6 +15,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    allowedHosts: true,
     proxy: {
       '/api': 'http://localhost:4000',
     },

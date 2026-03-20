@@ -1,24 +1,17 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { GeneratorProvider } from './contexts/GeneratorContext';
-import { GeneratorPage } from './pages/GeneratorPage';
-import { AppRunPage } from './pages/AppRunPage';
-import { SharePage } from './pages/SharePage';
-import { GalleryPage } from './pages/GalleryPage';
-import { NotFoundPage } from './pages/NotFoundPage';
-import './index.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HomePage } from "./pages/HomePage";
+import { AgentPage } from "./pages/AgentPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
+import "./index.css";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <GeneratorProvider>
       <Routes>
-        <Route path="/" element={<GeneratorPage />} />
-        <Route path="/app/:id" element={<AppRunPage />} />
-        <Route path="/share/:shortId" element={<SharePage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/agent/:id" element={<AgentPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      </GeneratorProvider>
     </BrowserRouter>
   );
 }

@@ -7,94 +7,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model App {
+// ─── bit7 core models ───────────────────────────────────────────────
+
+model Agent {
   id              String    @id @default(uuid())
   short_id        String    @unique @default(cuid())
-  name            String
-  description     String
-  spec            Json
-  original_prompt String
-  forked_from     String?
-  generated_code  String?
-  theme_color     String?
-  tagline         String?
-  latest_quality_score    Int?
-  latest_pipeline_summary String?
-  run_count       Int       @default(0)
+  name            String                          // e.g. "NutriBot"
+  description     String                          // what this agent does
+  system_prompt   String    @db.Text              // LLM system prompt
+  capabilities    Json      @default("[]")        // string[] — e.g. ["image_analysis","calorie_tracking"]
+  personality     Json?                            // tone, style, language prefs
+  original_prompt String    @db.Text              // what the user asked for
+  model           String    @default("claude-sonnet-4-20250514") // LLM model to use
+  temperature     Float     @default(0.7)
+  max_tokens      Int       @default(1024)
+  status          String    @default("active")    // active | paused | archived
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
-  runs            AppRun[]
-  versions        AppVersion[]
-  pipeline_runs   PipelineRun[]
+  phone_number    PhoneNumber?
+  conversations   Conversation[]
+  messages        Message[]
 
   @@index([short_id])
+  @@index([status])
   @@index([created_at])
-  @@map("apps")
+  @@map("agents")
 }
 
-model AppRun {
-  id          String   @id @default(uuid())
-  app_id      String
-  inputs      Json
-  output      Json
-  tokens_used Int
-  duration_ms Int
-  created_at  DateTime @default(now())
+model PhoneNumber {
+  id              String    @id @default(uuid())
+  agent_id        String    @unique
+  phone_number    String    @unique               // E.164 format: +15551234567
+  twilio_sid      String    @unique               // Twilio phone number SID
+  friendly_name   String?                          // formatted display name
+  status          String    @default("active")    // active | released
+  provisioned_at  DateTime  @default(now())
+  released_at     DateTime?
 
-  app         App      @relation(fields: [app_id], references: [id], onDelete: Cascade)
+  agent           Agent     @relation(fields: [agent_id], references: [id], onDelete: Cascade)
 
-  @@index([app_id, created_at])
-  @@map("app_runs")
+  @@index([phone_number])
+  @@index([agent_id])
+  @@map("phone_numbers")
 }
 
-model AppVersion {
-  id             String   @id @default(uuid())
-  app_id         String
-  label          String
-  source         String
-  generated_code String
-  metadata       Json?
-  created_at     DateTime @default(now())
+model Conversation {
+  id              String    @id @default(uuid())
+  agent_id        String
+  from_number     String                          // the user's phone number
+  started_at      DateTime  @default(now())
+  last_message_at DateTime  @default(now())
+  message_count   Int       @default(0)
+  metadata        Json?                            // any extra context
 
-  app            App      @relation(fields: [app_id], references: [id], onDelete: Cascade)
+  agent           Agent     @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+  messages        Message[]
 
-  @@index([app_id, created_at])
-  @@map("app_versions")
+  @@unique([agent_id, from_number])              // one conversation per user per agent
+  @@index([agent_id, last_message_at])
+  @@index([from_number])
+  @@map("conversations")
 }
 
-model FigmaTemplate {
-  id              String   @id @default(uuid())
-  file_key        String   @unique
-  file_name       String
-  thumbnail_url   String?
-  design_tokens   Json
-  page_names      Json     // string[]
-  component_count Int      @default(0)
-  raw_metadata    Json?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+model Message {
+  id              String    @id @default(uuid())
+  conversation_id String
+  agent_id        String
+  direction       String                          // inbound | outbound
+  body            String    @db.Text
+  media_urls      Json      @default("[]")        // string[] — MMS image URLs
+  twilio_sid      String?                          // Twilio message SID
+  tokens_used     Int       @default(0)
+  duration_ms     Int       @default(0)
+  created_at      DateTime  @default(now())
 
-  @@index([file_key])
-  @@map("figma_templates")
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  agent           Agent        @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id, created_at])
+  @@index([agent_id, created_at])
+  @@map("messages")
 }
 
-model PipelineRun {
-  id                String   @id @default(uuid())
-  app_id            String
-  prompt            String
-  intent            Json
-  artifact          Json
-  quality_score     Int
-  quality_breakdown Json?
-  state_history     Json?
-  total_duration_ms Int?
-  repair_count      Int      @default(0)
-  final_state       String?
-  created_at        DateTime @default(now())
-
-  app               App      @relation(fields: [app_id], references: [id], onDelete: Cascade)
-
-  @@index([app_id, created_at])
-  @@map("pipeline_runs")
-}
