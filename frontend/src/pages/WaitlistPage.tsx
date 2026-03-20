@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { ArrowRight, Mail, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SMS_EXAMPLES = [
@@ -165,8 +166,13 @@ export function WaitlistPage() {
 
         <div className="relative z-10 flex flex-col flex-1">
           {/* Logo */}
-          <header className="px-8 pt-8">
+          <header className="px-8 pt-8 flex items-center justify-between">
             <span className="text-[15px] font-medium tracking-tight italic">bit7</span>
+            {import.meta.env.DEV && (
+              <Link to="/app" className="text-[12px] text-white/50 hover:text-white transition-colors font-mono px-2 py-1 border border-white/10 rounded bg-white/5">
+                dev →
+              </Link>
+            )}
           </header>
 
           {/* Center content */}
