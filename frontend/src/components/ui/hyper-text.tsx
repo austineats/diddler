@@ -18,7 +18,7 @@ export function HyperText({ text, className, duration = 800, delay = 0 }: HyperT
     const timeout = setTimeout(() => {
       iterationRef.current = 0;
       const interval = setInterval(() => {
-        setDisplay((prev) =>
+        setDisplay(() =>
           text
             .split("")
             .map((char, i) => {
