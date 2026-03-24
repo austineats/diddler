@@ -278,7 +278,7 @@ export function WaitlistPage() {
                   }}
                 >
                   <a
-                    href="sms:bitseven@icloud.com"
+                    href="sms:bitseven@icloud.com&body=Hey%20Bit7!%20What%20can%20you%20do?"
                     className="relative flex items-center justify-center gap-2.5 px-10 py-4 rounded-full text-[15px] font-medium text-zinc-700 cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] overflow-hidden"
                     style={{
                       background: "linear-gradient(160deg, rgba(240,245,255,0.85) 0%, rgba(220,230,250,0.5) 50%, rgba(235,240,255,0.7) 100%)",
