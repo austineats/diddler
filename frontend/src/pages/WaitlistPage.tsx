@@ -44,7 +44,7 @@ const SMS_EXAMPLES = [
 function MatrixBG() {
   const chars = useMemo(() => {
     const pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+*@&#$!?<>{}[]=/\\|~^%";
-    const items: { char: string; x: number; y: number; opacity: number; size: number }[] = [];
+    const items: { char: string; x: number; y: number; opacity: number; size: number; duration: number; delay: number }[] = [];
     for (let i = 0; i < 120; i++) {
       items.push({
         char: pool[Math.floor(Math.random() * pool.length)],
@@ -52,6 +52,8 @@ function MatrixBG() {
         y: Math.random() * 100,
         opacity: 0.03 + Math.random() * 0.08,
         size: 11 + Math.random() * 6,
+        duration: 4 + Math.random() * 6,
+        delay: Math.random() * 5,
       });
     }
     return items;
@@ -62,12 +64,14 @@ function MatrixBG() {
       {chars.map((c, i) => (
         <span
           key={i}
-          className="absolute font-mono text-zinc-900"
+          className="absolute font-mono text-zinc-900 animate-matrix-fade"
           style={{
             left: `${c.x}%`,
             top: `${c.y}%`,
             opacity: c.opacity,
             fontSize: `${c.size}px`,
+            animationDuration: `${c.duration}s`,
+            animationDelay: `${c.delay}s`,
           }}
         >
           {c.char}

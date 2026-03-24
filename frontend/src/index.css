@@ -26,6 +26,14 @@
 
 @keyframes spin { to { transform: rotate(360deg) } }
 
+@keyframes matrix-fade {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+.animate-matrix-fade {
+  animation: matrix-fade ease-in-out infinite;
+}
+
 .spinner { width:14px; height:14px; border:1.5px solid rgba(0,0,0,0.1); border-top-color:#18181b; border-radius:50%; animation:spin 0.7s linear infinite; }
 .spinner-lg { width:20px; height:20px; border:2px solid rgba(0,0,0,0.1); border-top-color:#18181b; border-radius:50%; animation:spin 0.7s linear infinite; }
 
