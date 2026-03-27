@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id              String    @id @default(uuid())
+  short_id        String    @unique @default(cuid())
+  name            String
+  description     String
+  spec            Json      // AgentSpec
+  original_prompt String
+  generated_code  String?   // agent handler source / system prompt
+  agent_config    Json?     // AgentConfig
+  phone_number    String?   @unique
+  active          Boolean   @default(false)
+  latest_quality_score    Int?
+  latest_pipeline_summary String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  conversations   Conversation[]
+  user_states     UserState[]
+  pipeline_runs   PipelineRun[]
+
+  @@index([short_id])
+  @@index([phone_number])
+  @@index([created_at])
+  @@map("agents")
+}
+
+model Conversation {
+  id          String   @id @default(uuid())
+  agent_id    String
+  user_phone  String
+  role        String   // "user" | "agent"
+  content     String
+  media_url   String?
+  media_type  String?
+  created_at  DateTime @default(now())
+
+  agent       Agent    @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+
+  @@index([agent_id, user_phone, created_at])
+  @@map("conversations")
+}
+
+model UserState {
+  id                 String   @id @default(uuid())
+  agent_id           String
+  user_phone         String
+  data               Json     @default("{}")
+  conversation_count Int      @default(0)
+  last_active        DateTime @default(now())
+
+  agent              Agent    @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+
+  @@unique([agent_id, user_phone])
+  @@map("user_states")
+}
+
+model PhoneNumber {
+  id          String   @id @default(uuid())
+  number      String   @unique
+  sid         String   @unique  // Twilio SID
+  agent_id    String?  @unique
+  status      String   @default("available") // "available" | "assigned" | "released"
+  created_at  DateTime @default(now())
+
+  @@map("phone_numbers")
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  agent_id   String
+  event_type String   // "message_received", "message_sent", "error", "custom"
+  path       String?
+  referrer   String?
+  user_agent String?
+  session_id String?
+  metadata   Json?
+  created_at DateTime @default(now())
+
+  @@index([agent_id, created_at])
+  @@index([agent_id, event_type])
+  @@map("analytics_events")
+}
+
+model OAuthToken {
+  id            String    @id @default(uuid())
+  user_phone    String
+  service       String    // "spotify" | "gmail" | "twitter"
+  access_token  String
+  refresh_token String?
+  expires_at    DateTime?
+  created_at    DateTime  @default(now())
+
+  @@unique([user_phone, service])
+  @@map("oauth_tokens")
+}
+
+model PipelineRun {
+  id                String   @id @default(uuid())
+  agent_id          String
+  prompt            String
+  intent            Json
+  artifact          Json
+  quality_score     Int
+  quality_breakdown Json?
+  state_history     Json?
+  total_duration_ms Int?
+  repair_count      Int      @default(0)
+  final_state       String?
+  created_at        DateTime @default(now())
+
+  agent             Agent    @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+
+  @@index([agent_id, created_at])
+  @@map("pipeline_runs")
+}
+
+// ---------------------------------------------------------------------------
+// Innovation Layer — Memory, Subscriptions, Proactive Jobs
+// ---------------------------------------------------------------------------
+
+model Memory {
+  id          String   @id @default(uuid())
+  user_phone  String
+  agent_id    String
+  type        String   // "preference" | "episodic" | "fact" | "pattern"
+  key         String   // semantic key, e.g. "food_preference"
+  value       String   // the actual memory content
+  confidence  Float    @default(1.0)
+  source      String?  // conversation id or context
+  created_at  DateTime @default(now())
+  accessed_at DateTime @default(now())
+
+  @@index([user_phone, agent_id, type])
+  @@index([user_phone, key])
+  @@map("memories")
+}
+
+model Subscription {
+  id          String   @id @default(uuid())
+  user_phone  String
+  agent_id    String
+  type        String   // "package" | "flight" | "sports" | "timer"
+  config      Json     // tracking details (tracking number, flight #, team, etc.)
+  status      String   @default("active") // "active" | "paused" | "completed"
+  last_state  Json?    // previous check result for diffing
+  last_check  DateTime @default(now())
+  interval_ms Int      @default(300000) // poll interval (default 5 min)
+  created_at  DateTime @default(now())
+
+  @@index([status, last_check])
+  @@index([user_phone, agent_id])
+  @@map("subscriptions")
+}
+
+model ProactiveJob {
+  id          String    @id @default(uuid())
+  user_phone  String
+  agent_id    String
+  type        String    // "morning_briefing" | "nudge" | "reminder" | "reengagement"
+  schedule    String    // cron expression or "once:ISO_DATE"
+  config      Json      // job-specific config
+  enabled     Boolean   @default(true)
+  last_run    DateTime?
+  next_run    DateTime?
+  created_at  DateTime  @default(now())
+
+  @@index([enabled, next_run])
+  @@index([user_phone, agent_id])
+  @@map("proactive_jobs")
+}
+
+// ---------------------------------------------------------------------------
+// Blind Date — Waitlist Matchmaking via iMessage
+// ---------------------------------------------------------------------------
+
+model BlindDateSignup {
+  id            String    @id @default(uuid())
+  name          String
+  phone         String    @unique
+  school_id_url String                // base64 or URL of school ID photo
+  status        String    @default("waiting") // "waiting" | "matched" | "archived"
+  match_id      String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  match         BlindDateMatch? @relation(fields: [match_id], references: [id])
+
+  @@index([status])
+  @@index([created_at])
+  @@map("blind_date_signups")
+}
+
+model BlindDateMatch {
+  id             String    @id @default(uuid())
+  person_a_phone String
+  person_b_phone String
+  person_a_name  String
+  person_b_name  String
+  person_a_ready Boolean   @default(false)
+  person_b_ready Boolean   @default(false)
+  status         String    @default("pending") // "pending" | "revealed" | "expired"
+  revealed_at    DateTime?
+  created_at     DateTime  @default(now())
+
+  signups        BlindDateSignup[]
+
+  @@index([status])
+  @@index([person_a_phone])
+  @@index([person_b_phone])
+  @@map("blind_date_matches")
+}

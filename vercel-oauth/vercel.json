@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/connect", "destination": "/api/connect" },
+    { "source": "/connect/spotify", "destination": "/api/connect/spotify" },
+    { "source": "/connect/gmail", "destination": "/api/connect/gmail" },
+    { "source": "/connect/uber", "destination": "/api/connect/uber" },
+    { "source": "/connect/google-home", "destination": "/api/connect/google-home" },
+    { "source": "/connect/icloud", "destination": "/api/connect/icloud" },
+    { "source": "/connect/shortcuts", "destination": "/api/connect/shortcuts" },
+    { "source": "/callback/spotify", "destination": "/api/callback/spotify" },
+    { "source": "/callback/gmail", "destination": "/api/callback/gmail" },
+    { "source": "/callback/uber", "destination": "/api/callback/uber" }
+  ]
+}
