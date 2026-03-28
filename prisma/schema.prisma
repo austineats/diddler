@@ -8,24 +8,24 @@ datasource db {
 }
 
 model Agent {
-  id              String    @id @default(uuid())
-  short_id        String    @unique @default(cuid())
-  name            String
-  description     String
-  spec            Json      // AgentSpec
-  original_prompt String
-  generated_code  String?   // agent handler source / system prompt
-  agent_config    Json?     // AgentConfig
-  phone_number    String?   @unique
-  active          Boolean   @default(false)
+  id                      String   @id @default(uuid())
+  short_id                String   @unique @default(cuid())
+  name                    String
+  description             String
+  spec                    Json // AgentSpec
+  original_prompt         String
+  generated_code          String? // agent handler source / system prompt
+  agent_config            Json? // AgentConfig
+  phone_number            String?  @unique
+  active                  Boolean  @default(false)
   latest_quality_score    Int?
   latest_pipeline_summary String?
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
 
-  conversations   Conversation[]
-  user_states     UserState[]
-  pipeline_runs   PipelineRun[]
+  conversations Conversation[]
+  user_states   UserState[]
+  pipeline_runs PipelineRun[]
 
   @@index([short_id])
   @@index([phone_number])
@@ -34,16 +34,16 @@ model Agent {
 }
 
 model Conversation {
-  id          String   @id @default(uuid())
-  agent_id    String
-  user_phone  String
-  role        String   // "user" | "agent"
-  content     String
-  media_url   String?
-  media_type  String?
-  created_at  DateTime @default(now())
+  id         String   @id @default(uuid())
+  agent_id   String
+  user_phone String
+  role       String // "user" | "agent"
+  content    String
+  media_url  String?
+  media_type String?
+  created_at DateTime @default(now())
 
-  agent       Agent    @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agent_id], references: [id], onDelete: Cascade)
 
   @@index([agent_id, user_phone, created_at])
   @@map("conversations")
@@ -57,19 +57,19 @@ model UserState {
   conversation_count Int      @default(0)
   last_active        DateTime @default(now())
 
-  agent              Agent    @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agent_id], references: [id], onDelete: Cascade)
 
   @@unique([agent_id, user_phone])
   @@map("user_states")
 }
 
 model PhoneNumber {
-  id          String   @id @default(uuid())
-  number      String   @unique
-  sid         String   @unique  // Twilio SID
-  agent_id    String?  @unique
-  status      String   @default("available") // "available" | "assigned" | "released"
-  created_at  DateTime @default(now())
+  id         String   @id @default(uuid())
+  number     String   @unique
+  sid        String   @unique // Twilio SID
+  agent_id   String?  @unique
+  status     String   @default("available") // "available" | "assigned" | "released"
+  created_at DateTime @default(now())
 
   @@map("phone_numbers")
 }
@@ -77,7 +77,7 @@ model PhoneNumber {
 model AnalyticsEvent {
   id         String   @id @default(uuid())
   agent_id   String
-  event_type String   // "message_received", "message_sent", "error", "custom"
+  event_type String // "message_received", "message_sent", "error", "custom"
   path       String?
   referrer   String?
   user_agent String?
@@ -93,7 +93,7 @@ model AnalyticsEvent {
 model OAuthToken {
   id            String    @id @default(uuid())
   user_phone    String
-  service       String    // "spotify" | "gmail" | "twitter"
+  service       String // "spotify" | "gmail" | "twitter"
   access_token  String
   refresh_token String?
   expires_at    DateTime?
@@ -117,7 +117,7 @@ model PipelineRun {
   final_state       String?
   created_at        DateTime @default(now())
 
-  agent             Agent    @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agent_id], references: [id], onDelete: Cascade)
 
   @@index([agent_id, created_at])
   @@map("pipeline_runs")
@@ -131,11 +131,11 @@ model Memory {
   id          String   @id @default(uuid())
   user_phone  String
   agent_id    String
-  type        String   // "preference" | "episodic" | "fact" | "pattern"
-  key         String   // semantic key, e.g. "food_preference"
-  value       String   // the actual memory content
+  type        String // "preference" | "episodic" | "fact" | "pattern"
+  key         String // semantic key, e.g. "food_preference"
+  value       String // the actual memory content
   confidence  Float    @default(1.0)
-  source      String?  // conversation id or context
+  source      String? // conversation id or context
   created_at  DateTime @default(now())
   accessed_at DateTime @default(now())
 
@@ -148,10 +148,10 @@ model Subscription {
   id          String   @id @default(uuid())
   user_phone  String
   agent_id    String
-  type        String   // "package" | "flight" | "sports" | "timer"
-  config      Json     // tracking details (tracking number, flight #, team, etc.)
+  type        String // "package" | "flight" | "sports" | "timer"
+  config      Json // tracking details (tracking number, flight #, team, etc.)
   status      String   @default("active") // "active" | "paused" | "completed"
-  last_state  Json?    // previous check result for diffing
+  last_state  Json? // previous check result for diffing
   last_check  DateTime @default(now())
   interval_ms Int      @default(300000) // poll interval (default 5 min)
   created_at  DateTime @default(now())
@@ -162,16 +162,16 @@ model Subscription {
 }
 
 model ProactiveJob {
-  id          String    @id @default(uuid())
-  user_phone  String
-  agent_id    String
-  type        String    // "morning_briefing" | "nudge" | "reminder" | "reengagement"
-  schedule    String    // cron expression or "once:ISO_DATE"
-  config      Json      // job-specific config
-  enabled     Boolean   @default(true)
-  last_run    DateTime?
-  next_run    DateTime?
-  created_at  DateTime  @default(now())
+  id         String    @id @default(uuid())
+  user_phone String
+  agent_id   String
+  type       String // "morning_briefing" | "nudge" | "reminder" | "reengagement"
+  schedule   String // cron expression or "once:ISO_DATE"
+  config     Json // job-specific config
+  enabled    Boolean   @default(true)
+  last_run   DateTime?
+  next_run   DateTime?
+  created_at DateTime  @default(now())
 
   @@index([enabled, next_run])
   @@index([user_phone, agent_id])
