@@ -313,7 +313,7 @@ function PhoneMockup() {
             {/* Bubl intro */}
             <div className="flex justify-start">
               <div className="max-w-[78%] px-3 py-[7px] text-[13px] leading-[1.35] bg-[#1C1C1E] text-[#E5E5EA] rounded-[18px] rounded-bl-[4px]">
-                hey eli! this is grace: I think you'd have a great time with her
+                hey eli! this is bella: I think you'd have a great time with her
               </div>
             </div>
             <div className="flex justify-start">
