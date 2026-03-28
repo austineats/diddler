@@ -250,7 +250,7 @@ function ScrapbookMemory() {
 
       {/* Polaroid frame */}
       <div className="bg-[#f5f0e8] p-1.5 pb-10 sm:p-2 sm:pb-14 rounded-sm shadow-2xl">
-        <img src="/peson.jpg" alt="" className="w-[200px] sm:w-[260px] lg:w-[340px] xl:w-[380px] aspect-[3/4] object-cover rounded-[1px]" />
+        <img src="/peson.jpg" alt="" className="w-[200px] sm:w-[260px] lg:w-[300px] aspect-[3/4] object-cover rounded-[1px]" />
 
         {/* Handwritten caption under photo */}
         <p
@@ -282,18 +282,12 @@ function ScrapbookMemory() {
 
 /* ─── Phone mockup ─── */
 function PhoneMockup() {
-  const msgs = [
-    { dir: "in" as const, text: "hey sarah... your bubl match is ready 👀" },
-    { dir: "in" as const, text: "are you ready to find out who you got?" },
-    { dir: "out" as const, text: "omg YES" },
-    { dir: "in" as const, text: "you're locked in 🔒 waiting on your match..." },
-    { dir: "in" as const, text: "your match is... Bella! 🎉\n\ntheir number: (949) 555-0123\n\nsay hi 👋" },
-  ];
   return (
-    <div className="w-[250px] sm:w-[280px] lg:w-[320px] shrink-0">
-      <div className="bg-black rounded-[44px] p-[10px] ring-1 ring-white/10">
-        <div className="bg-black rounded-[34px] overflow-hidden relative">
-          <div className="relative px-6 pt-3 pb-1 flex items-center justify-between">
+    <div className="w-[270px] sm:w-[300px] shrink-0">
+      <div className="bg-black rounded-[48px] p-[12px] ring-1 ring-white/10 shadow-2xl shadow-black/50">
+        <div className="bg-black rounded-[36px] overflow-hidden relative" style={{maxHeight:'580px'}}>
+          {/* Status bar */}
+          <div className="relative px-6 pt-1 pb-0 flex items-center justify-between">
             <span className="text-[11px] font-semibold text-white w-12">9:41</span>
             <div className="absolute left-1/2 -translate-x-1/2 w-[90px] h-[22px] bg-black rounded-full" />
             <div className="flex items-center gap-1 w-12 justify-end">
@@ -302,32 +296,50 @@ function PhoneMockup() {
               <svg width="22" height="10" viewBox="0 0 22 10" fill="none"><rect x="0.5" y="0.5" width="18" height="9" rx="2" stroke="white" strokeWidth="1" opacity="0.35"/><rect x="19.5" y="3" width="2" height="4" rx="1" fill="white" opacity="0.4"/><rect x="1.5" y="1.5" width="14" height="7" rx="1" fill="white"/></svg>
             </div>
           </div>
-          <div className="px-3 pt-1 pb-2">
-            <div className="flex items-center gap-1 mb-2">
+          {/* Header */}
+          <div className="px-3 pt-0 pb-1">
+            <div className="flex items-center gap-1 mb-1">
               <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M8.5 1L1.5 8L8.5 15" stroke="#007AFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               <span className="text-[14px] text-[#007AFF]">12</span>
             </div>
             <div className="flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center mb-1">
-                <span className="text-[12px] font-bold text-white">b</span>
-              </div>
-              <p className="text-[13px] font-semibold text-white">bubl</p>
-              <p className="text-[10px] text-[#8E8E93]">iMessage</p>
+              <img src="/bubl-logo.png" className="w-8 h-8 rounded-full object-cover mb-0.5" alt="bubl" />
+              <p className="text-[11px] font-semibold text-white">bubl</p>
+              <p className="text-[9px] text-[#8E8E93]">iMessage</p>
             </div>
           </div>
-          <div className="px-3 pb-3 pt-2 space-y-[6px] min-h-[260px]">
-            {msgs.map((m, i) => (
-              <div key={i} className={`flex ${m.dir === "out" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[78%] px-3 py-[7px] text-[13px] leading-[1.35] ${
-                  m.dir === "out"
-                    ? "bg-[#007AFF] text-white rounded-[18px] rounded-br-[4px]"
-                    : "bg-[#1C1C1E] text-[#E5E5EA] rounded-[18px] rounded-bl-[4px]"
-                }`}>
-                  <p className="whitespace-pre-wrap">{m.text}</p>
-                </div>
+          {/* Messages */}
+          <div className="px-3 pb-3 pt-2 space-y-[6px]">
+            {/* Bubl intro */}
+            <div className="flex justify-start">
+              <div className="max-w-[78%] px-3 py-[7px] text-[13px] leading-[1.35] bg-[#1C1C1E] text-[#E5E5EA] rounded-[18px] rounded-bl-[4px]">
+                hey eli! this is bella: I think you'd have a great time with her
               </div>
-            ))}
+            </div>
+            <div className="flex justify-start">
+              <div className="max-w-[78%] px-3 py-[7px] text-[13px] leading-[1.35] bg-[#1C1C1E] text-[#E5E5EA] rounded-[18px] rounded-bl-[4px]">
+                you both love fashion AND matcha, you guys also both went to Japan last year!
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="max-w-[78%] px-3 py-[7px] text-[13px] leading-[1.35] bg-[#1C1C1E] text-[#E5E5EA] rounded-[18px] rounded-bl-[4px]">
+                wanna meet her?
+              </div>
+            </div>
+            {/* Profile card — Bella image */}
+            <div className="flex justify-start">
+              <div className="max-w-[92%] rounded-[14px] overflow-hidden">
+                <img src="/bubl. iphone ui.jpeg" className="w-full rounded-[14px]" alt="Bella profile card" />
+              </div>
+            </div>
+            {/* User reply */}
+            <div className="flex justify-end">
+              <div className="max-w-[78%] px-3 py-[7px] text-[13px] leading-[1.35] bg-[#007AFF] text-white rounded-[18px] rounded-br-[4px]">
+                omg YES
+              </div>
+            </div>
           </div>
+          {/* Input bar */}
           <div className="px-3 pb-4 pt-1">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-[#1C1C1E] flex items-center justify-center">
@@ -353,11 +365,13 @@ type FormState = "idle" | "submitting" | "success";
 export function BlindDatePage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [age, setAge] = useState("");
+  const [school, setSchool] = useState("");
   const [formState, setFormState] = useState<FormState>("idle");
   const [error, setError] = useState("");
-  const [position, setPosition] = useState(0);
+  const [, setPosition] = useState(0);
   const signupRef = useRef<HTMLDivElement>(null);
+
   const fmt = (v: string) => {
     const d = v.replace(/\D/g, "").slice(0, 10);
     if (d.length <= 3) return d;
@@ -366,12 +380,13 @@ export function BlindDatePage() {
   };
   const submit = async () => {
     setError("");
-    if (!name.trim() || !phone.trim() || !email.trim()) { setError("all fields are required"); return; }
+    if (!name.trim() || !phone.trim() || !age.trim() || !school) { setError("all fields are required"); return; }
     setFormState("submitting");
     const fd = new FormData();
     fd.append("name", name.trim());
     fd.append("phone", phone.replace(/\D/g, ""));
-    fd.append("email", email.trim());
+    fd.append("age", age.trim());
+    fd.append("school", school);
     try {
       const res = await fetch("/api/blind-date/signup", { method: "POST", body: fd });
       const data = await res.json();
@@ -393,7 +408,7 @@ export function BlindDatePage() {
 
       {/* Nav */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/5">
-        <div className="max-w-6xl xl:max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <span className="text-white font-bold text-[18px] tracking-[-0.03em]">bubl.</span>
           <button onClick={scrollToSignup} className="text-white/60 text-[13px] hover:text-white transition">
             join waitlist &rarr;
@@ -405,12 +420,12 @@ export function BlindDatePage() {
       <motion.section
         variants={sectionVariants} initial="hidden" animate="visible"
         className="relative z-10 min-h-[100svh] flex flex-col justify-end px-5 sm:px-6 pb-16 sm:pb-24 pt-16">
-        <div className="max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto w-full flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-16">
+        <div className="max-w-5xl mx-auto w-full flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-10">
           <div className="flex-1 order-2 lg:order-1">
-            <motion.h1 variants={itemVariants} className="text-[56px] sm:text-[100px] lg:text-[160px] xl:text-[200px] font-bold leading-[0.85] tracking-[-0.05em] text-white select-none">
+            <motion.h1 variants={itemVariants} className="text-[56px] sm:text-[100px] lg:text-[160px] font-bold leading-[0.85] tracking-[-0.05em] text-white select-none">
               bubl.
             </motion.h1>
-            <motion.p variants={itemVariants} className="mt-4 sm:mt-6 text-white/60 text-[16px] sm:text-[22px] lg:text-[24px] leading-snug max-w-md lg:max-w-lg">
+            <motion.p variants={itemVariants} className="mt-4 sm:mt-6 text-white/60 text-[16px] sm:text-[22px] leading-snug max-w-md">
               Get a curated match every Thursday. No app download, no follows, no dms.
             </motion.p>
             <motion.button variants={itemVariants} onClick={scrollToSignup}
@@ -418,7 +433,7 @@ export function BlindDatePage() {
               Join the Waitlist
             </motion.button>
           </div>
-          <motion.div variants={itemVariants} className="shrink-0 order-1 lg:order-2 self-center lg:self-auto lg:mb-4">
+          <motion.div variants={itemVariants} className="shrink-0 order-1 lg:order-2 self-center lg:self-auto lg:mb-2">
             <ScrapbookMemory />
           </motion.div>
         </div>
@@ -439,11 +454,11 @@ export function BlindDatePage() {
 
       {/* ─── How it works — editorial layout ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }} className="py-20 sm:py-32 px-5 sm:px-6">
-        <ScrapPaper index={0} className="max-w-5xl lg:max-w-6xl mx-auto">
+        <ScrapPaper index={0} className="max-w-5xl mx-auto">
           <div className="grid lg:grid-cols-[1fr_1px_1fr] gap-8 lg:gap-0">
             <div className="lg:pr-16">
               <motion.p variants={itemVariants} className="text-[20px] sm:text-[22px] text-white/40 mb-4 sm:mb-6" style={{ fontFamily: "Caveat, cursive", transform: "rotate(-2deg)" }}>How it works</motion.p>
-              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[48px] xl:text-[56px] font-bold tracking-[-0.03em] text-white leading-[1.05]">
+              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[48px] font-bold tracking-[-0.03em] text-white leading-[1.05]">
                 Sign up.<br />
                 Get texted.<br />
                 Meet someone<br />
@@ -454,9 +469,9 @@ export function BlindDatePage() {
             <div className="lg:pl-16 flex flex-col justify-center space-y-8">
               {[
                 "Drop your name, number, and school ID.",
-                "Every Thursday between 9–11am we send you a match over iMessage.",
-                "Both say yes — we reveal names and numbers.",
-                "We break the ice. You take it from there.",
+                "Every Thursday we send you a match over iMessage.",
+                "Reply Yes — we set the date.",
+                "All ages are carefully matched to ensure safety.",
               ].map((text, i) => (
                 <motion.div key={i} variants={itemVariants} className="flex gap-4 items-baseline">
                   <span className="font-mono text-[12px] text-white/20 shrink-0">{String(i + 1).padStart(2, "0")}</span>
@@ -470,10 +485,10 @@ export function BlindDatePage() {
 
       {/* ─── Pull quote ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} className="py-16 sm:py-20 px-5 sm:px-6">
-        <ScrapPaper index={1} className="max-w-4xl lg:max-w-5xl mx-auto text-center">
-          <motion.p variants={itemVariants} className="text-[22px] sm:text-[36px] lg:text-[44px] xl:text-[52px] font-bold tracking-[-0.02em] leading-[1.15] text-white/80">
-            &ldquo;Tinder gave me carpal tunnel.<br />
-            bubl gave me a date.&rdquo;
+        <ScrapPaper index={1} className="max-w-4xl mx-auto text-center">
+          <motion.p variants={itemVariants} className="text-[22px] sm:text-[36px] lg:text-[44px] font-bold tracking-[-0.02em] leading-[1.15] text-white/80">
+            &ldquo;Instagram gave me digital <span className="text-white/30">&lsquo;connections.&rsquo;</span><br />
+            Bubl gave me something <span className="underline decoration-[4px] decoration-pink-500" style={{textUnderlineOffset:'4px'}}>real</span>.&rdquo;
           </motion.p>
           <motion.p variants={itemVariants} className="mt-4 font-mono text-[12px] text-white/20 uppercase tracking-[0.15em]">— actual high schooler, probably</motion.p>
         </ScrapPaper>
@@ -481,14 +496,14 @@ export function BlindDatePage() {
 
       {/* ─── iMessage demo — offset layout ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} className="py-20 sm:py-32 px-5 sm:px-6">
-        <ScrapPaper index={2} className="max-w-5xl lg:max-w-6xl mx-auto">
+        <ScrapPaper index={2} className="max-w-5xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 lg:gap-16">
             <motion.div variants={itemVariants} className="w-full lg:w-1/2 flex justify-center lg:justify-start">
               <PhoneMockup />
             </motion.div>
             <div className="w-full lg:w-1/2 lg:pt-12">
               <motion.p variants={itemVariants} className="text-[20px] sm:text-[22px] text-white/40 mb-4 sm:mb-6" style={{ fontFamily: "Caveat, cursive", transform: "rotate(1.5deg)" }}>No app needed</motion.p>
-              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[44px] xl:text-[52px] font-bold tracking-[-0.03em] text-white leading-[1.05] mb-4 sm:mb-6">
+              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[44px] font-bold tracking-[-0.03em] text-white leading-[1.05] mb-4 sm:mb-6">
                 It lives in<br />your texts.
               </motion.h2>
               <motion.p variants={itemVariants} className="text-white/40 text-[15px] leading-[1.7] max-w-sm">
@@ -506,13 +521,13 @@ export function BlindDatePage() {
 
       {/* ─── Photo collage (3-panel) ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} className="py-20 sm:py-32 px-5 sm:px-6 overflow-hidden">
-        <div className="max-w-5xl lg:max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <motion.p variants={itemVariants} className="text-[20px] sm:text-[24px] text-white/40 mb-10 sm:mb-16 text-center" style={{ fontFamily: "Caveat, cursive", transform: "rotate(-1.5deg)" }}>Real people. Real nights.</motion.p>
           {/* Mobile: stacked polaroids */}
           <div className="flex flex-col items-center gap-6 sm:hidden">
             {[
               { src: "/elsam4.jpg", rot: "-2deg" },
-              { src: "/grace.jpg", rot: "1.5deg" },
+              { src: "/rave1.jpg", rot: "1.5deg" },
               { src: "/vibes.jpg", rot: "-1deg" },
             ].map((img, i) => (
               <motion.div key={i} variants={itemVariants} style={{ transform: `rotate(${img.rot})` }}>
@@ -531,7 +546,7 @@ export function BlindDatePage() {
             </div>
             <div className="absolute right-0 top-4 w-[42%]" style={{ transform: "rotate(2deg)" }}>
               <div className="bg-[#1a1a1a] p-2 pb-8 rounded">
-                <img src="/grace.jpg" alt="" className="w-full aspect-[4/3] object-cover rounded-sm" />
+                <img src="/rave1.jpg" alt="" className="w-full aspect-[4/3] object-cover rounded-sm" />
               </div>
             </div>
             <div className="absolute left-[15%] bottom-0 w-[45%]" style={{ transform: "rotate(1.5deg)" }}>
@@ -563,9 +578,15 @@ export function BlindDatePage() {
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-white flex items-center justify-center">
                 <Check className="w-8 h-8 text-black" strokeWidth={3} />
               </div>
-              <h2 className="text-[28px] font-bold text-white mb-2">you're in</h2>
-              <p className="text-white/50 text-[15px] mb-1">#{position} on the waitlist</p>
-              <p className="text-white/30 text-[14px]">we'll text you when your match is ready</p>
+              <h2 className="text-[28px] font-bold text-white mb-2">You're In!</h2>
+              <p className="text-white/50 text-[15px] mb-2">we're busy curating your perfect match..</p>
+              <p className="text-white/30 text-[13px] mb-5">text bubl to receive your match, we use imsg!</p>
+              <a
+                href="sms:textbubl@icloud.com&body=Hey Bubl, I've signed up!"
+                className="inline-block px-8 py-3 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-full transition-all"
+              >
+                Text Bubl →
+              </a>
             </div>
           ) : (
             <>
@@ -577,16 +598,22 @@ export function BlindDatePage() {
               <div className="space-y-3">
                 <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="name"
                   className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
-                <div>
-                  <input type="tel" value={phone} onChange={(e) => setPhone(fmt(e.target.value))} placeholder="phone"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
-                  <p className="text-[11px] text-white/15 mt-1 ml-1">iMessage required</p>
-                </div>
-                <div>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="student email"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
-                  <p className="text-[11px] text-white/15 mt-1 ml-1">.edu email preferred</p>
-                </div>
+                <input type="tel" value={phone} onChange={(e) => setPhone(fmt(e.target.value))} placeholder="phone (iMessage only)"
+                  className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
+                <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="age"
+                  className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
+                <select value={school} onChange={(e) => setSchool(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white focus:outline-none focus:border-white/25 transition bg-white/5 appearance-none cursor-pointer"
+                  style={{color: school ? 'white' : 'rgba(255,255,255,0.2)'}}>
+                  <option value="" disabled>school</option>
+                  <option value="Portola High School">Portola High School</option>
+                  <option value="Irvine High School">Irvine High School</option>
+                  <option value="Northwood High School">Northwood High School</option>
+                  <option value="Woodbridge High School">Woodbridge High School</option>
+                  <option value="Beckman High School">Beckman High School</option>
+                  <option value="Crean Lutheran High School">Crean Lutheran High School</option>
+                  <option value="University High School">University High School</option>
+                </select>
 
                 {error && <p className="text-[13px] text-red-400 text-center">{error}</p>}
 
@@ -607,7 +634,7 @@ export function BlindDatePage() {
         <ScrapPaper index={4} className="max-w-xl mx-auto">
           <motion.p variants={itemVariants} className="text-[24px] text-white/40 mb-12" style={{ fontFamily: "Caveat, cursive", transform: "rotate(2deg)" }}>FAQ</motion.p>
           {[
-            { q: "How does matching work?", a: "Every Thursday between 9–11am we pair everyone and send both people an iMessage. Both say yes, we reveal names and numbers." },
+            { q: "How does matching work?", a: "Every Thursday we pair everyone and send results through iMessage. Both say yes, we set the event." },
             { q: "Do I need an app?", a: "No. iMessage only." },
             { q: "Why school ID?", a: "We verify every user is a real high school student. Your ID is never shared." },
             { q: "What if I'm not into my match?", a: "Reply 'no'. Back in the pool next week." },
@@ -623,7 +650,7 @@ export function BlindDatePage() {
 
       {/* Footer */}
       <footer className="py-10 px-6 border-t border-white/5">
-        <div className="max-w-6xl xl:max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <span className="text-white/20 font-bold text-[15px] tracking-[-0.03em]">bubl</span>
           <p className="text-white/15 text-[12px] font-mono">every thursday</p>
         </div>

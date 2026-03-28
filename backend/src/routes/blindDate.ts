@@ -31,13 +31,12 @@ function normalizePhone(raw: string): string | null {
 // POST /signup
 // ---------------------------------------------------------------------------
 
-blindDateRouter.post("/signup", upload.single("school_id"), async (req, res) => {
+blindDateRouter.post("/signup", upload.none(), async (req, res) => {
   try {
-    const { name, phone, gender, looking_for, hobbies } = req.body;
-    const file = req.file;
+    const { name, phone, age, school, gender, looking_for, hobbies } = req.body;
 
-    if (!name || !phone || !file) {
-      return res.status(400).json({ ok: false, error: "name, phone, and school_id photo are required" });
+    if (!name || !phone) {
+      return res.status(400).json({ ok: false, error: "name and phone are required" });
     }
 
     const normalized = normalizePhone(phone);
@@ -57,9 +56,6 @@ blindDateRouter.post("/signup", upload.single("school_id"), async (req, res) => 
       });
     }
 
-    // Store school ID as base64 data URL
-    const base64 = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-
     let parsedHobbies: string[] = [];
     try { parsedHobbies = hobbies ? JSON.parse(hobbies) : []; } catch { /* ignore */ }
 
@@ -67,8 +63,8 @@ blindDateRouter.post("/signup", upload.single("school_id"), async (req, res) => 
       data: {
         name: name.trim(),
         phone: normalized,
-        school_id_url: base64,
-        gender: gender || null,
+        school_id_url: school || null,
+        gender: age || null,
         looking_for: looking_for || null,
         hobbies: parsedHobbies,
       },
