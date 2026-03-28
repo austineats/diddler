@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Camera, Check } from "lucide-react";
-import { motion, AnimatePresence, type Variants } from "motion/react";
+import { motion, type Variants } from "motion/react";
 
 /* ─── Scrapbook paper styles ─── */
 type PaperStyle = "lined" | "grid" | "plain" | "yellow" | "pink";
@@ -250,7 +250,7 @@ function ScrapbookMemory() {
 
       {/* Polaroid frame */}
       <div className="bg-[#f5f0e8] p-1.5 pb-10 sm:p-2 sm:pb-14 rounded-sm shadow-2xl">
-        <img src="/peson.jpg" alt="" className="w-[200px] sm:w-[260px] lg:w-[300px] aspect-[3/4] object-cover rounded-[1px]" />
+        <img src="/peson.jpg" alt="" className="w-[200px] sm:w-[260px] lg:w-[340px] xl:w-[380px] aspect-[3/4] object-cover rounded-[1px]" />
 
         {/* Handwritten caption under photo */}
         <p
@@ -290,7 +290,7 @@ function PhoneMockup() {
     { dir: "in" as const, text: "your match is... Jake! 🎉\n\ntheir number: (949) 555-0123\n\nsay hi 👋" },
   ];
   return (
-    <div className="w-[250px] sm:w-[280px] shrink-0">
+    <div className="w-[250px] sm:w-[280px] lg:w-[320px] shrink-0">
       <div className="bg-black rounded-[44px] p-[10px] ring-1 ring-white/10">
         <div className="bg-black rounded-[34px] overflow-hidden relative">
           <div className="relative px-6 pt-3 pb-1 flex items-center justify-between">
@@ -401,7 +401,7 @@ export function BlindDatePage() {
 
       {/* Nav */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-6xl xl:max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
           <span className="text-white font-bold text-[18px] tracking-[-0.03em]">bubl.</span>
           <button onClick={scrollToSignup} className="text-white/60 text-[13px] hover:text-white transition">
             join waitlist &rarr;
@@ -413,12 +413,12 @@ export function BlindDatePage() {
       <motion.section
         variants={sectionVariants} initial="hidden" animate="visible"
         className="relative z-10 min-h-[100svh] flex flex-col justify-end px-5 sm:px-6 pb-16 sm:pb-24 pt-16">
-        <div className="max-w-5xl mx-auto w-full flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-10">
+        <div className="max-w-5xl lg:max-w-6xl xl:max-w-7xl mx-auto w-full flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 lg:gap-16">
           <div className="flex-1 order-2 lg:order-1">
-            <motion.h1 variants={itemVariants} className="text-[56px] sm:text-[100px] lg:text-[160px] font-bold leading-[0.85] tracking-[-0.05em] text-white select-none">
+            <motion.h1 variants={itemVariants} className="text-[56px] sm:text-[100px] lg:text-[160px] xl:text-[200px] font-bold leading-[0.85] tracking-[-0.05em] text-white select-none">
               bubl.
             </motion.h1>
-            <motion.p variants={itemVariants} className="mt-4 sm:mt-6 text-white/60 text-[16px] sm:text-[22px] leading-snug max-w-md">
+            <motion.p variants={itemVariants} className="mt-4 sm:mt-6 text-white/60 text-[16px] sm:text-[22px] lg:text-[24px] leading-snug max-w-md lg:max-w-lg">
               Get a curated match every Thursday. No app download, no follows, no dms.
             </motion.p>
             <motion.button variants={itemVariants} onClick={scrollToSignup}
@@ -426,7 +426,7 @@ export function BlindDatePage() {
               Join the Waitlist
             </motion.button>
           </div>
-          <motion.div variants={itemVariants} className="shrink-0 order-1 lg:order-2 self-center lg:self-auto lg:mb-2">
+          <motion.div variants={itemVariants} className="shrink-0 order-1 lg:order-2 self-center lg:self-auto lg:mb-4">
             <ScrapbookMemory />
           </motion.div>
         </div>
@@ -447,11 +447,11 @@ export function BlindDatePage() {
 
       {/* ─── How it works — editorial layout ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }} className="py-20 sm:py-32 px-5 sm:px-6">
-        <ScrapPaper index={0} className="max-w-5xl mx-auto">
+        <ScrapPaper index={0} className="max-w-5xl lg:max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-[1fr_1px_1fr] gap-8 lg:gap-0">
             <div className="lg:pr-16">
               <motion.p variants={itemVariants} className="text-[20px] sm:text-[22px] text-white/40 mb-4 sm:mb-6" style={{ fontFamily: "Caveat, cursive", transform: "rotate(-2deg)" }}>How it works</motion.p>
-              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[48px] font-bold tracking-[-0.03em] text-white leading-[1.05]">
+              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[48px] xl:text-[56px] font-bold tracking-[-0.03em] text-white leading-[1.05]">
                 Sign up.<br />
                 Get texted.<br />
                 Meet someone<br />
@@ -478,8 +478,8 @@ export function BlindDatePage() {
 
       {/* ─── Pull quote ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} className="py-16 sm:py-20 px-5 sm:px-6">
-        <ScrapPaper index={1} className="max-w-4xl mx-auto text-center">
-          <motion.p variants={itemVariants} className="text-[22px] sm:text-[36px] lg:text-[44px] font-bold tracking-[-0.02em] leading-[1.15] text-white/80">
+        <ScrapPaper index={1} className="max-w-4xl lg:max-w-5xl mx-auto text-center">
+          <motion.p variants={itemVariants} className="text-[22px] sm:text-[36px] lg:text-[44px] xl:text-[52px] font-bold tracking-[-0.02em] leading-[1.15] text-white/80">
             &ldquo;Tinder gave me carpal tunnel.<br />
             bubl gave me a date.&rdquo;
           </motion.p>
@@ -489,14 +489,14 @@ export function BlindDatePage() {
 
       {/* ─── iMessage demo — offset layout ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} className="py-20 sm:py-32 px-5 sm:px-6">
-        <ScrapPaper index={2} className="max-w-5xl mx-auto">
+        <ScrapPaper index={2} className="max-w-5xl lg:max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 lg:gap-16">
             <motion.div variants={itemVariants} className="w-full lg:w-1/2 flex justify-center lg:justify-start">
               <PhoneMockup />
             </motion.div>
             <div className="w-full lg:w-1/2 lg:pt-12">
               <motion.p variants={itemVariants} className="text-[20px] sm:text-[22px] text-white/40 mb-4 sm:mb-6" style={{ fontFamily: "Caveat, cursive", transform: "rotate(1.5deg)" }}>No app needed</motion.p>
-              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[44px] font-bold tracking-[-0.03em] text-white leading-[1.05] mb-4 sm:mb-6">
+              <motion.h2 variants={itemVariants} className="text-[28px] sm:text-[36px] lg:text-[44px] xl:text-[52px] font-bold tracking-[-0.03em] text-white leading-[1.05] mb-4 sm:mb-6">
                 It lives in<br />your texts.
               </motion.h2>
               <motion.p variants={itemVariants} className="text-white/40 text-[15px] leading-[1.7] max-w-sm">
@@ -514,7 +514,7 @@ export function BlindDatePage() {
 
       {/* ─── Photo collage (3-panel) ─── */}
       <motion.section variants={sectionVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} className="py-20 sm:py-32 px-5 sm:px-6 overflow-hidden">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl lg:max-w-6xl mx-auto">
           <motion.p variants={itemVariants} className="text-[20px] sm:text-[24px] text-white/40 mb-10 sm:mb-16 text-center" style={{ fontFamily: "Caveat, cursive", transform: "rotate(-1.5deg)" }}>Real people. Real nights.</motion.p>
           {/* Mobile: stacked polaroids */}
           <div className="flex flex-col items-center gap-6 sm:hidden">
@@ -642,7 +642,7 @@ export function BlindDatePage() {
 
       {/* Footer */}
       <footer className="py-10 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl xl:max-w-7xl mx-auto flex items-center justify-between">
           <span className="text-white/20 font-bold text-[15px] tracking-[-0.03em]">bubl</span>
           <p className="text-white/15 text-[12px] font-mono">every thursday</p>
         </div>
