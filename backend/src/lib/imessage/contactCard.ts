@@ -1,6 +1,6 @@
 /**
- * Contact Card — generates and sends a vCard (.vcf) for the Bit7 agent
- * so users can easily save the contact with name + profile picture.
+ * Contact Card — generates and sends a vCard (.vcf) for bubl
+ * so users can save the contact with name + profile picture.
  */
 import * as fs from "fs";
 import * as path from "path";
@@ -22,16 +22,20 @@ function buildVCard(name: string, org: string, note: string): string {
     `FN:${name}`,
     `N:;${name};;;`,
     `ORG:${org}`,
-    "TITLE:AI Companion",
+    "TITLE:Your Matchmaker",
     `NOTE:${note}`,
-    "EMAIL;type=INTERNET;type=pref:bitseven@icloud.com",
-    "IMPP;X-SERVICE-TYPE=iMessage;type=pref:imessage:bitseven@icloud.com",
+    "EMAIL;type=INTERNET;type=pref:textbubl@icloud.com",
+    "IMPP;X-SERVICE-TYPE=iMessage;type=pref:imessage:textbubl@icloud.com",
   ];
 
   // Embed profile photo if it exists
-  const avatarPath = path.join(ASSETS_DIR, "bit7-avatar.jpg");
-  if (fs.existsSync(avatarPath)) {
-    const imageData = fs.readFileSync(avatarPath).toString("base64");
+  const avatarPath = path.join(ASSETS_DIR, "bubl-avatar.jpg");
+  // Fallback to old avatar name
+  const fallbackPath = path.join(ASSETS_DIR, "bit7-avatar.jpg");
+  const photoPath = fs.existsSync(avatarPath) ? avatarPath : fs.existsSync(fallbackPath) ? fallbackPath : null;
+
+  if (photoPath) {
+    const imageData = fs.readFileSync(photoPath).toString("base64");
     lines.push(`PHOTO;ENCODING=b;TYPE=JPEG:${imageData}`);
   }
 
@@ -40,24 +44,23 @@ function buildVCard(name: string, org: string, note: string): string {
 }
 
 /**
- * Send the Bit7 contact card to a user via iMessage.
+ * Send the bubl contact card to a user via iMessage.
  * Creates a temp .vcf file and sends it as an attachment.
  */
 export async function sendContactCard(to: string): Promise<void> {
   const vcf = buildVCard(
-    "Bit7",
-    "Bit7",
-    "Your iMessage AI companion — powered by Bit7",
+    "bubl.",
+    "bubl",
+    "Your matchmaker — curated double dates every Thursday via iMessage",
   );
 
-  const tmpPath = path.join(os.tmpdir(), `bit7-contact-${Date.now()}.vcf`);
+  const tmpPath = path.join(os.tmpdir(), `bubl-contact-${Date.now()}.vcf`);
   fs.writeFileSync(tmpPath, vcf, "utf-8");
 
   try {
     const sdk = getIMessageSDK();
-    await sdk.sendFile(to, tmpPath, "Here's my contact card — save it to add me to your contacts!");
+    await sdk.sendFile(to, tmpPath, "save my contact so you never miss a match drop! 💜");
   } finally {
-    // Clean up temp file
     try {
       fs.unlinkSync(tmpPath);
     } catch {
