@@ -97,13 +97,13 @@ export function JoinPage() {
                   You and {invitedBy} are now teammates.
                 </p>
                 <p className="text-[#5f574f] text-[8px] leading-[2] mb-6">
-                  bubl will find your opponents and text you both on Thursday!
+                  bubl will find your match and text you both on Thursday!
                 </p>
                 <p
                   className="text-[#ffec27] text-[7px] uppercase"
                   style={{ animation: "blink-pixel 1.5s step-end infinite" }}
                 >
-                  searching for opponents...
+                  searching for your match...
                 </p>
               </div>
             ) : (

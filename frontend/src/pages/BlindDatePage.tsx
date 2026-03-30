@@ -626,14 +626,6 @@ export function BlindDatePage() {
                     type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="&gt; name"
                     className={inputClass} style={px}
                   />
-                  <input
-                    type="tel" value={phone} onChange={(e) => setPhone(fmt(e.target.value))} placeholder="&gt; phone (iMessage)"
-                    className={inputClass} style={px}
-                  />
-                  <input
-                    type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="&gt; age"
-                    className={inputClass} style={px}
-                  />
                   <select
                     value={gender} onChange={(e) => setGender(e.target.value)}
                     className={`${inputClass} appearance-none cursor-pointer`}
@@ -643,6 +635,14 @@ export function BlindDatePage() {
                     <option value="boy">Boy</option>
                     <option value="girl">Girl</option>
                   </select>
+                  <input
+                    type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="&gt; age"
+                    className={inputClass} style={px}
+                  />
+                  <input
+                    type="tel" value={phone} onChange={(e) => setPhone(fmt(e.target.value))} placeholder="&gt; phone (iMessage)"
+                    className={inputClass} style={px}
+                  />
                   <select
                     value={school} onChange={(e) => setSchool(e.target.value)}
                     className={`${inputClass} appearance-none cursor-pointer`}

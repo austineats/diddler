@@ -228,9 +228,11 @@ model BlindDateTeam {
   player1_name String
   player1_phone String
   player1_gender String                   // "boy" | "girl"
+  player1_ready Boolean   @default(false)
   player2_name  String?
   player2_phone String?
   player2_gender String?
+  player2_ready Boolean   @default(false)
   status       String    @default("waiting") // "waiting" | "full" | "matched"
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt

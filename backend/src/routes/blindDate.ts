@@ -26,7 +26,7 @@ async function logActivity(action: string, actor_name?: string, actor_phone?: st
 function bublWaitingReply(name: string): string {
   const replies = [
     `lets gooo ${name}!! 🔥 im curating your match rn but i can only match you once your friend has joined. send them the invite link!`,
-    `yooo ${name}! 🎮 you're in the queue! once your teammate joins i'll start finding your opponents. tell them to hurry up lol`,
+    `yooo ${name}! 🎮 you're in the queue! once your teammate joins i'll start finding your match. tell them to hurry up lol`,
     `${name}!! welcome to bubl 💜 im getting everything ready but i need your friend to sign up first — share that invite link!`,
     `ayy ${name} 🫶 signed up and locked in! waiting on your teammate to join so i can start the matchmaking magic ✨`,
     `${name}! 🎯 you're on the list. get your friend to join through your invite link and i'll find you the perfect double date!`,
@@ -37,7 +37,7 @@ function bublWaitingReply(name: string): string {
 function friendJoinedReply(friendName: string): string {
   const replies = [
     `${friendName} just signed up! 🔥 you're both on the list now — i'm finding your matches!`,
-    `yo ${friendName} joined your team! 🎮 you're all set, sit tight while i find your opponents`,
+    `yo ${friendName} joined your team! 🎮 you're all set, sit tight while i find your match`,
     `${friendName} is in!! 💜 both of you are locked in. match drop coming soon 👀`,
     `lets goo ${friendName} just joined! 🫶 your team is ready — i'll text you when i find your match`,
     `${friendName} signed up! ✨ team complete. working on finding the perfect double date for you two`,
@@ -252,15 +252,23 @@ blindDateRouter.post("/ready", async (req, res) => {
     const signup = await prisma.blindDateSignup.findUnique({ where: { phone: normalized } });
     if (!signup) return res.status(404).json({ ok: false, error: "not signed up" });
 
-    // Find their team
+    // Find their team and mark ready
     const team = await prisma.blindDateTeam.findFirst({
       where: { OR: [{ player1_phone: normalized }, { player2_phone: normalized }] },
       orderBy: { created_at: "desc" },
     });
 
+    if (team) {
+      const isPlayer1 = team.player1_phone === normalized;
+      await prisma.blindDateTeam.update({
+        where: { id: team.id },
+        data: isPlayer1 ? { player1_ready: true } : { player2_ready: true },
+      });
+    }
+
     let reply: string;
     if (team && team.status === "full") {
-      reply = `${signup.name}!! both you and your teammate are locked in 🔥 im finding your matches now. sit tight, match drop coming soon 👀`;
+      reply = `${signup.name}!! both you and your teammate are locked in 🔥 im finding your match now. sit tight, match drop coming soon 👀`;
     } else {
       reply = bublWaitingReply(signup.name);
     }
@@ -294,9 +302,9 @@ blindDateRouter.get("/team/:code", async (req, res) => {
       team: {
         code: team.code,
         status: team.status,
-        player1: { name: team.player1_name, gender: team.player1_gender },
+        player1: { name: team.player1_name, gender: team.player1_gender, ready: team.player1_ready },
         player2: team.player2_name
-          ? { name: team.player2_name, gender: team.player2_gender }
+          ? { name: team.player2_name, gender: team.player2_gender, ready: team.player2_ready }
           : null,
       },
     });

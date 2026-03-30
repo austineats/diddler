@@ -35,7 +35,7 @@ const BOY_NAMES = [
 
 
 /* ─── Player slot ─── */
-function PixelPlayer({ name, filled, color, onInvite }: { name?: string; filled: boolean; color: "blue" | "pink"; onInvite?: () => void }) {
+function PixelPlayer({ name, filled, color, ready, onInvite }: { name?: string; filled: boolean; color: "blue" | "pink"; ready?: boolean; onInvite?: () => void }) {
   const c = color === "blue" ? "#29adff" : "#ff77a8";
   const cDark = color === "blue" ? "#1a6b99" : "#993d64";
 
@@ -51,7 +51,11 @@ function PixelPlayer({ name, filled, color, onInvite }: { name?: string; filled:
         }}
       >
         {filled ? (
-          <span className="text-[16px] sm:text-[18px] text-[#00e436]">READY</span>
+          ready ? (
+            <span className="text-[14px] sm:text-[16px] text-[#00e436]">READY</span>
+          ) : (
+            <span className="text-[10px] sm:text-[12px] text-[#ffec27]" style={{ animation: "blink-pixel 2s step-end infinite" }}>NOT READY</span>
+          )
         ) : (
           <button
             onClick={onInvite}
@@ -79,11 +83,11 @@ function PixelPlayer({ name, filled, color, onInvite }: { name?: string; filled:
 
 
 
-/* ─── TBD opponent slot with spinning name ─── */
-function TbdPlayer({ index, opponentGender }: { index: number; opponentGender: "girl" | "boy" }) {
-  const names = opponentGender === "girl" ? GIRL_NAMES : BOY_NAMES;
-  const c = opponentGender === "girl" ? "#ff004d" : "#29adff";
-  const cDark = opponentGender === "girl" ? "#7e2553" : "#1a6b99";
+/* ─── TBD match slot with spinning name ─── */
+function TbdPlayer({ index, matchGender }: { index: number; matchGender: "girl" | "boy" }) {
+  const names = matchGender === "girl" ? GIRL_NAMES : BOY_NAMES;
+  const c = matchGender === "girl" ? "#ff004d" : "#29adff";
+  const cDark = matchGender === "girl" ? "#7e2553" : "#1a6b99";
   const [idx, setIdx] = useState(() => (index * 11) % names.length);
 
   useEffect(() => {
@@ -135,8 +139,8 @@ function VsBadge() {
 
 /* ═══ Team data type ═══ */
 type TeamData = {
-  player1: { name: string; gender: string };
-  player2: { name: string; gender: string } | null;
+  player1: { name: string; gender: string; ready: boolean };
+  player2: { name: string; gender: string; ready: boolean } | null;
 };
 
 /* ═══ Page ═══ */
@@ -149,14 +153,14 @@ export function InvitePage() {
   const initial = stored ? JSON.parse(stored) : null;
 
   const [team, setTeam] = useState<TeamData>({
-    player1: initial ? { name: initial.name, gender: initial.gender || "boy" } : { name: "...", gender: "boy" },
+    player1: initial ? { name: initial.name, gender: initial.gender || "boy", ready: false } : { name: "...", gender: "boy", ready: false },
     player2: null,
   });
   const [copied, setCopied] = useState(false);
   const [loaded, setLoaded] = useState(!!initial);
 
   const playerGender = team.player1.gender;
-  const opponentGender = playerGender === "girl" ? "boy" : "girl";
+  const matchGender = playerGender === "girl" ? "boy" : "girl";
   const teamFull = team.player2 !== null;
   const playerCount = teamFull ? 2 : 1;
 
@@ -261,9 +265,9 @@ export function InvitePage() {
           {/* 2v2 Arena */}
           <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-4 lg:gap-8">
             <div className="flex gap-4 sm:gap-5">
-              <PixelPlayer name={team.player1.name} filled color={playerGender === "girl" ? "pink" : "blue"} />
+              <PixelPlayer name={team.player1.name} filled ready={team.player1.ready} color={playerGender === "girl" ? "pink" : "blue"} />
               {teamFull ? (
-                <PixelPlayer name={team.player2!.name} filled color={playerGender === "girl" ? "pink" : "blue"} />
+                <PixelPlayer name={team.player2!.name} filled ready={team.player2!.ready} color={playerGender === "girl" ? "pink" : "blue"} />
               ) : (
                 <PixelPlayer filled={false} color={playerGender === "girl" ? "pink" : "blue"} onInvite={copyLink} />
               )}
@@ -272,16 +276,16 @@ export function InvitePage() {
             <VsBadge />
 
             <div className="flex gap-4 sm:gap-5">
-              <TbdPlayer index={1} opponentGender={opponentGender as "girl" | "boy"} />
-              <TbdPlayer index={2} opponentGender={opponentGender as "girl" | "boy"} />
+              <TbdPlayer index={1} matchGender={matchGender as "girl" | "boy"} />
+              <TbdPlayer index={2} matchGender={matchGender as "girl" | "boy"} />
             </div>
           </div>
 
           {/* Message */}
           <p className="text-[#c2c3c7] text-[9px] sm:text-[10px] text-center leading-[2.2] max-w-sm">
             {teamFull
-              ? "Both teammates are in! bubl will find your opponents and text you on Thursday."
-              : "Invite your friend to join your team. Once both slots are filled, bubl will find your opponents!"
+              ? "Both teammates are in! bubl will find your match and text you on Thursday."
+              : "Invite your friend to join your team. Once both slots are filled, bubl will find your match!"
             }
           </p>
 
