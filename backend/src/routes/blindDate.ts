@@ -282,6 +282,18 @@ blindDateRouter.get("/admin/analytics", async (_req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /admin/visits — raw visit logs with IP, user agent, path, referrer
+// ---------------------------------------------------------------------------
+
+blindDateRouter.get("/admin/visits", async (_req, res) => {
+  const visits = await prisma.siteAnalytics.findMany({
+    orderBy: { created_at: "desc" },
+    take: 300,
+  });
+  return res.json({ ok: true, visits });
+});
+
+// ---------------------------------------------------------------------------
 // GET /admin/activity — activity log for admin dashboard
 // ---------------------------------------------------------------------------
 

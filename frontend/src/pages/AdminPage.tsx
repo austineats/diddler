@@ -54,6 +54,7 @@ export function AdminPage() {
   const [tab, setTab] = useState<"users" | "teams" | "activity" | "visits">("users");
   const [statFilter, setStatFilter] = useState<string | null>(null);
   const [activity, setActivity] = useState<{ id: string; action: string; actor_name: string | null; actor_phone: string | null; details: string | null; created_at: string }[]>([]);
+  const [visits, setVisits] = useState<{ id: string; event: string; path: string | null; referrer: string | null; user_agent: string | null; ip: string | null; created_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (authed) loadData(); }, [authed]);
@@ -92,20 +93,23 @@ export function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [signupRes, teamRes, analyticsRes, activityRes] = await Promise.all([
+      const [signupRes, teamRes, analyticsRes, activityRes, visitsRes] = await Promise.all([
         fetch("/api/blind-date/admin/signups"),
         fetch("/api/blind-date/admin/teams"),
         fetch("/api/blind-date/admin/analytics"),
         fetch("/api/blind-date/admin/activity"),
+        fetch("/api/blind-date/admin/visits"),
       ]);
       const signupData = await signupRes.json();
       const teamData = await teamRes.json();
       const analyticsData = await analyticsRes.json();
       const activityData = await activityRes.json();
+      const visitsData = await visitsRes.json();
       setSignups(signupData.signups || []);
       setTeams(teamData.teams || []);
       if (analyticsData.ok) setAnalytics(analyticsData);
       setActivity(activityData.logs || []);
+      setVisits(visitsData.visits || []);
     } catch (e) { console.error("Failed to load:", e); }
     setLoading(false);
   };
@@ -155,6 +159,7 @@ export function AdminPage() {
             <button key={i} onClick={() => {
               if (["signups"].includes(s.filter)) { setTab("users"); setStatFilter(null); }
               else if (["teams", "full", "ready", "waiting"].includes(s.filter)) { setTab("teams"); setStatFilter(s.filter); }
+              else if (["active1h", "today", "week", "alltime"].includes(s.filter)) { setTab("visits"); setStatFilter(s.filter); }
               else { setTab("activity"); setStatFilter(s.filter); }
             }}
               className={`shrink-0 border-2 px-3 py-1.5 text-center cursor-pointer hover:opacity-80 ${statFilter === s.filter ? "ring-2 ring-white" : ""}`}
@@ -185,6 +190,10 @@ export function AdminPage() {
               className={`flex-1 py-2 text-[6px] border-2 ${tab === "activity" ? "border-[#ffec27] bg-[#ffec27] text-[#1d2b53]" : "border-[#ffec27]/30 text-[#c2c3c7]"}`} style={px}>
               LOGS
             </button>
+            <button onClick={() => { setTab("visits"); setStatFilter(null); }}
+              className={`flex-1 py-2 text-[6px] border-2 ${tab === "visits" ? "border-[#00e436] bg-[#00e436] text-[#1d2b53]" : "border-[#00e436]/30 text-[#c2c3c7]"}`} style={px}>
+              VISITS
+            </button>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-[#29adff]" />
@@ -198,6 +207,8 @@ export function AdminPage() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>LOADING...</p>
+          ) : tab === "visits" ? (
+            <VisitsList visits={visits} statFilter={statFilter} />
           ) : tab === "activity" ? (
             <ActivityList activity={activity} />
           ) : tab === "users" ? (
@@ -418,6 +429,36 @@ export function AdminPage() {
       </div>
       </div>
     </div>
+  );
+}
+
+function VisitsList({ visits, statFilter }: { visits: { id: string; event: string; path: string | null; referrer: string | null; user_agent: string | null; ip: string | null; created_at: string }[]; statFilter: string | null }) {
+  const now = Date.now();
+  let filtered = visits;
+  if (statFilter === "active1h") filtered = visits.filter(v => now - new Date(v.created_at).getTime() < 60 * 60 * 1000);
+  else if (statFilter === "today") {
+    const today = new Date(); today.setHours(0,0,0,0);
+    filtered = visits.filter(v => new Date(v.created_at) >= today);
+  } else if (statFilter === "week") {
+    const week = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    filtered = visits.filter(v => new Date(v.created_at) >= week);
+  }
+
+  if (filtered.length === 0) return <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={{ fontFamily: "'Press Start 2P', monospace" }}>NO VISITS</p>;
+  return (
+    <>
+      {filtered.map(v => (
+        <div key={v.id} className="px-3 py-2 border-b-2 border-[#1d2b53]">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[#00e436] text-[8px]" style={{ fontFamily: "'Press Start 2P', monospace" }}>{v.path || "/"}</span>
+            <span className="text-[#c2c3c7]/40 text-[6px]" style={{ fontFamily: "'Press Start 2P', monospace" }}>{timeAgo(v.created_at)}</span>
+          </div>
+          {v.ip && <p className="text-[#ffec27] text-[7px]" style={{ fontFamily: "'Press Start 2P', monospace" }}>IP: {v.ip}</p>}
+          {v.referrer && <p className="text-[#c2c3c7] text-[6px] truncate" style={{ fontFamily: "'Press Start 2P', monospace" }}>FROM: {v.referrer}</p>}
+          {v.user_agent && <p className="text-[#c2c3c7]/40 text-[5px] truncate mt-0.5" style={{ fontFamily: "'Press Start 2P', monospace" }}>{v.user_agent}</p>}
+        </div>
+      ))}
+    </>
   );
 }
 
