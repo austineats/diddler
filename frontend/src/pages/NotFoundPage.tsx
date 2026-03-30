@@ -9,7 +9,7 @@ export function NotFoundPage() {
 
   return (
     <div
-      className="min-h-screen bg-[#0d0d1a] flex flex-col items-center justify-center text-center px-6 relative overflow-hidden"
+      className="min-h-screen bg-[#0d0d1a] flex flex-col items-center justify-center text-center px-4 sm:px-6 relative overflow-hidden"
       style={pixelFont}
     >
       {/* Pixel stars background */}

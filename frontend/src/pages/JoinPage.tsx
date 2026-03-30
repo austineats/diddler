@@ -57,7 +57,7 @@ export function JoinPage() {
     "w-full px-3 sm:px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[9px] sm:text-[11px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27]";
 
   return (
-    <div className="min-h-screen relative" style={px}>
+    <div className="min-h-screen relative overflow-x-hidden" style={px}>
       {/* Background */}
       <div className="fixed inset-0 z-0" style={{ background: "#0d0d1a" }} />
       <div
@@ -72,14 +72,14 @@ export function JoinPage() {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Nav */}
         <nav className="border-b-4 border-[#29adff] bg-[#1d2b53]/95">
-          <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[18px]">bubl.</button>
-            <span className="text-[#ffec27] text-[9px]">&lt; JOIN TEAM &gt;</span>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[14px] sm:text-[18px]">bubl.</button>
+            <span className="text-[#ffec27] text-[7px] sm:text-[9px]">&lt; JOIN TEAM &gt;</span>
           </div>
         </nav>
 
         {/* Main */}
-        <div className="flex-1 flex items-center justify-center px-5 py-12">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-5 py-8 sm:py-12">
           <div
             className="w-full max-w-md p-5 sm:p-10"
             style={{ border: "4px solid #29adff", background: "#1d2b53", boxShadow: "4px 4px 0 #1a6b99" }}
@@ -108,8 +108,8 @@ export function JoinPage() {
               </div>
             ) : (
               <>
-                <p className="text-[#ff77a8] text-[10px] mb-3 text-center">&lt; TEAMMATE INVITE &gt;</p>
-                <p className="text-[#29adff] text-[9px] text-center mb-4 leading-[2]">
+                <p className="text-[#ff77a8] text-[8px] sm:text-[10px] mb-2 sm:mb-3 text-center">&lt; TEAMMATE INVITE &gt;</p>
+                <p className="text-[#29adff] text-[8px] sm:text-[9px] text-center mb-3 sm:mb-4 leading-[2] break-words">
                   {invitedBy} invited you to be their teammate!
                 </p>
                 <h2 className="text-[16px] sm:text-[28px] text-center mb-6 sm:mb-8 text-[#ffec27]">
@@ -158,7 +158,7 @@ export function JoinPage() {
                   <button
                     onClick={submit}
                     disabled={formState === "submitting"}
-                    className="w-full py-4 text-[13px] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50"
+                    className="w-full py-3 sm:py-4 min-h-[44px] text-[10px] sm:text-[13px] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50"
                     style={{
                       border: "4px solid #00e436",
                       background: "#00e436",

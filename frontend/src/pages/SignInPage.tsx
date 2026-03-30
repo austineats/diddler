@@ -72,7 +72,7 @@ export function SignInPage() {
     "w-full px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[13px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27] text-center tracking-[0.2em]";
 
   return (
-    <div className="min-h-screen relative" style={px}>
+    <div className="min-h-screen relative overflow-x-hidden" style={px}>
       {/* Background */}
       <div className="fixed inset-0 z-0" style={{ background: "#0d0d1a" }} />
       <div
@@ -87,14 +87,14 @@ export function SignInPage() {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Nav */}
         <nav className="border-b-4 border-[#29adff] bg-[#1d2b53]/95">
-          <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[18px]">bubl.</button>
-            <span className="text-[#ffec27] text-[9px]">&lt; SIGN IN &gt;</span>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[14px] sm:text-[18px]">bubl.</button>
+            <span className="text-[#ffec27] text-[7px] sm:text-[9px]">&lt; SIGN IN &gt;</span>
           </div>
         </nav>
 
         {/* Main */}
-        <div className="flex-1 flex items-center justify-center px-5 py-12">
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-5 py-8 sm:py-12">
           <div
             className="w-full max-w-sm p-5 sm:p-10"
             style={{ border: "4px solid #29adff", background: "#1d2b53", boxShadow: "4px 4px 0 #1a6b99" }}
@@ -126,7 +126,7 @@ export function SignInPage() {
                   <button
                     onClick={sendOtp}
                     disabled={loading}
-                    className="w-full py-4 text-[12px] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50"
+                    className="w-full py-3 sm:py-4 min-h-[44px] text-[10px] sm:text-[12px] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50"
                     style={{
                       border: "4px solid #ffec27",
                       background: "#ffec27",
@@ -166,7 +166,7 @@ export function SignInPage() {
                     placeholder="____"
                     maxLength={4}
                     className={inputClass}
-                    style={{ ...px, fontSize: "24px", letterSpacing: "0.5em" }}
+                    style={{ ...px, fontSize: "20px", letterSpacing: "0.4em" }}
                     autoFocus
                   />
 
@@ -175,7 +175,7 @@ export function SignInPage() {
                   <button
                     onClick={verifyOtp}
                     disabled={loading}
-                    className="w-full py-4 text-[12px] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50"
+                    className="w-full py-3 sm:py-4 min-h-[44px] text-[10px] sm:text-[12px] active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50"
                     style={{
                       border: "4px solid #00e436",
                       background: "#00e436",
@@ -188,7 +188,7 @@ export function SignInPage() {
 
                   <button
                     onClick={() => { setStep("phone"); setOtp(""); setError(""); }}
-                    className="w-full py-2 text-[9px] text-[#29adff]"
+                    className="w-full py-3 min-h-[44px] text-[8px] sm:text-[9px] text-[#29adff]"
                   >
                     wrong number? go back
                   </button>

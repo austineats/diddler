@@ -202,8 +202,8 @@ export function InvitePage() {
 
   if (!loaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ ...px, background: "#0d0d1a" }}>
-        <p className="text-[#ffec27] text-[11px]" style={{ animation: "blink-pixel 1s step-end infinite" }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ ...px, background: "#0d0d1a" }}>
+        <p className="text-[#ffec27] text-[9px] sm:text-[11px] text-center" style={{ animation: "blink-pixel 1s step-end infinite" }}>
           LOADING...
         </p>
       </div>
@@ -211,7 +211,7 @@ export function InvitePage() {
   }
 
   return (
-    <div className="min-h-screen relative" style={px}>
+    <div className="min-h-screen relative overflow-x-hidden" style={px}>
       {/* Background */}
       <div className="fixed inset-0 z-0" style={{ background: "#0d0d1a" }} />
       {/* Scanlines */}
@@ -228,9 +228,9 @@ export function InvitePage() {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Nav */}
         <nav className="border-b-4 border-[#29adff] bg-[#1d2b53]/95">
-          <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[18px]">bubl.</button>
-            <span className="text-[#ffec27] text-[9px]">&lt; PARTY UP &gt;</span>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[14px] sm:text-[18px]">bubl.</button>
+            <span className="text-[#ffec27] text-[7px] sm:text-[9px]">&lt; PARTY UP &gt;</span>
           </div>
         </nav>
 
@@ -282,7 +282,7 @@ export function InvitePage() {
           </div>
 
           {/* Message */}
-          <p className="text-[#c2c3c7] text-[9px] sm:text-[10px] text-center leading-[2.2] max-w-sm">
+          <p className="text-[#c2c3c7] text-[7px] sm:text-[10px] text-center leading-[2] sm:leading-[2.2] max-w-xs sm:max-w-sm px-2 break-words">
             {teamFull
               ? "Both teammates are in! bubl will find your match and text you on Thursday."
               : "Invite your friend to join your team. Once both slots are filled, bubl will find your match!"
