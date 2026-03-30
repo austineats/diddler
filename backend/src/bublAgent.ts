@@ -1,46 +1,53 @@
 import { IMessageSDK } from "@photon-ai/imessage-kit";
+import OpenAI from "openai";
 import { prisma } from "./lib/db.js";
 import { sendContactCard } from "./lib/imessage/contactCard.js";
 
 const sdk = new IMessageSDK();
 const TYPING_URL = process.env.TYPING_URL ?? "http://localhost:5055";
 
-// Track who we've already greeted + sent contact card this session
-const greeted = new Set<string>();
+// Per-user conversation history (kept in memory, last 20 messages)
+const conversations = new Map<string, { role: "user" | "assistant"; content: string }[]>();
 const sentCard = new Set<string>();
 
-function sleep(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
+// ─── LLM client ───
+
+function getLLM(): OpenAI {
+  // Prefer Anthropic if available, fall back to Gemini
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (anthropicKey) {
+    return new OpenAI({
+      apiKey: anthropicKey,
+      baseURL: "https://api.anthropic.com/v1/",
+    });
+  }
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    return new OpenAI({
+      apiKey: geminiKey,
+      baseURL: process.env.GEMINI_BASE_URL ?? "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+  }
+  throw new Error("No LLM API key set (ANTHROPIC_API_KEY or GEMINI_API_KEY)");
 }
+
+function getModel(): string {
+  if (process.env.ANTHROPIC_API_KEY) return "claude-haiku-4-5-20251001";
+  return "gemini-2.0-flash-lite";
+}
+
+// ─── Helpers ───
+
+function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
 async function sendReadReceipt(phone: string) {
-  try {
-    await fetch(`${TYPING_URL}/read`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat: phone }),
-    });
-  } catch {}
+  try { await fetch(`${TYPING_URL}/read`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat: phone }) }); } catch {}
 }
-
 async function startTyping(phone: string) {
-  try {
-    await fetch(`${TYPING_URL}/typing/start`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat: phone }),
-    });
-  } catch {}
+  try { await fetch(`${TYPING_URL}/typing/start`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat: phone }) }); } catch {}
 }
-
 async function stopTyping(phone: string) {
-  try {
-    await fetch(`${TYPING_URL}/typing/stop`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat: phone }),
-    });
-  } catch {}
+  try { await fetch(`${TYPING_URL}/typing/stop`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat: phone }) }); } catch {}
 }
 
 function normalizePhone(raw: string): string {
@@ -56,31 +63,19 @@ async function lookupUser(phone: string) {
   const normalized = normalizePhone(phone);
   try {
     return await prisma.blindDateSignup.findFirst({
-      where: {
-        OR: [
-          { phone: normalized },
-          { phone },
-          { phone: normalized.replace("+1", "") },
-        ],
-      },
+      where: { OR: [{ phone: normalized }, { phone }, { phone: normalized.replace("+1", "") }] },
     });
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 async function lookupTeam(phone: string) {
   const normalized = normalizePhone(phone);
   try {
     return await prisma.blindDateTeam.findFirst({
-      where: {
-        OR: [{ player1_phone: normalized }, { player2_phone: normalized }],
-      },
+      where: { OR: [{ player1_phone: normalized }, { player2_phone: normalized }] },
       orderBy: { created_at: "desc" },
     });
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 async function markReady(phone: string) {
@@ -93,9 +88,7 @@ async function markReady(phone: string) {
       where: { id: team.id },
       data: isP1 ? { player1_ready: true } : { player2_ready: true },
     });
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 async function logActivity(action: string, name?: string, phone?: string, details?: string) {
@@ -106,86 +99,105 @@ async function logActivity(action: string, name?: string, phone?: string, detail
   } catch {}
 }
 
-// ─── Reply generators ───
+// ─── System prompt builder ───
 
-function welcomeReplies(name: string): string[] {
-  const sets = [
-    [`hey ${name}! 👋 welcome to bubl.`, `we're curating your perfect match rn.. sit tight 💜`],
-    [`${name}! you're officially in 🔒`, `your match is brewing.. we'll text you when it's ready`],
-    [`hey ${name} 👀`, `get excited! we're finding someone perfect for you and your teammate`],
-    [`${name}!! welcome to bubl. 💜`, `your double date is curating as we speak.. stay tuned`],
-  ];
-  return sets[Math.floor(Math.random() * sets.length)];
-}
+function buildSystemPrompt(user: { name: string; gender?: string | null } | null, team: { code: string; status: string; player1_name: string; player2_name: string | null; player1_ready: boolean; player2_ready: boolean } | null): string {
+  const firstName = user?.name?.split(" ")[0] || "there";
 
-function readyUpReply(name: string, teamFull: boolean, teammateName?: string): string[] {
-  if (teamFull && teammateName) {
-    return [
-      `${name}!! you and ${teammateName} are locked in 🔥`,
-      `im finding your match rn.. sit tight, match drop coming soon 👀`,
-    ];
+  let context = "";
+  if (user) {
+    context += `\nThe user's name is ${user.name} (call them ${firstName}). Gender: ${user.gender || "unknown"}.`;
   }
-  const waiting = [
-    `lets gooo ${name}! 🔥 im curating your match but i need your teammate to join first. share that invite link!`,
-    `${name}! you're ready 💜 but i can only start matching once your friend joins too. send them the invite!`,
-    `ayy ${name} 🫶 signed up and locked in! waiting on your teammate to join so i can start the matchmaking ✨`,
-    `${name}! 🎯 you're on the list. get your friend to join through your invite link and i'll find your perfect match!`,
-  ];
-  return [waiting[Math.floor(Math.random() * waiting.length)]];
+  if (team) {
+    const isP1 = team.player1_name === user?.name;
+    const teammateName = isP1 ? team.player2_name : team.player1_name;
+    context += `\nTeam code: ${team.code}. Status: ${team.status}.`;
+    if (teammateName) {
+      context += ` Teammate: ${teammateName}.`;
+    } else {
+      context += ` No teammate yet — they need to invite a friend.`;
+    }
+    const ready = isP1 ? team.player1_ready : team.player2_ready;
+    context += ` This user is ${ready ? "READY" : "NOT READY yet"}.`;
+  }
+  if (!user) {
+    context += `\nThis person is NOT signed up yet. Encourage them to sign up at bubl.buzz.`;
+  }
+
+  return `You are bubl — a friendly, Gen-Z matchmaker bot that sets up double dates every Thursday via iMessage.
+
+PERSONALITY:
+- You text like a close friend: casual, warm, hyped, supportive
+- Use lowercase, abbreviations, emojis (💜 👀 🔥 😭 🫶), slang naturally
+- Keep messages SHORT — 1-2 sentences max per message. This is iMessage, not email
+- Be playful, teasing, and fun. Never robotic or corporate
+- Match their energy — if they're hyped, be hyped. If they're chill, be chill
+- Use their first name often
+
+HOW BUBL WORKS:
+- Users sign up with a friend (teammate) for a double date
+- Every Thursday, bubl matches two teams together
+- It all happens over iMessage — no app needed
+- Users need to "ready up" by texting bubl after signing up
+- Both teammates need to join before matching can begin
+
+CURRENT USER CONTEXT:${context}
+
+RULES:
+- If they say they "signed up" or are "ready", hype them up and acknowledge it
+- If they ask about their match, build excitement but don't reveal details you don't have
+- If they haven't signed up, warmly encourage them to go to bubl.buzz
+- If their teammate hasn't joined yet, remind them to share the invite link
+- Never break character. You ARE bubl
+- Never say "I'm an AI" or "I'm a bot" — you're bubl, a matchmaker
+- Keep it real and personal. Reference their name and situation
+- If you don't know something, be honest but keep the vibe fun
+- Reply with 1-2 short messages. Never write paragraphs`;
 }
 
-function friendJoinedNotification(friendName: string): string[] {
-  const msgs = [
-    `${friendName} just joined your team! 🔥 you're both on the list now`,
-    `yo ${friendName} is in! 🎮 your team is ready, sit tight while i find your match`,
-    `${friendName} joined!! 💜 match drop coming soon 👀`,
-  ];
-  return [msgs[Math.floor(Math.random() * msgs.length)]];
-}
+// ─── Generate reply via LLM ───
 
-function contextReply(text: string, name: string): string | null {
-  const t = text.toLowerCase();
+async function generateReply(sender: string, text: string, user: Awaited<ReturnType<typeof lookupUser>>, team: Awaited<ReturnType<typeof lookupTeam>>): Promise<string[]> {
+  // Get or create conversation history
+  if (!conversations.has(sender)) conversations.set(sender, []);
+  const history = conversations.get(sender)!;
 
-  // Signed up / ready up detection
-  if (t.includes("signed up") || t.includes("i've signed up") || t.includes("ive signed up") || t.includes("ready"))
-    return null; // handled by readyUp flow
+  // Add user message
+  history.push({ role: "user", content: text });
 
-  if (t.includes("huzz") || t.includes("baddie") || t.includes("hot") || t.includes("cute"))
-    return `oh we got plenty ${name} 👀 your perfect match is curating rn..`;
-  if (t.includes("when") || t.includes("how long") || t.includes("thursday"))
-    return `soon ${name}! match drops happen every thursday 💜`;
-  if (t.includes("who") || t.includes("match") || t.includes("date"))
-    return `can't spoil it yet ${name} 🤫 but trust.. you're gonna love them`;
-  if (t.includes("excited") || t.includes("can't wait") || t.includes("hyped") || t.includes("lets go"))
-    return `WE'RE hyped for you too ${name} 💜 it's gonna be worth the wait`;
-  if (t.includes("cancel") || t.includes("nvm") || t.includes("nevermind") || t.includes("stop"))
-    return `nooo ${name} don't leave 😭 your match is almost ready!`;
-  if (t.includes("thank") || t.includes("thx") || t.includes("appreciate"))
-    return `ofc ${name} 💜 we gotchu`;
-  if (t.includes("friend") || t.includes("teammate") || t.includes("invite"))
-    return `share your invite link with your friend! once they join i'll start finding your match 🎯`;
-  if (t.includes("how") && (t.includes("work") || t.includes("this")))
-    return `it's simple ${name}! you + a friend sign up, we find you a double date match every thursday. no app needed, just imsg 💜`;
-  if (t.includes("lol") || t.includes("haha") || t.includes("😂") || t.includes("💀"))
-    return "😭💜";
-  if (t.includes("hello") || t.includes("hi") || t.includes("hey") || t.includes("sup") || t.includes("yo") || t.includes("what's up"))
-    return `heyy ${name} 👋 we're still working on your match.. stay tuned!`;
+  // Keep only last 20 messages
+  if (history.length > 20) history.splice(0, history.length - 20);
 
-  return null;
-}
+  const systemPrompt = buildSystemPrompt(user, team);
 
-function genericFollowUp(name: string): string {
-  const replies = [
-    `we're still working on it ${name}! you'll be the first to know 💜`,
-    `patience ${name} 👀 good things take time`,
-    `your match is almost ready ${name}.. hang tight!`,
-    `still curating ${name}! we want it to be perfect 💜`,
-    `soon ${name} 🔒 making sure it's a great fit`,
-    `working on it rn ${name}! we'll text you the moment it's ready`,
-    `trust the process ${name} 👀💜`,
-    `we gotchu ${name}.. your match is coming soon`,
-  ];
-  return replies[Math.floor(Math.random() * replies.length)];
+  try {
+    const llm = getLLM();
+    const response = await llm.chat.completions.create({
+      model: getModel(),
+      max_tokens: 200,
+      temperature: 0.9,
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...history,
+      ],
+    });
+
+    const reply = response.choices[0]?.message?.content?.trim() || "hey 💜 give me a sec, something glitched";
+
+    // Split on double newlines to send as separate iMessages
+    const parts = reply.split(/\n\n+/).map(s => s.trim()).filter(Boolean);
+    const messages = parts.length > 0 ? parts : [reply];
+
+    // Add to history
+    history.push({ role: "assistant", content: reply });
+
+    return messages;
+  } catch (e) {
+    console.error("[bubl] LLM error:", e);
+    // Fallback — at least reply something
+    const firstName = user?.name?.split(" ")[0] || "";
+    return [firstName ? `hey ${firstName}! 💜 give me one sec` : "hey! 💜 give me one sec"];
+  }
 }
 
 // ─── Main agent ───
@@ -197,74 +209,47 @@ export async function startBublAgent() {
 
       const sender = msg.sender;
       const text = (msg.text || "").trim();
-      const textLower = text.toLowerCase();
+      if (!text) return;
+
       console.log(`[bubl] From ${sender}: "${text}"`);
 
       // Read receipt
       await sendReadReceipt(sender);
       await sleep(300);
 
-      // Typing indicator
+      // Start typing
       await startTyping(sender);
-      await sleep(800 + Math.random() * 400);
 
-      // Look up user in DB
+      // Look up user context
       const user = await lookupUser(sender);
-      const firstName = user?.name?.split(" ")[0] || null;
       const team = user ? await lookupTeam(sender) : null;
+      const firstName = user?.name?.split(" ")[0] || null;
 
-      let replies: string[];
-
-      if (!user) {
-        // Unknown user — nudge to sign up
-        replies = [
-          "hey! 👋 sign up at bubl.buzz to get matched",
-          "we set up double dates every thursday over imsg — no app needed! 💜",
-        ];
-        logActivity("unknown_message", undefined, sender, `"${text}"`);
-
-      } else if (
-        textLower.includes("signed up") ||
-        textLower.includes("ive signed up") ||
-        textLower.includes("i've signed up") ||
-        textLower.includes("ready")
-      ) {
-        // Ready up flow — mark them ready in DB
+      // Check if this is a ready-up message — mark in DB
+      const textLower = text.toLowerCase();
+      if (user && (textLower.includes("signed up") || textLower.includes("ive signed up") || textLower.includes("i've signed up"))) {
         await markReady(sender);
-        const updatedTeam = await lookupTeam(sender);
-        const isP1 = updatedTeam?.player1_phone === normalizePhone(sender);
-        const teammateName = isP1 ? updatedTeam?.player2_name : updatedTeam?.player1_name;
-        replies = readyUpReply(firstName!, updatedTeam?.status === "full", teammateName || undefined);
-        logActivity("ready_up", firstName!, normalizePhone(sender), `Team: ${team?.code || "none"}`);
-
-      } else if (firstName && !greeted.has(sender)) {
-        // First message from signed-up user — personalized welcome
-        greeted.add(sender);
-        replies = welcomeReplies(firstName);
-        logActivity("first_message", firstName, normalizePhone(sender), `Team: ${team?.code || "none"}`);
-
-      } else if (firstName) {
-        // Returning user — contextual reply or generic
-        const ctx = contextReply(text, firstName);
-        replies = [ctx || genericFollowUp(firstName)];
-
-      } else {
-        replies = ["hey! 👋 sign up at bubl.buzz to get matched"];
+        logActivity("ready_up", firstName || undefined, normalizePhone(sender), `Team: ${team?.code || "none"}`);
       }
+
+      // Generate LLM reply
+      const replies = await generateReply(sender, text, user, team);
+
+      logActivity("message", firstName || undefined, normalizePhone(sender), `"${text}" → "${replies.join(" | ")}"`);
 
       // Send replies with realistic typing gaps
       for (let i = 0; i < replies.length; i++) {
         if (i > 0) {
           await startTyping(sender);
-          await sleep(400 + Math.random() * 300);
+          await sleep(300 + Math.random() * 400);
         }
         await sdk.send(sender, replies[i]);
-        console.log(`[bubl] Replied to ${sender}: "${replies[i]}"`);
+        console.log(`[bubl] → ${sender}: "${replies[i]}"`);
       }
 
       await stopTyping(sender);
 
-      // Send contact card on first interaction (once per session)
+      // Send contact card on first interaction
       if (!sentCard.has(sender)) {
         sentCard.add(sender);
         await sleep(500);
@@ -272,7 +257,7 @@ export async function startBublAgent() {
           await sendContactCard(sender);
           console.log(`[bubl] Sent contact card to ${sender}`);
         } catch (e) {
-          console.warn(`[bubl] Failed to send contact card:`, e);
+          console.warn(`[bubl] Contact card failed:`, e);
         }
       }
     },
