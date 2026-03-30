@@ -33,7 +33,7 @@ function getLLM(): OpenAI {
 
 function getModel(): string {
   if (process.env.ANTHROPIC_API_KEY) return "claude-haiku-4-5-20251001";
-  return "gemini-2.0-flash-lite";
+  return "gemini-flash-lite-latest";
 }
 
 // ─── Helpers ───
