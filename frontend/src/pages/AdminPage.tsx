@@ -50,6 +50,7 @@ export function AdminPage() {
   const [analytics, setAnalytics] = useState<Analytics>({ totalVisits: 0, todayVisits: 0, weekVisits: 0, activeLastHour: 0 });
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Signup | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [tab, setTab] = useState<"users" | "teams" | "activity" | "visits">("users");
   const [statFilter, setStatFilter] = useState<string | null>(null);
   const [activity, setActivity] = useState<{ id: string; action: string; actor_name: string | null; actor_phone: string | null; details: string | null; created_at: string }[]>([]);
@@ -204,7 +205,7 @@ export function AdminPage() {
               <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO USERS</p>
             ) : (
               filtered.map(s => (
-                <button key={s.id} onClick={() => setSelected(s)}
+                <button key={s.id} onClick={() => { setSelected(s); setSelectedTeam(null); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left border-b-2 border-[#1d2b53] transition-colors ${
                     selected?.id === s.id ? "bg-[#1d2b53]" : "hover:bg-[#1d2b53]/60"
                   }`}>
@@ -237,7 +238,8 @@ export function AdminPage() {
               <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO TEAMS</p>
             ) : (
               filteredTeams.map(t => (
-                <div key={t.id} className="px-4 py-3 border-b-2 border-[#1d2b53]">
+                <button key={t.id} onClick={() => { setSelectedTeam(t); setSelected(null); }}
+                  className={`w-full text-left px-4 py-3 border-b-2 border-[#1d2b53] ${selectedTeam?.id === t.id ? "bg-[#1d2b53]" : "hover:bg-[#1d2b53]/60"}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#29adff] text-[9px]" style={px}>{t.code}</span>
                     <span className={`text-[7px] px-2 py-1 border-2 ${
@@ -265,7 +267,7 @@ export function AdminPage() {
                     )}
                   </div>
                   <p className="text-[#c2c3c7]/40 text-[7px] mt-2" style={px}>{timeAgo(t.created_at)}</p>
-                </div>
+                </button>
               ))
             );
             })()
@@ -356,10 +358,61 @@ export function AdminPage() {
               </div>
             </div>
           </div>
+        ) : selectedTeam ? (
+          <div className="max-w-md w-full">
+            <button onClick={() => setSelectedTeam(null)}
+              className="mb-4 text-[#c2c3c7] hover:text-[#fff1e8] transition">
+              <X className="w-5 h-5" />
+            </button>
+            <div className="border-4 border-[#ff77a8] bg-[#1d2b53] overflow-hidden">
+              <div className="p-6 space-y-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-[16px] text-[#ff77a8]" style={px}>TEAM {selectedTeam.code}</h2>
+                  <span className={`text-[9px] px-3 py-1.5 border-2 ${
+                    selectedTeam.status === "full" ? "border-[#00e436] text-[#00e436]" : "border-[#ffec27] text-[#ffec27]"
+                  }`} style={px}>{selectedTeam.status.toUpperCase()}</span>
+                </div>
+
+                <div className="h-[4px] bg-[#ff77a8]/30" />
+
+                <ProfileRow label="PLAYER 1" value={
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-3 h-3 ${selectedTeam.player1_ready ? "bg-[#00e436]" : "bg-[#ffec27]"}`} />
+                      <span className="text-[#fff1e8] text-[10px]" style={px}>{selectedTeam.player1_name}</span>
+                    </div>
+                    <p className="text-[#c2c3c7] text-[8px]" style={px}>{selectedTeam.player1_phone}</p>
+                    <p className="text-[#c2c3c7] text-[7px]" style={px}>GENDER: {selectedTeam.player1_gender}</p>
+                    <p className="text-[#c2c3c7] text-[7px]" style={px}>{selectedTeam.player1_ready ? "READY" : "NOT READY"}</p>
+                  </div>
+                } />
+
+                <ProfileRow label="PLAYER 2" value={
+                  selectedTeam.player2_name ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-3 h-3 ${selectedTeam.player2_ready ? "bg-[#00e436]" : "bg-[#ffec27]"}`} />
+                        <span className="text-[#fff1e8] text-[10px]" style={px}>{selectedTeam.player2_name}</span>
+                      </div>
+                      <p className="text-[#c2c3c7] text-[8px]" style={px}>{selectedTeam.player2_phone}</p>
+                      <p className="text-[#c2c3c7] text-[7px]" style={px}>GENDER: {selectedTeam.player2_gender}</p>
+                      <p className="text-[#c2c3c7] text-[7px]" style={px}>{selectedTeam.player2_ready ? "READY" : "NOT READY"}</p>
+                    </div>
+                  ) : (
+                    <span className="text-[#5f574f] text-[9px]" style={px}>WAITING FOR INVITE</span>
+                  )
+                } />
+
+                <ProfileRow label="CREATED" value={
+                  <span className="text-[#c2c3c7] text-[8px]" style={px}>{new Date(selectedTeam.created_at).toLocaleString()}</span>
+                } />
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="text-center">
-            <p className="text-[#c2c3c7]/40 text-[9px]" style={px}>SELECT A USER TO</p>
-            <p className="text-[#c2c3c7]/40 text-[9px] mt-2" style={px}>VIEW THEIR PROFILE</p>
+            <p className="text-[#c2c3c7]/40 text-[9px]" style={px}>SELECT A USER OR TEAM</p>
+            <p className="text-[#c2c3c7]/40 text-[9px] mt-2" style={px}>TO VIEW DETAILS</p>
           </div>
         )}
       </div>
