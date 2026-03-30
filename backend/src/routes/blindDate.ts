@@ -239,6 +239,49 @@ blindDateRouter.get("/admin/teams", async (_req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /analytics — track page views
+// ---------------------------------------------------------------------------
+
+blindDateRouter.post("/analytics", async (req, res) => {
+  try {
+    const { event, path, referrer } = req.body;
+    await prisma.siteAnalytics.create({
+      data: {
+        event: event || "visit",
+        path: path || null,
+        referrer: referrer || null,
+        user_agent: req.headers["user-agent"] || null,
+        ip: req.ip || null,
+      },
+    });
+    return res.json({ ok: true });
+  } catch {
+    return res.json({ ok: true }); // fail silently
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /admin/analytics — site stats for admin
+// ---------------------------------------------------------------------------
+
+blindDateRouter.get("/admin/analytics", async (_req, res) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [totalVisits, todayVisits, weekVisits, activeLastHour] = await Promise.all([
+    prisma.siteAnalytics.count(),
+    prisma.siteAnalytics.count({ where: { created_at: { gte: today } } }),
+    prisma.siteAnalytics.count({ where: { created_at: { gte: weekAgo } } }),
+    prisma.siteAnalytics.count({
+      where: { created_at: { gte: new Date(now.getTime() - 60 * 60 * 1000) } },
+    }),
+  ]);
+
+  return res.json({ ok: true, totalVisits, todayVisits, weekVisits, activeLastHour });
+});
+
+// ---------------------------------------------------------------------------
 // GET /admin/activity — activity log for admin dashboard
 // ---------------------------------------------------------------------------
 

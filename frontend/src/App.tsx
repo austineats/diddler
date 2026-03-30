@@ -1,4 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+function TrackPageView() {
+  const location = useLocation();
+  useEffect(() => {
+    fetch("/api/blind-date/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: "visit",
+        path: location.pathname,
+        referrer: document.referrer || null,
+      }),
+    }).catch(() => {});
+  }, [location.pathname]);
+  return null;
+}
 
 import { DashboardPage } from "./pages/DashboardPage";
 import { CreateAgentPage } from "./pages/CreateAgentPage";
@@ -17,6 +34,7 @@ import "./index.css";
 export default function App() {
   return (
     <BrowserRouter>
+      <TrackPageView />
       <Routes>
         <Route path="/" element={<BlindDatePage />} />
         <Route path="/app" element={<DashboardPage />} />

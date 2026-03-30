@@ -275,6 +275,20 @@ model BublContactSent {
   @@map("bubl_contact_sent")
 }
 
+model SiteAnalytics {
+  id         String   @id @default(uuid())
+  event      String                        // "visit" | "signup_view" | "invite_view" | "join_view"
+  path       String?
+  referrer   String?
+  user_agent String?
+  ip         String?
+  created_at DateTime @default(now())
+
+  @@index([event])
+  @@index([created_at])
+  @@map("site_analytics")
+}
+
 // ---------------------------------------------------------------------------
 // Bubl — User Profiles & Stats
 // ---------------------------------------------------------------------------

@@ -30,6 +30,13 @@ interface Team {
   created_at: string;
 }
 
+interface Analytics {
+  totalVisits: number;
+  todayVisits: number;
+  weekVisits: number;
+  activeLastHour: number;
+}
+
 const ADMIN_PASS = "bubl2026";
 
 const px = { fontFamily: "'Press Start 2P', monospace" };
@@ -40,6 +47,7 @@ export function AdminPage() {
   const [passError, setPassError] = useState(false);
   const [signups, setSignups] = useState<Signup[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics>({ totalVisits: 0, todayVisits: 0, weekVisits: 0, activeLastHour: 0 });
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Signup | null>(null);
   const [tab, setTab] = useState<"users" | "teams">("users");
@@ -81,14 +89,17 @@ export function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [signupRes, teamRes] = await Promise.all([
+      const [signupRes, teamRes, analyticsRes] = await Promise.all([
         fetch("/api/blind-date/admin/signups"),
         fetch("/api/blind-date/admin/teams"),
+        fetch("/api/blind-date/admin/analytics"),
       ]);
       const signupData = await signupRes.json();
       const teamData = await teamRes.json();
+      const analyticsData = await analyticsRes.json();
       setSignups(signupData.signups || []);
       setTeams(teamData.teams || []);
+      if (analyticsData.ok) setAnalytics(analyticsData);
     } catch (e) { console.error("Failed to load:", e); }
     setLoading(false);
   };
@@ -111,50 +122,52 @@ export function AdminPage() {
   const readyCount = teams.filter(t => t.player1_ready && t.player2_ready).length;
 
   return (
-    <div className="min-h-screen bg-[#0d0d1a] text-[#fff1e8] flex flex-col sm:flex-row" style={px}>
+    <div className="min-h-screen bg-[#0d0d1a] text-[#fff1e8] flex flex-col" style={px}>
+      {/* Top bar */}
+      <div className="border-b-4 border-[#29adff] bg-[#1d2b53]/80 px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <span className="text-[14px] text-[#ff004d]" style={px}>bubl.</span>
+            <span className="text-[#c2c3c7] text-[8px]" style={px}>ADMIN</span>
+          </div>
+          <button onClick={() => loadData()} className="text-[#29adff] text-[7px] hover:text-[#ffec27]" style={px}>REFRESH</button>
+        </div>
+
+        {/* Stats — horizontal scroll */}
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {[
+            { val: analytics.activeLastHour, label: "ACTIVE 1H", color: "#00e436" },
+            { val: analytics.todayVisits, label: "TODAY", color: "#29adff" },
+            { val: analytics.weekVisits, label: "THIS WEEK", color: "#ff77a8" },
+            { val: analytics.totalVisits, label: "ALL TIME", color: "#c2c3c7" },
+            { val: signups.length, label: "SIGNUPS", color: "#ffec27" },
+            { val: teams.length, label: "TEAMS", color: "#29adff" },
+            { val: fullTeams.length, label: "FULL", color: "#00e436" },
+            { val: readyCount, label: "READY", color: "#ff77a8" },
+            { val: waitingTeams.length, label: "WAITING", color: "#5f574f" },
+          ].map((s, i) => (
+            <div key={i} className="shrink-0 border-2 px-3 py-1.5 text-center" style={{ borderColor: s.color, background: `${s.color}10` }}>
+              <p className="text-[11px]" style={{ ...px, color: s.color }}>{s.val}</p>
+              <p className="text-[5px] mt-0.5 text-[#c2c3c7]" style={px}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main content area */}
+      <div className="flex flex-col sm:flex-row flex-1">
       {/* Sidebar */}
-      <div className="w-full sm:w-[360px] border-b-4 sm:border-b-0 sm:border-r-4 border-[#29adff] flex flex-col sm:h-screen">
-        <div className="p-4 border-b-4 border-[#29adff]">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <span className="text-[14px] text-[#ff004d]" style={px}>bubl.</span>
-              <span className="text-[#c2c3c7] text-[8px]" style={px}>ADMIN</span>
-            </div>
-          </div>
-
-          {/* Stats — horizontal scroll */}
-          <div className="flex gap-3 overflow-x-auto pb-3 mb-3 -mx-1 px-1">
-            <div className="shrink-0 border-2 border-[#ffec27] bg-[#ffec27]/10 px-3 py-2 text-center">
-              <p className="text-[#ffec27] text-[12px]" style={px}>{signups.length}</p>
-              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>SIGNUPS</p>
-            </div>
-            <div className="shrink-0 border-2 border-[#29adff] bg-[#29adff]/10 px-3 py-2 text-center">
-              <p className="text-[#29adff] text-[12px]" style={px}>{teams.length}</p>
-              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>TEAMS</p>
-            </div>
-            <div className="shrink-0 border-2 border-[#00e436] bg-[#00e436]/10 px-3 py-2 text-center">
-              <p className="text-[#00e436] text-[12px]" style={px}>{fullTeams.length}</p>
-              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>FULL</p>
-            </div>
-            <div className="shrink-0 border-2 border-[#ff77a8] bg-[#ff77a8]/10 px-3 py-2 text-center">
-              <p className="text-[#ff77a8] text-[12px]" style={px}>{readyCount}</p>
-              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>READY</p>
-            </div>
-            <div className="shrink-0 border-2 border-[#5f574f] bg-[#5f574f]/10 px-3 py-2 text-center">
-              <p className="text-[#5f574f] text-[12px]" style={px}>{waitingTeams.length}</p>
-              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>WAITING</p>
-            </div>
-          </div>
-
+      <div className="w-full sm:w-[340px] border-b-4 sm:border-b-0 sm:border-r-4 border-[#29adff] flex flex-col sm:h-[calc(100vh-90px)]">
+        <div className="p-3 border-b-4 border-[#29adff]">
           {/* Tab switcher */}
           <div className="flex gap-2 mb-3">
             <button onClick={() => setTab("users")}
-              className={`flex-1 py-2 text-[8px] border-2 ${tab === "users" ? "border-[#29adff] bg-[#29adff] text-[#1d2b53]" : "border-[#29adff]/30 text-[#c2c3c7]"}`} style={px}>
-              USERS
+              className={`flex-1 py-2 text-[7px] border-2 ${tab === "users" ? "border-[#29adff] bg-[#29adff] text-[#1d2b53]" : "border-[#29adff]/30 text-[#c2c3c7]"}`} style={px}>
+              USERS ({signups.length})
             </button>
             <button onClick={() => setTab("teams")}
-              className={`flex-1 py-2 text-[8px] border-2 ${tab === "teams" ? "border-[#ff77a8] bg-[#ff77a8] text-[#1d2b53]" : "border-[#ff77a8]/30 text-[#c2c3c7]"}`} style={px}>
-              TEAMS
+              className={`flex-1 py-2 text-[7px] border-2 ${tab === "teams" ? "border-[#ff77a8] bg-[#ff77a8] text-[#1d2b53]" : "border-[#ff77a8]/30 text-[#c2c3c7]"}`} style={px}>
+              TEAMS ({teams.length})
             </button>
           </div>
           <div className="relative">
@@ -326,6 +339,7 @@ export function AdminPage() {
             <p className="text-[#c2c3c7]/40 text-[9px] mt-2" style={px}>VIEW THEIR PROFILE</p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
