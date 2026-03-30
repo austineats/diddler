@@ -193,6 +193,9 @@ model BlindDateSignup {
   hobbies       Json      @default("[]") // array of strings
   status        String    @default("waiting") // "waiting" | "matched" | "archived"
   match_id      String?
+  signup_ip     String?
+  user_agent    String?
+  referrer      String?
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
 

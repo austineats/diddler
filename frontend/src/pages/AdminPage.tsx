@@ -11,6 +11,9 @@ interface Signup {
   hobbies: string[];
   status: string;
   school_id_url?: string;
+  signup_ip?: string;
+  user_agent?: string;
+  referrer?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -360,6 +363,9 @@ export function AdminPage() {
                 <ProfileRow label="SIGNED UP" value={
                   <span className="text-[#c2c3c7] text-[8px]" style={px}>{new Date(selected.created_at).toLocaleString()}</span>
                 } />
+                {selected.signup_ip && <ProfileRow label="IP ADDRESS" value={<span className="text-[#ffec27] text-[9px]" style={px}>{selected.signup_ip}</span>} />}
+                {selected.user_agent && <ProfileRow label="DEVICE" value={<span className="text-[#c2c3c7] text-[7px] break-words leading-[1.8]" style={px}>{selected.user_agent}</span>} />}
+                {selected.referrer && <ProfileRow label="REFERRER" value={<span className="text-[#29adff] text-[8px] break-words" style={px}>{selected.referrer}</span>} />}
 
                 <button onClick={() => removeSignup(selected.id)}
                   className="w-full mt-2 py-3 border-4 border-[#ff004d] bg-[#ff004d]/10 text-[#ff004d] text-[9px] hover:bg-[#ff004d]/25 transition"

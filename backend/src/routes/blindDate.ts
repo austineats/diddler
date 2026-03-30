@@ -103,6 +103,9 @@ blindDateRouter.post("/signup", upload.none(), async (req, res) => {
         gender: gender || null,
         looking_for: looking_for || null,
         hobbies: parsedHobbies,
+        signup_ip: req.ip || null,
+        user_agent: req.headers["user-agent"] || null,
+        referrer: req.headers["referer"] || null,
       },
     });
 
