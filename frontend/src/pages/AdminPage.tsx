@@ -51,6 +51,7 @@ export function AdminPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Signup | null>(null);
   const [tab, setTab] = useState<"users" | "teams">("users");
+  const [statFilter, setStatFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (authed) loadData(); }, [authed]);
@@ -136,20 +137,26 @@ export function AdminPage() {
         {/* Stats — horizontal scroll */}
         <div className="flex gap-2 overflow-x-auto pb-1">
           {[
-            { val: analytics.activeLastHour, label: "ACTIVE 1H", color: "#00e436" },
-            { val: analytics.todayVisits, label: "TODAY", color: "#29adff" },
-            { val: analytics.weekVisits, label: "THIS WEEK", color: "#ff77a8" },
-            { val: analytics.totalVisits, label: "ALL TIME", color: "#c2c3c7" },
-            { val: signups.length, label: "SIGNUPS", color: "#ffec27" },
-            { val: teams.length, label: "TEAMS", color: "#29adff" },
-            { val: fullTeams.length, label: "FULL", color: "#00e436" },
-            { val: readyCount, label: "READY", color: "#ff77a8" },
-            { val: waitingTeams.length, label: "WAITING", color: "#5f574f" },
+            { val: analytics.activeLastHour, label: "ACTIVE 1H", color: "#00e436", filter: "active1h" },
+            { val: analytics.todayVisits, label: "TODAY", color: "#29adff", filter: "today" },
+            { val: analytics.weekVisits, label: "THIS WEEK", color: "#ff77a8", filter: "week" },
+            { val: analytics.totalVisits, label: "ALL TIME", color: "#c2c3c7", filter: "alltime" },
+            { val: signups.length, label: "SIGNUPS", color: "#ffec27", filter: "signups" },
+            { val: teams.length, label: "TEAMS", color: "#29adff", filter: "teams" },
+            { val: fullTeams.length, label: "FULL", color: "#00e436", filter: "full" },
+            { val: readyCount, label: "READY", color: "#ff77a8", filter: "ready" },
+            { val: waitingTeams.length, label: "WAITING", color: "#5f574f", filter: "waiting" },
           ].map((s, i) => (
-            <div key={i} className="shrink-0 border-2 px-3 py-1.5 text-center" style={{ borderColor: s.color, background: `${s.color}10` }}>
+            <button key={i} onClick={() => {
+              if (["signups"].includes(s.filter)) { setTab("users"); setStatFilter(null); }
+              else if (["teams", "full", "ready", "waiting"].includes(s.filter)) { setTab("teams"); setStatFilter(s.filter); }
+              else { setStatFilter(s.filter); }
+            }}
+              className={`shrink-0 border-2 px-3 py-1.5 text-center cursor-pointer hover:opacity-80 ${statFilter === s.filter ? "ring-2 ring-white" : ""}`}
+              style={{ borderColor: s.color, background: `${s.color}10` }}>
               <p className="text-[11px]" style={{ ...px, color: s.color }}>{s.val}</p>
               <p className="text-[5px] mt-0.5 text-[#c2c3c7]" style={px}>{s.label}</p>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -211,10 +218,15 @@ export function AdminPage() {
             )
           ) : (
             /* Teams tab */
-            teams.length === 0 ? (
+            (() => {
+              let filteredTeams = teams;
+              if (statFilter === "full") filteredTeams = teams.filter(t => t.status === "full");
+              else if (statFilter === "ready") filteredTeams = teams.filter(t => t.player1_ready && t.player2_ready);
+              else if (statFilter === "waiting") filteredTeams = teams.filter(t => t.status === "waiting");
+              return filteredTeams.length === 0 ? (
               <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO TEAMS</p>
             ) : (
-              teams.map(t => (
+              filteredTeams.map(t => (
                 <div key={t.id} className="px-4 py-3 border-b-2 border-[#1d2b53]">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[#29adff] text-[9px]" style={px}>{t.code}</span>
@@ -245,7 +257,8 @@ export function AdminPage() {
                   <p className="text-[#c2c3c7]/40 text-[7px] mt-2" style={px}>{timeAgo(t.created_at)}</p>
                 </div>
               ))
-            )
+            );
+            })()
           )}
         </div>
       </div>
