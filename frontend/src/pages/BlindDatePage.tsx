@@ -200,7 +200,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         className="w-full py-5 flex items-center justify-between text-left gap-4 group"
         style={px}
       >
-        <span className="text-[#fff1e8] text-[11px] sm:text-[12px] leading-[2]">&gt; {q}</span>
+        <span className="text-[#fff1e8] text-[8px] sm:text-[12px] leading-[2]">&gt; {q}</span>
         <span
           className="text-[#ffec27] text-[14px] shrink-0 transition-none"
           style={{ transform: open ? "rotate(90deg)" : "none" }}
@@ -210,7 +210,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       </button>
       {open && (
         <div className="pb-5 -mt-1">
-          <p className="text-[#c2c3c7] text-[10px] sm:text-[11px] leading-[2.2] pl-4">{a}</p>
+          <p className="text-[#c2c3c7] text-[7px] sm:text-[11px] leading-[2.2] pl-4">{a}</p>
         </div>
       )}
     </div>
@@ -260,7 +260,7 @@ export function BlindDatePage() {
   const scrollToSignup = () => signupRef.current?.scrollIntoView({ behavior: "smooth" });
 
   const inputClass =
-    "w-full px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[11px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27]";
+    "w-full px-3 sm:px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[9px] sm:text-[11px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27]";
 
   return (
     <div className="min-h-screen relative" style={px}>
@@ -287,14 +287,14 @@ export function BlindDatePage() {
 
       {/* ─── Nav ─── */}
       <nav className="fixed top-0 w-full z-50 border-b-4 border-[#29adff] bg-[#1d2b53]/95">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <span className="text-[#ff004d] text-[18px]">bubl.</span>
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate("/signin")} className="text-[#c2c3c7] text-[11px] hover:text-[#ffec27] transition-none">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <span className="text-[#ff004d] text-[14px] sm:text-[18px]">bubl.</span>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button onClick={() => navigate("/signin")} className="text-[#c2c3c7] text-[8px] sm:text-[11px] hover:text-[#ffec27] transition-none">
               &gt;&gt; [ SIGN IN ]
             </button>
-            <span className="text-[#5f574f] text-[11px]">|</span>
-            <button onClick={scrollToSignup} className="text-[#29adff] text-[11px] hover:text-[#ffec27] transition-none">
+            <span className="text-[#5f574f] text-[8px] sm:text-[11px]">|</span>
+            <button onClick={scrollToSignup} className="text-[#29adff] text-[8px] sm:text-[11px] hover:text-[#ffec27] transition-none">
               [ JOIN ] &gt;&gt;
             </button>
           </div>
@@ -302,7 +302,7 @@ export function BlindDatePage() {
       </nav>
 
       {/* ─── Hero ─── */}
-      <section className="relative z-10 min-h-[100svh] flex flex-col justify-center px-5 sm:px-6 pt-24 pb-16">
+      <section className="relative z-10 min-h-[100svh] flex flex-col justify-center px-4 sm:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16">
         <div className="max-w-5xl mx-auto w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
           <div className="flex-1 order-2 lg:order-1">
             <div className="flex items-center gap-4 mb-8">
@@ -310,18 +310,18 @@ export function BlindDatePage() {
               <PixelHeart size={40} />
               <PixelHeart size={40} />
             </div>
-            <h1 className="text-[48px] sm:text-[80px] lg:text-[112px] leading-none tracking-tight text-[#ff004d]">
+            <h1 className="text-[36px] sm:text-[80px] lg:text-[112px] leading-none tracking-tight text-[#ff004d]">
               bubl.
             </h1>
-            <p className="mt-6 text-[#c2c3c7] text-[13px] sm:text-[15px] leading-[2.2] max-w-lg">
+            <p className="mt-4 sm:mt-6 text-[#c2c3c7] text-[10px] sm:text-[15px] leading-[2.2] max-w-lg">
               Get a match every Thursday. No app downloads, No awkward dms.
             </p>
-            <p className="mt-3 text-[#ffec27] text-[11px] leading-[2]">
+            <p className="mt-2 sm:mt-3 text-[#ffec27] text-[8px] sm:text-[11px] leading-[2]">
               &gt; iMessage only<BlinkCursor />
             </p>
             <button
               onClick={scrollToSignup}
-              className="mt-8 px-8 py-4 border-4 border-[#ffec27] bg-[#ffec27] text-[#1d2b53] text-[13px] hover:bg-[#fff1a8] active:translate-x-[2px] active:translate-y-[2px] transition-none"
+              className="mt-6 sm:mt-8 px-6 sm:px-8 py-3 sm:py-4 border-4 border-[#ffec27] bg-[#ffec27] text-[#1d2b53] text-[10px] sm:text-[13px] hover:bg-[#fff1a8] active:translate-x-[2px] active:translate-y-[2px] transition-none"
               style={{ boxShadow: "4px 4px 0 #ab5236" }}
             >
               &gt; JOIN WAITLIST
@@ -354,7 +354,7 @@ export function BlindDatePage() {
             {Array.from({ length: 2 }).map((_, half) => (
               <div key={half} className="flex shrink-0">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <span key={i} className="text-[#29adff] text-[11px] mx-8 uppercase shrink-0">
+                  <span key={i} className="text-[#29adff] text-[7px] sm:text-[11px] mx-4 sm:mx-8 uppercase shrink-0">
                     *** iMessage only *** love is a game, literally *** every thursday *** no app required
                   </span>
                 ))}
@@ -364,12 +364,12 @@ export function BlindDatePage() {
         </div>
 
         {/* ─── How it works ─── */}
-        <section className="py-24 sm:py-32 px-5 sm:px-6">
-          <PixelBox color="#29adff" className="max-w-4xl mx-auto bg-[#1d2b53] p-8 sm:p-12">
+        <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
+          <PixelBox color="#29adff" className="max-w-4xl mx-auto bg-[#1d2b53] p-5 sm:p-8 lg:p-12">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
               <div>
-                <p className="text-[#ff77a8] text-[11px] mb-5">&lt; HOW IT WORKS &gt;</p>
-                <h2 className="text-[22px] sm:text-[30px] lg:text-[38px] text-[#fff1e8] leading-[1.7]">
+                <p className="text-[#ff77a8] text-[8px] sm:text-[11px] mb-4 sm:mb-5">&lt; HOW IT WORKS &gt;</p>
+                <h2 className="text-[16px] sm:text-[30px] lg:text-[38px] text-[#fff1e8] leading-[1.7]">
                   Sign up.<br />
                   Get texted.<br />
                   Meet someone<br />
@@ -385,8 +385,8 @@ export function BlindDatePage() {
                   "Ages are carefully matched for safety.",
                 ].map((text, i) => (
                   <div key={i} className="flex gap-4 items-start">
-                    <span className="text-[#ffec27] text-[14px] shrink-0">[{i + 1}]</span>
-                    <p className="text-[#c2c3c7] text-[11px] leading-[2.2]">{text}</p>
+                    <span className="text-[#ffec27] text-[10px] sm:text-[14px] shrink-0">[{i + 1}]</span>
+                    <p className="text-[#c2c3c7] text-[8px] sm:text-[11px] leading-[2.2]">{text}</p>
                   </div>
                 ))}
               </div>
@@ -395,15 +395,15 @@ export function BlindDatePage() {
         </section>
 
         {/* ─── Your Personalized Matchmaker ─── */}
-        <section className="py-24 sm:py-32 px-5 sm:px-6">
+        <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto">
             {/* Title */}
             <div className="text-center mb-16">
               <div className="inline-block bg-[#1d2b53] border-4 border-[#ff77a8] px-6 py-3" style={{ boxShadow: "4px 4px 0 #7a2a4a" }}>
-                <span className="text-[#fff1e8] text-[16px] sm:text-[20px]">Your </span>
-                <span className="text-[#ff004d] text-[16px] sm:text-[20px] italic">Personalized</span>
+                <span className="text-[#fff1e8] text-[12px] sm:text-[20px]">Your </span>
+                <span className="text-[#ff004d] text-[12px] sm:text-[20px] italic">Personalized</span>
                 <br />
-                <span className="text-[#fff1e8] text-[16px] sm:text-[20px]">Matchmaker</span>
+                <span className="text-[#fff1e8] text-[12px] sm:text-[20px]">Matchmaker</span>
               </div>
             </div>
 
@@ -411,7 +411,7 @@ export function BlindDatePage() {
             <div className="grid sm:grid-cols-3 gap-8 sm:gap-6">
               {/* Column 1 — AI Research */}
               <div className="flex flex-col items-center text-center gap-5">
-                <p className="text-[#fff1e8] text-[13px] sm:text-[14px] leading-[1.8]">Backed by the best<br />AI research</p>
+                <p className="text-[#fff1e8] text-[9px] sm:text-[14px] leading-[1.8]">Backed by the best<br />AI research</p>
                 <div className="bg-[#1d2b53] border-4 border-[#29adff] p-6 w-full h-[180px] flex items-center justify-center" style={{ boxShadow: "4px 4px 0 #1a6b99" }}>
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex gap-2">
@@ -435,7 +435,7 @@ export function BlindDatePage() {
 
               {/* Column 2 — Learns preferences */}
               <div className="flex flex-col items-center text-center gap-5">
-                <p className="text-[#fff1e8] text-[13px] sm:text-[14px] leading-[1.8]">bubl learns your<br />preferences</p>
+                <p className="text-[#fff1e8] text-[9px] sm:text-[14px] leading-[1.8]">bubl learns your<br />preferences</p>
                 <div className="bg-[#1d2b53] border-4 border-[#ff77a8] p-6 w-full h-[180px] flex items-center justify-center" style={{ boxShadow: "4px 4px 0 #993d64" }}>
                   <div className="flex flex-col items-center gap-3">
                     <div className="relative">
@@ -491,7 +491,7 @@ export function BlindDatePage() {
 
               {/* Column 3 — Finds the one */}
               <div className="flex flex-col items-center text-center gap-5">
-                <p className="text-[#fff1e8] text-[13px] sm:text-[14px] leading-[1.8]">Scans the entire pool<br />to find the one</p>
+                <p className="text-[#fff1e8] text-[9px] sm:text-[14px] leading-[1.8]">Scans the entire pool<br />to find the one</p>
                 <div className="bg-[#1d2b53] border-4 border-[#ffec27] p-6 w-full h-[180px] flex items-center justify-center" style={{ boxShadow: "4px 4px 0 #998d17" }}>
                   <div className="flex flex-col items-center gap-3">
                     <div className="bg-[#2a2a2a] border-4 border-[#5f574f] p-2 rounded-sm">
@@ -516,9 +516,9 @@ export function BlindDatePage() {
         </section>
 
         {/* ─── Pull quote ─── */}
-        <section className="py-20 sm:py-24 px-5 sm:px-6">
-          <PixelBox color="#ff77a8" className="max-w-3xl mx-auto bg-[#1d2b53] p-8 sm:p-12 text-center">
-            <p className="text-[13px] sm:text-[16px] lg:text-[18px] text-[#fff1e8] leading-[2.4]">
+        <section className="py-14 sm:py-20 lg:py-24 px-4 sm:px-6">
+          <PixelBox color="#ff77a8" className="max-w-3xl mx-auto bg-[#1d2b53] p-5 sm:p-8 lg:p-12 text-center">
+            <p className="text-[9px] sm:text-[16px] lg:text-[18px] text-[#fff1e8] leading-[2.4]">
               "Instagram gave me digital<br />
               <span className="text-[#7e2553]">'connections.'</span><br />
               Bubl gave me something<br />
@@ -529,15 +529,15 @@ export function BlindDatePage() {
         </section>
 
         {/* ─── iMessage demo ─── */}
-        <section className="py-24 sm:py-32 px-5 sm:px-6">
-          <PixelBox color="#29adff" className="max-w-4xl mx-auto bg-[#1d2b53] p-8 sm:p-12">
+        <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
+          <PixelBox color="#29adff" className="max-w-4xl mx-auto bg-[#1d2b53] p-5 sm:p-8 lg:p-12">
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-16">
               <div className="flex justify-center lg:justify-start">
                 <PhoneMockup />
               </div>
               <div className="lg:pt-8">
                 <p className="text-[#ff77a8] text-[11px] mb-5">&lt; NO APP NEEDED &gt;</p>
-                <h2 className="text-[22px] sm:text-[28px] lg:text-[34px] text-[#fff1e8] leading-[1.7] mb-5">
+                <h2 className="text-[16px] sm:text-[28px] lg:text-[34px] text-[#fff1e8] leading-[1.7] mb-4 sm:mb-5">
                   bubl lives in<br />your texts.
                 </h2>
                 <p className="text-[#c2c3c7] text-[11px] leading-[2.2] max-w-sm">
@@ -552,7 +552,7 @@ export function BlindDatePage() {
         </section>
 
         {/* ─── Photo collage ─── */}
-        <section className="py-24 sm:py-32 px-5 sm:px-6">
+        <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
           <p className="text-center text-[#ff77a8] text-[13px] mb-12">&lt; REAL PEOPLE. REAL NIGHTS. &gt;</p>
           {/* Mobile stack */}
           <div className="flex flex-col items-center gap-8 sm:hidden">
@@ -592,8 +592,8 @@ export function BlindDatePage() {
         </section>
 
         {/* ─── Signup form ─── */}
-        <section ref={signupRef} className="py-24 sm:py-32 px-5 sm:px-6">
-          <PixelBox color="#ffec27" className="max-w-md mx-auto bg-[#1d2b53] p-8 sm:p-10">
+        <section ref={signupRef} className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
+          <PixelBox color="#ffec27" className="max-w-md mx-auto bg-[#1d2b53] p-5 sm:p-8 lg:p-10">
             {formState === "success" ? (
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-6 border-4 border-[#00e436] bg-[#1d2b53] flex items-center justify-center">
@@ -675,9 +675,9 @@ export function BlindDatePage() {
         </section>
 
         {/* ─── FAQ (interactive accordion) ─── */}
-        <section className="py-24 sm:py-32 px-5 sm:px-6">
-          <PixelBox color="#29adff" className="max-w-2xl mx-auto bg-[#1d2b53] p-8 sm:p-10">
-            <p className="text-[#ffec27] text-[14px] mb-8">&lt; FAQ &gt;</p>
+        <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6">
+          <PixelBox color="#29adff" className="max-w-2xl mx-auto bg-[#1d2b53] p-5 sm:p-8 lg:p-10">
+            <p className="text-[#ffec27] text-[10px] sm:text-[14px] mb-6 sm:mb-8">&lt; FAQ &gt;</p>
             <FaqItem q="How does matching work?" a="Every Thursday we pair everyone and send results through iMessage. Both say yes, we set the event." />
             <FaqItem q="Do I need an app?" a="No. iMessage only." />
             <FaqItem q="Why school ID?" a="We verify every user is a real student. Your ID is never shared." />

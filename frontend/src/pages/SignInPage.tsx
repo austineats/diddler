@@ -96,17 +96,17 @@ export function SignInPage() {
         {/* Main */}
         <div className="flex-1 flex items-center justify-center px-5 py-12">
           <div
-            className="w-full max-w-sm p-8 sm:p-10"
+            className="w-full max-w-sm p-5 sm:p-10"
             style={{ border: "4px solid #29adff", background: "#1d2b53", boxShadow: "4px 4px 0 #1a6b99" }}
           >
             {/* Step 1: Phone number */}
             {step === "phone" && (
               <div>
                 <p className="text-[#ff77a8] text-[10px] mb-3 text-center">&lt; WELCOME BACK &gt;</p>
-                <h2 className="text-[18px] sm:text-[22px] text-center mb-3 text-[#fff1e8]">
+                <h2 className="text-[14px] sm:text-[22px] text-center mb-3 text-[#fff1e8]">
                   Sign in
                 </h2>
-                <p className="text-[#c2c3c7] text-[8px] text-center mb-8 leading-[2]">
+                <p className="text-[#c2c3c7] text-[7px] sm:text-[8px] text-center mb-6 sm:mb-8 leading-[2]">
                   Enter your phone number and we'll send a code via iMessage
                 </p>
 

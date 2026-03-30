@@ -40,7 +40,7 @@ function PixelPlayer({ name, filled, color, ready, onInvite }: { name?: string; 
   const cDark = color === "blue" ? "#1a6b99" : "#993d64";
 
   return (
-    <div className="flex flex-col items-center gap-3 w-[120px] sm:w-[140px]">
+    <div className="flex flex-col items-center gap-3 w-[100px] sm:w-[140px]">
       <div
         className="w-full aspect-[3/4] flex items-center justify-center"
         style={{
@@ -98,7 +98,7 @@ function TbdPlayer({ index, matchGender }: { index: number; matchGender: "girl" 
   }, [names]);
 
   return (
-    <div className="flex flex-col items-center gap-3 w-[120px] sm:w-[140px]">
+    <div className="flex flex-col items-center gap-3 w-[100px] sm:w-[140px]">
       <div
         className="w-full aspect-[3/4] flex items-center justify-center"
         style={{
@@ -235,12 +235,12 @@ export function InvitePage() {
         </nav>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 gap-10">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-5 py-8 sm:py-12 gap-6 sm:gap-10">
 
           {/* Title */}
           <div className="text-center">
             <p className="text-[#ff77a8] text-[9px] sm:text-[10px] mb-3">&lt; DOUBLE DATE MODE &gt;</p>
-            <h1 className="text-[20px] sm:text-[28px] lg:text-[34px] text-[#fff1e8] leading-[1.6]">
+            <h1 className="text-[16px] sm:text-[28px] lg:text-[34px] text-[#fff1e8] leading-[1.6]">
               {teamFull ? (
                 <>Team <span className="text-[#00e436]">ready!</span></>
               ) : (
@@ -251,7 +251,7 @@ export function InvitePage() {
 
           {/* Player count */}
           <div
-            className="px-5 py-2 text-[11px] sm:text-[13px]"
+            className="px-4 sm:px-5 py-2 text-[8px] sm:text-[13px]"
             style={{
               border: `4px solid ${teamFull ? "#00e436" : "#ffec27"}`,
               background: "#1d2b53",
@@ -263,7 +263,7 @@ export function InvitePage() {
           </div>
 
           {/* 2v2 Arena */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-4 lg:gap-8">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-4 lg:gap-8">
             <div className="flex gap-4 sm:gap-5">
               <PixelPlayer name={team.player1.name} filled ready={team.player1.ready} color={playerGender === "girl" ? "pink" : "blue"} />
               {teamFull ? (
@@ -293,7 +293,7 @@ export function InvitePage() {
           {teamFull ? (
             <a
               href="sms:textbubl@icloud.com&body=bubl i've signed up!"
-              className="px-8 py-4 text-[12px] sm:text-[13px] active:translate-x-[2px] active:translate-y-[2px] inline-block text-center"
+              className="px-6 sm:px-8 py-3 sm:py-4 text-[9px] sm:text-[13px] active:translate-x-[2px] active:translate-y-[2px] inline-block text-center"
               style={{
                 border: "4px solid #00e436",
                 background: "#00e436",
@@ -306,7 +306,7 @@ export function InvitePage() {
           ) : (
             <button
               onClick={copyLink}
-              className="px-8 py-4 text-[12px] sm:text-[13px] active:translate-x-[2px] active:translate-y-[2px]"
+              className="px-6 sm:px-8 py-3 sm:py-4 text-[9px] sm:text-[13px] active:translate-x-[2px] active:translate-y-[2px]"
               style={{
                 border: "4px solid #ffec27",
                 background: copied ? "#00e436" : "#ffec27",

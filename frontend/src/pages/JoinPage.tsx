@@ -54,7 +54,7 @@ export function JoinPage() {
   };
 
   const inputClass =
-    "w-full px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[11px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27]";
+    "w-full px-3 sm:px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[9px] sm:text-[11px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27]";
 
   return (
     <div className="min-h-screen relative" style={px}>
@@ -81,7 +81,7 @@ export function JoinPage() {
         {/* Main */}
         <div className="flex-1 flex items-center justify-center px-5 py-12">
           <div
-            className="w-full max-w-md p-8 sm:p-10"
+            className="w-full max-w-md p-5 sm:p-10"
             style={{ border: "4px solid #29adff", background: "#1d2b53", boxShadow: "4px 4px 0 #1a6b99" }}
           >
             {formState === "success" ? (
@@ -112,7 +112,7 @@ export function JoinPage() {
                 <p className="text-[#29adff] text-[9px] text-center mb-4 leading-[2]">
                   {invitedBy} invited you to be their teammate!
                 </p>
-                <h2 className="text-[22px] sm:text-[28px] text-center mb-8 text-[#ffec27]">
+                <h2 className="text-[16px] sm:text-[28px] text-center mb-6 sm:mb-8 text-[#ffec27]">
                   Join {invitedBy}'s team.
                 </h2>
 
