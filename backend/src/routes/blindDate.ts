@@ -103,7 +103,7 @@ blindDateRouter.post("/signup", upload.none(), async (req, res) => {
         gender: gender || null,
         looking_for: looking_for || null,
         hobbies: parsedHobbies,
-        signup_ip: req.ip || null,
+        signup_ip: (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.headers["cf-connecting-ip"] as string || req.ip || null,
         user_agent: req.headers["user-agent"] || null,
         referrer: req.headers["referer"] || null,
       },
@@ -283,7 +283,7 @@ blindDateRouter.post("/analytics", async (req, res) => {
         path: path || null,
         referrer: referrer || null,
         user_agent: req.headers["user-agent"] || null,
-        ip: req.ip || null,
+        ip: (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.headers["cf-connecting-ip"] as string || req.ip || null,
       },
     });
     return res.json({ ok: true });
