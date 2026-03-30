@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 
 type Slot = {
@@ -27,10 +27,50 @@ const itemVariants = {
 
 const API = import.meta.env.VITE_API_URL || "";
 
-function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; blurred?: boolean }) {
+// Classic restroom sign silhouettes
+function MaleIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 100 260" fill="currentColor" className={className} style={style}>
+      {/* Head */}
+      <circle cx="50" cy="22" r="18" />
+      {/* Left arm */}
+      <rect x="2" y="52" width="14" height="72" rx="7" transform="rotate(-12 9 52)" />
+      {/* Right arm */}
+      <rect x="84" y="52" width="14" height="72" rx="7" transform="rotate(12 91 52)" />
+      {/* Body */}
+      <rect x="30" y="50" width="40" height="90" rx="3" />
+      {/* Left leg */}
+      <rect x="31" y="132" width="16" height="100" rx="8" />
+      {/* Right leg */}
+      <rect x="53" y="132" width="16" height="100" rx="8" />
+    </svg>
+  );
+}
+
+function FemaleIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 100 260" fill="currentColor" className={className} style={style}>
+      {/* Head */}
+      <circle cx="50" cy="22" r="18" />
+      {/* Left arm */}
+      <rect x="2" y="52" width="14" height="72" rx="7" transform="rotate(-12 9 52)" />
+      {/* Right arm */}
+      <rect x="84" y="52" width="14" height="72" rx="7" transform="rotate(12 91 52)" />
+      {/* Upper body */}
+      <rect x="33" y="50" width="34" height="44" rx="3" />
+      {/* Skirt with V cutout for legs */}
+      <path d="M50,88 L88,170 L64,170 L50,135 L36,170 L12,170 Z" />
+      {/* Left leg */}
+      <rect x="29" y="162" width="16" height="72" rx="8" />
+      {/* Right leg */}
+      <rect x="55" y="162" width="16" height="72" rx="8" />
+    </svg>
+  );
+}
+
+function SlotCard({ slot, onJoin, blurred, mystery }: { slot: Slot; onJoin: () => void; blurred?: boolean; mystery?: boolean }) {
   const isGuy = slot.role === "guy";
   const accent = isGuy ? "#3b82f6" : "#ec4899";
-  const accentDim = isGuy ? "rgba(59,130,246,0.15)" : "rgba(236,72,153,0.15)";
   const accentMid = isGuy ? "rgba(59,130,246,0.3)" : "rgba(236,72,153,0.3)";
 
   return (
@@ -38,52 +78,54 @@ function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; b
       variants={itemVariants}
       className="relative flex flex-col group cursor-pointer"
       style={{ width: "100%" }}
-      onClick={() => !slot.filled && onJoin()}
+      onClick={() => !slot.filled && !mystery && onJoin()}
     >
       {/* Card body — tall vertical */}
       <div
         className="relative flex-1 flex flex-col items-center justify-center overflow-hidden transition-all duration-300"
         style={{
-          minHeight: 320,
-          background: slot.filled
-            ? `linear-gradient(180deg, ${accentDim} 0%, rgba(0,0,0,0.6) 100%)`
-            : "rgba(255,255,255,0.03)",
+          minHeight: 180,
+          aspectRatio: "1",
+          background: "rgba(255,255,255,0.03)",
           border: slot.filled ? `1px solid ${accentMid}` : "1px dashed rgba(255,255,255,0.08)",
-          clipPath: "polygon(10% 0%, 90% 0%, 100% 4%, 100% 96%, 90% 100%, 10% 100%, 0% 96%, 0% 4%)",
         }}
       >
         {/* Top accent line */}
         {slot.filled && (
-          <div className="absolute top-0 left-[10%] right-[10%] h-[2px]" style={{ background: accent }} />
+          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: accent }} />
         )}
 
         {slot.filled ? (
           blurred ? (
             <>
-              {/* Big question mark */}
-              <span className="text-[72px] sm:text-[80px] font-bold select-none" style={{ color: "rgba(255,255,255,0.12)", textShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}>?</span>
+              {isGuy
+                ? <MaleIcon className="w-16 sm:w-20 mb-2" style={{ color: "rgba(255,255,255,0.08)", filter: "blur(6px)" }} />
+                : <FemaleIcon className="w-16 sm:w-20 mb-2" style={{ color: "rgba(255,255,255,0.08)", filter: "blur(6px)" }} />
+              }
             </>
           ) : (
             <>
-              {/* Big emoji avatar */}
-              <div
-                className="text-[64px] sm:text-[72px] mb-2 select-none"
-                style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
-              >
-                {isGuy ? "🧑" : "👩"}
-              </div>
-              {/* Ready badge */}
+              {isGuy
+                ? <MaleIcon className="w-16 sm:w-20 mb-2" style={{ color: accent, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
+                : <FemaleIcon className="w-16 sm:w-20 mb-2" style={{ color: accent, filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }} />
+              }
               <div className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{ background: accentMid, color: accent }}>
                 ready
               </div>
             </>
           )
+        ) : mystery ? (
+          <>
+            {isGuy
+              ? <MaleIcon className="w-14 sm:w-18" style={{ color: "rgba(255,255,255,0.06)", filter: "blur(5px)" }} />
+              : <FemaleIcon className="w-14 sm:w-18" style={{ color: "rgba(255,255,255,0.06)", filter: "blur(5px)" }} />
+            }
+          </>
         ) : (
           <>
-            {/* Empty plus icon */}
             <div
               className="w-14 h-14 rounded-lg flex items-center justify-center transition-all group-hover:scale-110"
-              style={{ border: `2px dashed rgba(255,255,255,0.1)` }}
+              style={{ border: "2px dashed rgba(255,255,255,0.1)" }}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -94,15 +136,8 @@ function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; b
         )}
       </div>
 
-      {/* Bottom banner / nameplate */}
-      <div
-        className="relative py-3 text-center transition-all duration-300"
-        style={{
-          background: slot.filled
-            ? `linear-gradient(180deg, ${accentMid} 0%, transparent 100%)`
-            : "transparent",
-        }}
-      >
+      {/* Bottom nameplate — no gradient */}
+      <div className="py-3 text-center">
         {slot.filled ? (
           <>
             <p className="text-white font-bold text-[15px] sm:text-[17px] tracking-wide">
@@ -112,17 +147,12 @@ function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; b
               {blurred ? "mystery" : slot.is_host ? "matched" : "joined"}
             </p>
           </>
+        ) : mystery ? (
+          <p className="text-white/10 text-[13px]">? ? ?</p>
         ) : (
           <p className="text-white/10 text-[13px]">empty slot</p>
         )}
       </div>
-
-      {/* Bottom diamond ornament */}
-      {slot.filled && (
-        <div className="flex justify-center -mt-1">
-          <div className="w-4 h-4 rotate-45 border border-white/10" style={{ background: accentDim }} />
-        </div>
-      )}
     </motion.div>
   );
 }
@@ -179,8 +209,10 @@ function JoinModal({ role, onClose, onSubmit, submitting }: { role: "guy" | "gir
 export function PartyPage() {
   const { code } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const viewerSide = searchParams.get("as") as "guy" | "girl" | null;
+  const locState = location.state as { hostName?: string; hostRole?: "guy" | "girl" } | null;
   const [party, setParty] = useState<PartyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -191,7 +223,7 @@ export function PartyPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showJoinCode, setShowJoinCode] = useState(false);
   const [joinCode, setJoinCode] = useState("");
-  const [createData, setCreateData] = useState({ guyName: "", guyPhone: "", girlName: "", girlPhone: "", iAm: "" as "guy" | "girl" | "" });
+  const [createData, setCreateData] = useState({ name: "", phone: "", role: "" as "guy" | "girl" | "" });
   const [createError, setCreateError] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -203,13 +235,13 @@ export function PartyPage() {
   };
 
   const handleCreate = async () => {
-    const { guyName, guyPhone, girlName, girlPhone, iAm } = createData;
-    if (!guyName.trim() || !guyPhone.trim() || !girlName.trim() || !girlPhone.trim()) {
-      setCreateError("all fields required");
+    const { name, phone, role } = createData;
+    if (!name.trim() || !phone.trim()) {
+      setCreateError("enter your name and phone");
       return;
     }
-    if (!iAm) {
-      setCreateError("select who you are");
+    if (!role) {
+      setCreateError("select guys or girls");
       return;
     }
     setCreating(true);
@@ -219,27 +251,40 @@ export function PartyPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          guy_name: guyName.trim(),
-          guy_phone: guyPhone.replace(/\D/g, ""),
-          girl_name: girlName.trim(),
-          girl_phone: girlPhone.replace(/\D/g, ""),
+          name: name.trim(),
+          phone: phone.replace(/\D/g, ""),
+          role,
         }),
       });
       const data = await res.json();
-      if (data.ok) navigate(`/party/${data.code}?as=${createData.iAm}`);
+      if (data.ok) navigate(`/party/${data.code}?as=${role}`);
       else setCreateError(data.error || "something went wrong");
     } catch {
-      setCreateError("couldn't connect");
+      const mockCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      navigate(`/party/${mockCode}?as=${role}`);
     } finally {
       setCreating(false);
     }
   };
 
+  // Auto-create party from waitlist signup
+  useEffect(() => {
+    if (code) return; // already in a lobby
+    const saved = localStorage.getItem("bubl_user");
+    if (!saved) return;
+    try {
+      const user = JSON.parse(saved) as { name: string; phone: string; role: "guy" | "girl" };
+      if (!user.name || !user.role) return;
+      localStorage.removeItem("bubl_user"); // consume it so it doesn't re-trigger
+      const mockCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      navigate(`/party/${mockCode}?as=${user.role}`, { replace: true, state: { hostName: user.name, hostRole: user.role } });
+    } catch { /* ignore bad data */ }
+  }, [code, navigate]);
+
   // Fetch party data
   useEffect(() => {
     if (!code) {
       setLoading(false);
-      setError("no party code");
       return;
     }
     fetch(`${API}/api/party/${code}`)
@@ -249,19 +294,21 @@ export function PartyPage() {
         else setError(data.error || "party not found");
       })
       .catch(() => {
-        // Fallback to mock data for demo
+        // Fallback to mock data — use host info from navigation state or defaults
+        const side = (locState?.hostRole || searchParams.get("as") || "guy") as "guy" | "girl";
+        const hostName = locState?.hostName || "Alex";
+        const otherSide = side === "guy" ? "girl" : "guy";
         setParty({
           code: code!,
           status: "waiting",
           slots: [
-            { position: 0, role: "guy", is_host: true, name: "Alex", filled: true },
-            { position: 1, role: "guy", is_host: false, name: null, filled: false },
-            { position: 2, role: "girl", is_host: true, name: "Sarah", filled: true },
-            { position: 3, role: "girl", is_host: false, name: null, filled: false },
+            { position: 0, role: side, is_host: true, name: hostName, filled: true },
+            { position: 1, role: side, is_host: false, name: null, filled: false },
+            { position: 2, role: otherSide, is_host: false, name: null, filled: false },
+            { position: 3, role: otherSide, is_host: false, name: null, filled: false },
           ],
         });
-        // Default demo to guy's perspective so girl side is blurred
-        if (!searchParams.get("as")) navigate(`/party/${code}?as=guy`, { replace: true });
+        if (!searchParams.get("as")) navigate(`/party/${code}?as=${side}`, { replace: true });
       })
       .finally(() => setLoading(false));
   }, [code]);
@@ -313,6 +360,9 @@ export function PartyPage() {
   };
 
   const slots = party?.slots || [];
+  const mySlots = viewerSide ? slots.filter(s => s.role === viewerSide) : slots.filter(s => s.role === "guy");
+  const otherSlots = viewerSide ? slots.filter(s => s.role !== viewerSide) : slots.filter(s => s.role === "girl");
+  const myDuoFull = mySlots.length === 2 && mySlots.every(s => s.filled);
   const allFilled = slots.length === 4 && slots.every(s => s.filled);
 
   // Loading state
@@ -339,7 +389,7 @@ export function PartyPage() {
         </nav>
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
           <h1 className="text-[48px] sm:text-[64px] font-bold tracking-[-0.04em] text-white leading-[0.95] mb-3">double date</h1>
-          <p className="text-white/40 text-[16px] sm:text-[18px] mb-12">2v2 — every match brings a friend</p>
+          <p className="text-white/40 text-[16px] sm:text-[18px] mb-12">grab a friend, get matched with another duo</p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
             <button
@@ -362,39 +412,33 @@ export function PartyPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowCreate(false)}>
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-              <h3 className="text-white font-bold text-[24px] mb-1">start a lobby</h3>
-              <p className="text-white/40 text-[14px] mb-6">enter both matched people to create the party</p>
+              <h3 className="text-white font-bold text-[24px] mb-1">start a party</h3>
+              <p className="text-white/40 text-[14px] mb-6">grab a friend, then get matched with another duo</p>
               <div className="space-y-4">
                 <div>
-                  <p className="text-blue-400 text-[11px] font-semibold uppercase tracking-widest mb-2">his side</p>
-                  <input type="text" value={createData.guyName} onChange={e => setCreateData(d => ({ ...d, guyName: e.target.value }))} placeholder="name"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5 mb-2" />
-                  <input type="tel" value={createData.guyPhone} onChange={e => setCreateData(d => ({ ...d, guyPhone: fmt(e.target.value) }))} placeholder="phone"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
-                </div>
-                <div>
-                  <p className="text-pink-400 text-[11px] font-semibold uppercase tracking-widest mb-2">her side</p>
-                  <input type="text" value={createData.girlName} onChange={e => setCreateData(d => ({ ...d, girlName: e.target.value }))} placeholder="name"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5 mb-2" />
-                  <input type="tel" value={createData.girlPhone} onChange={e => setCreateData(d => ({ ...d, girlPhone: fmt(e.target.value) }))} placeholder="phone"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
-                </div>
-                <div>
-                  <p className="text-white/40 text-[11px] font-semibold uppercase tracking-widest mb-2">which one are you?</p>
+                  <p className="text-white/40 text-[11px] font-semibold uppercase tracking-widest mb-2">we're the</p>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setCreateData(d => ({ ...d, iAm: "guy" }))}
-                      className={`flex-1 py-2.5 rounded-lg text-[14px] font-semibold transition ${createData.iAm === "guy" ? "bg-blue-500/20 border border-blue-500/40 text-blue-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}
+                      onClick={() => setCreateData(d => ({ ...d, role: "guy" }))}
+                      className={`flex-1 py-3 rounded-lg text-[15px] font-semibold transition ${createData.role === "guy" ? "bg-blue-500/20 border border-blue-500/40 text-blue-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}
                     >
-                      i'm the guy
+                      guys
                     </button>
                     <button
-                      onClick={() => setCreateData(d => ({ ...d, iAm: "girl" }))}
-                      className={`flex-1 py-2.5 rounded-lg text-[14px] font-semibold transition ${createData.iAm === "girl" ? "bg-pink-500/20 border border-pink-500/40 text-pink-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}
+                      onClick={() => setCreateData(d => ({ ...d, role: "girl" }))}
+                      className={`flex-1 py-3 rounded-lg text-[15px] font-semibold transition ${createData.role === "girl" ? "bg-pink-500/20 border border-pink-500/40 text-pink-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}
                     >
-                      i'm the girl
+                      girls
                     </button>
                   </div>
+                </div>
+                <div>
+                  <p className={`text-[11px] font-semibold uppercase tracking-widest mb-2 ${createData.role === "girl" ? "text-pink-400" : "text-blue-400"}`}>your info</p>
+                  <input type="text" value={createData.name} onChange={e => setCreateData(d => ({ ...d, name: e.target.value }))} placeholder="your name"
+                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5 mb-2" />
+                  <input type="tel" value={createData.phone} onChange={e => setCreateData(d => ({ ...d, phone: fmt(e.target.value) }))} placeholder="phone"
+                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
+                  <p className="text-[11px] text-white/15 mt-1 ml-1">iMessage required</p>
                 </div>
                 {createError && <p className="text-red-400 text-[13px] text-center">{createError}</p>}
                 <button onClick={handleCreate} disabled={creating}
@@ -467,64 +511,10 @@ export function PartyPage() {
       </nav>
 
       <div className="relative z-10 pt-24 pb-20 px-5 sm:px-6">
-        <div className="relative max-w-2xl mx-auto">
-        {/* Tape strips on corners — outside clip-path so they're visible */}
-        <div className="absolute -top-3 -left-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(-15deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-        <div className="absolute -top-3 -right-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(12deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-        <div className="absolute -bottom-3 -left-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(10deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-        <div className="absolute -bottom-3 -right-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(-8deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-
         <motion.div
           variants={sectionVariants} initial="hidden" animate="visible"
-          className="relative px-10 sm:px-14 py-12"
-          style={{
-            background: "#1a2236",
-            boxShadow: "4px 6px 30px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.03)",
-            transform: "rotate(-0.3deg)",
-            clipPath: "polygon(0% 0.5%, 1.5% 0%, 3% 0.8%, 5% 0.2%, 7% 0.6%, 10% 0%, 12% 0.4%, 15% 0.1%, 18% 0.7%, 20% 0%, 25% 0.3%, 30% 0%, 35% 0.5%, 40% 0.1%, 50% 0.4%, 60% 0%, 65% 0.3%, 70% 0.1%, 75% 0.6%, 80% 0%, 85% 0.4%, 90% 0.1%, 93% 0.5%, 95% 0%, 97% 0.3%, 99% 0%, 100% 0.6%, 100% 5%, 99.5% 8%, 100% 12%, 99.6% 16%, 100% 20%, 99.5% 25%, 100% 30%, 99.7% 35%, 100% 40%, 99.5% 45%, 100% 50%, 99.6% 55%, 100% 60%, 99.5% 65%, 100% 70%, 99.7% 75%, 100% 80%, 99.5% 85%, 100% 90%, 99.6% 95%, 100% 99%, 99% 100%, 97% 99.5%, 95% 100%, 93% 99.6%, 90% 100%, 85% 99.5%, 80% 100%, 75% 99.6%, 70% 100%, 65% 99.5%, 60% 100%, 50% 99.6%, 40% 100%, 35% 99.5%, 30% 100%, 25% 99.4%, 20% 100%, 15% 99.6%, 10% 100%, 7% 99.5%, 5% 100%, 3% 99.6%, 1.5% 100%, 0% 99.5%, 0% 95%, 0.4% 90%, 0% 85%, 0.5% 80%, 0% 75%, 0.3% 70%, 0% 65%, 0.5% 60%, 0% 55%, 0.4% 50%, 0% 45%, 0.5% 40%, 0% 35%, 0.3% 30%, 0% 25%, 0.5% 20%, 0% 16%, 0.4% 12%, 0% 8%, 0.5% 5%)",
-          }}
+          className="max-w-2xl mx-auto"
         >
-          {/* Notebook holes on left side */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 pointer-events-none z-10">
-            {[12, 25, 38, 50, 62, 75, 88].map(pct => (
-              <div key={pct} className="absolute left-2" style={{
-                top: `${pct}%`,
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                background: "rgba(0,0,0,0.7)",
-                boxShadow: "inset 0 1px 3px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03)",
-              }} />
-            ))}
-          </div>
-
-          {/* Lined paper lines */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 0.06 }}>
-            {Array.from({ length: 30 }, (_, i) => 24 + i * 24).map(y => (
-              <div key={y} className="absolute left-10 right-4" style={{ top: y, height: 1, background: "#8ba8d4" }} />
-            ))}
-          </div>
-
-          {/* Red margin line */}
-          <div className="absolute top-0 bottom-0 pointer-events-none" style={{ left: 36, width: 1, background: "rgba(196,107,107,0.15)" }} />
-
-          {/* Crumple / wrinkle overlays */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: `
-              linear-gradient(127deg, transparent 30%, rgba(255,255,255,0.015) 32%, transparent 34%),
-              linear-gradient(237deg, transparent 45%, rgba(0,0,0,0.04) 47%, transparent 49%),
-              linear-gradient(352deg, transparent 60%, rgba(255,255,255,0.012) 62%, transparent 64%),
-              linear-gradient(78deg, transparent 20%, rgba(0,0,0,0.03) 22%, transparent 24%),
-              linear-gradient(190deg, transparent 70%, rgba(255,255,255,0.02) 72%, transparent 74%)
-            `,
-          }} />
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: `
-              radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 60%, rgba(0,0,0,0.03) 0%, transparent 40%),
-              radial-gradient(ellipse at 40% 80%, rgba(255,255,255,0.015) 0%, transparent 45%)
-            `,
-          }} />
 
           <motion.div variants={itemVariants} className="text-center mb-12">
             <h1 className="text-[40px] sm:text-[56px] font-bold tracking-[-0.04em] text-white leading-[0.95]">
@@ -535,42 +525,32 @@ export function PartyPage() {
             </p>
           </motion.div>
 
-          {/* Valorant-style 4-card row: guys | VS | girls */}
-          <motion.div variants={sectionVariants} className="flex items-center gap-3 sm:gap-5 mb-10">
-            {/* Guys side */}
-            <div className="flex-1 flex gap-3 sm:gap-4">
-              {slots.filter(s => s.role === "guy").map((s) => (
-                <SlotCard key={s.position} slot={s} onJoin={() => setJoinModal("guy")} blurred={!!viewerSide && viewerSide !== "guy" && s.filled} />
-              ))}
-            </div>
-
-            {/* VS divider */}
-            <div className="flex flex-col items-center gap-2 px-1">
-              <div className="w-px h-8 bg-white/10" />
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center bg-white/5">
-                <span className="text-white/25 font-bold text-[12px] sm:text-[14px]">VS</span>
-              </div>
-              <div className="w-px h-8 bg-white/10" />
-            </div>
-
-            {/* Girls side */}
-            <div className="flex-1 flex gap-3 sm:gap-4">
-              {slots.filter(s => s.role === "girl").map((s) => (
-                <SlotCard key={s.position} slot={s} onJoin={() => setJoinModal("girl")} blurred={!!viewerSide && viewerSide !== "girl" && s.filled} />
-              ))}
-            </div>
+          {/* 2x2 grid: guys left, girls right */}
+          <motion.div variants={sectionVariants} className="grid grid-cols-[1fr_1px_1fr] gap-x-6 sm:gap-x-10 gap-y-4 mb-10 items-start">
+            {/* Row 1 */}
+            <SlotCard slot={mySlots[0] || { position: 0, role: viewerSide || "guy", is_host: true, name: null, filled: false }} onJoin={() => setJoinModal(viewerSide || "guy")} />
+            <div className="bg-white/10 self-stretch row-span-2" />
+            <SlotCard slot={otherSlots[0] || { position: 2, role: viewerSide === "girl" ? "guy" : "girl", is_host: false, name: null, filled: false }} onJoin={() => {}} blurred={otherSlots[0]?.filled} mystery={!otherSlots[0]?.filled} />
+            {/* Row 2 */}
+            <SlotCard slot={mySlots[1] || { position: 1, role: viewerSide || "guy", is_host: false, name: null, filled: false }} onJoin={() => setJoinModal(viewerSide || "guy")} />
+            <SlotCard slot={otherSlots[1] || { position: 3, role: viewerSide === "girl" ? "guy" : "girl", is_host: false, name: null, filled: false }} onJoin={() => {}} blurred={otherSlots[1]?.filled} mystery={!otherSlots[1]?.filled} />
           </motion.div>
 
           <motion.div variants={itemVariants} className="text-center mb-8">
             {allFilled ? (
               <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-6 py-4">
-                <p className="text-green-400 font-semibold text-[16px]">party's full — let's go</p>
-                <p className="text-green-400/50 text-[13px] mt-1">match details drop thursday 9–11am</p>
+                <p className="text-green-400 font-semibold text-[16px]">you're matched — double date time</p>
+                <p className="text-green-400/50 text-[13px] mt-1">details drop thursday</p>
+              </div>
+            ) : myDuoFull ? (
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-6 py-4">
+                <p className="text-yellow-400 font-semibold text-[16px]">duo ready — searching for a match...</p>
+                <p className="text-yellow-400/50 text-[13px] mt-1">we'll match you with another duo</p>
               </div>
             ) : (
               <div className="bg-white/5 border border-white/10 rounded-xl px-6 py-4">
                 <p className="text-white/60 text-[15px]">
-                  {slots.filter(s => !s.filled).length} slot{slots.filter(s => !s.filled).length > 1 ? "s" : ""} left — share the link
+                  invite your friend to complete your duo
                 </p>
               </div>
             )}
@@ -594,8 +574,8 @@ export function PartyPage() {
             <p className="text-white/30 text-[13px] uppercase tracking-widest font-semibold mb-6 text-center">how it works</p>
             <div className="grid sm:grid-cols-3 gap-6 text-center">
               {[
-                { step: "01", text: "you get matched with someone" },
-                { step: "02", text: "both of you invite a friend to fill the party" },
+                { step: "01", text: "start a party and invite your friend" },
+                { step: "02", text: "your duo gets matched with another duo" },
                 { step: "03", text: "thursday hits — double date time" },
               ].map((s) => (
                 <div key={s.step}>
@@ -607,7 +587,6 @@ export function PartyPage() {
           </motion.div>
 
         </motion.div>
-        </div>
       </div>
 
       {joinModal && (

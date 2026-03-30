@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { motion, type Variants } from "motion/react";
 
@@ -363,10 +364,12 @@ function PhoneMockup() {
 type FormState = "idle" | "submitting" | "success";
 
 export function BlindDatePage() {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState("");
   const [school, setSchool] = useState("");
+  const [gender, setGender] = useState<"guy" | "girl" | "">("");
   const [formState, setFormState] = useState<FormState>("idle");
   const [error, setError] = useState("");
   const [, setPosition] = useState(0);
@@ -380,20 +383,26 @@ export function BlindDatePage() {
   };
   const submit = async () => {
     setError("");
-    if (!name.trim() || !phone.trim() || !age.trim() || !school) { setError("all fields are required"); return; }
+    if (!name.trim() || !phone.trim() || !age.trim() || !school || !gender) { setError("all fields are required"); return; }
     setFormState("submitting");
     const fd = new FormData();
     fd.append("name", name.trim());
     fd.append("phone", phone.replace(/\D/g, ""));
     fd.append("age", age.trim());
     fd.append("school", school);
-    try {
-      const res = await fetch("/api/blind-date/signup", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || "something went wrong"); setFormState("idle"); return; }
-      setPosition(data.position);
-      setFormState("success");
-    } catch { setError("couldn't connect — try again"); setFormState("idle"); }
+    fd.append("gender", gender);
+
+    // Save user info to localStorage so party page can use it
+    localStorage.setItem("bubl_user", JSON.stringify({
+      name: name.trim(),
+      phone: phone.replace(/\D/g, ""),
+      role: gender,
+    }));
+
+    // Fire signup to API in background, but always redirect
+    fetch("/api/blind-date/signup", { method: "POST", body: fd }).catch(() => {});
+    setFormState("success");
+    setTimeout(() => navigate("/party"), 1000);
   };
   const scrollToSignup = () => signupRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -614,6 +623,17 @@ export function BlindDatePage() {
                   <option value="Crean Lutheran High School">Crean Lutheran High School</option>
                   <option value="University High School">University High School</option>
                 </select>
+
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setGender("guy")}
+                    className={`flex-1 py-3 rounded-lg text-[14px] font-semibold transition ${gender === "guy" ? "bg-blue-500/20 border border-blue-500/40 text-blue-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}>
+                    guy
+                  </button>
+                  <button type="button" onClick={() => setGender("girl")}
+                    className={`flex-1 py-3 rounded-lg text-[14px] font-semibold transition ${gender === "girl" ? "bg-pink-500/20 border border-pink-500/40 text-pink-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}>
+                    girl
+                  </button>
+                </div>
 
                 {error && <p className="text-[13px] text-red-400 text-center">{error}</p>}
 
