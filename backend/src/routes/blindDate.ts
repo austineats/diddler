@@ -226,6 +226,18 @@ blindDateRouter.delete("/admin/signups/:id", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /admin/teams — all teams for admin dashboard
+// ---------------------------------------------------------------------------
+
+blindDateRouter.get("/admin/teams", async (_req, res) => {
+  const teams = await prisma.blindDateTeam.findMany({
+    orderBy: { created_at: "desc" },
+    take: 200,
+  });
+  return res.json({ ok: true, teams });
+});
+
+// ---------------------------------------------------------------------------
 // GET /admin/activity — activity log for admin dashboard
 // ---------------------------------------------------------------------------
 

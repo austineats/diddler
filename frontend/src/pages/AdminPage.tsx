@@ -13,6 +13,21 @@ interface Signup {
   created_at: string;
 }
 
+interface Team {
+  id: string;
+  code: string;
+  player1_name: string;
+  player1_phone: string;
+  player1_gender: string;
+  player1_ready: boolean;
+  player2_name: string | null;
+  player2_phone: string | null;
+  player2_gender: string | null;
+  player2_ready: boolean;
+  status: string;
+  created_at: string;
+}
+
 const ADMIN_PASS = "bubl2026";
 
 const px = { fontFamily: "'Press Start 2P', monospace" };
@@ -22,8 +37,10 @@ export function AdminPage() {
   const [passInput, setPassInput] = useState("");
   const [passError, setPassError] = useState(false);
   const [signups, setSignups] = useState<Signup[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Signup | null>(null);
+  const [tab, setTab] = useState<"users" | "teams">("users");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (authed) loadData(); }, [authed]);
@@ -62,9 +79,14 @@ export function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/blind-date/admin/signups");
-      const data = await res.json();
-      setSignups(data.signups || []);
+      const [signupRes, teamRes] = await Promise.all([
+        fetch("/api/blind-date/admin/signups"),
+        fetch("/api/blind-date/admin/teams"),
+      ]);
+      const signupData = await signupRes.json();
+      const teamData = await teamRes.json();
+      setSignups(signupData.signups || []);
+      setTeams(teamData.teams || []);
     } catch (e) { console.error("Failed to load:", e); }
     setLoading(false);
   };
@@ -82,17 +104,56 @@ export function AdminPage() {
     s.name.toLowerCase().includes(search.toLowerCase()) || s.phone.includes(search)
   );
 
+  const fullTeams = teams.filter(t => t.status === "full");
+  const waitingTeams = teams.filter(t => t.status === "waiting");
+  const readyCount = teams.filter(t => t.player1_ready && t.player2_ready).length;
+
   return (
-    <div className="min-h-screen bg-[#0d0d1a] text-[#fff1e8] flex" style={px}>
-      {/* Sidebar — user list */}
-      <div className="w-[360px] border-r-4 border-[#29adff] flex flex-col h-screen">
+    <div className="min-h-screen bg-[#0d0d1a] text-[#fff1e8] flex flex-col sm:flex-row" style={px}>
+      {/* Sidebar */}
+      <div className="w-full sm:w-[360px] border-b-4 sm:border-b-0 sm:border-r-4 border-[#29adff] flex flex-col sm:h-screen">
         <div className="p-4 border-b-4 border-[#29adff]">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <span className="text-[14px] text-[#ff004d]" style={px}>bubl.</span>
               <span className="text-[#c2c3c7] text-[8px]" style={px}>ADMIN</span>
             </div>
-            <span className="text-[#ffec27] text-[8px]" style={px}>{signups.length} WAITLISTS</span>
+          </div>
+
+          {/* Stats — horizontal scroll */}
+          <div className="flex gap-3 overflow-x-auto pb-3 mb-3 -mx-1 px-1">
+            <div className="shrink-0 border-2 border-[#ffec27] bg-[#ffec27]/10 px-3 py-2 text-center">
+              <p className="text-[#ffec27] text-[12px]" style={px}>{signups.length}</p>
+              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>SIGNUPS</p>
+            </div>
+            <div className="shrink-0 border-2 border-[#29adff] bg-[#29adff]/10 px-3 py-2 text-center">
+              <p className="text-[#29adff] text-[12px]" style={px}>{teams.length}</p>
+              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>TEAMS</p>
+            </div>
+            <div className="shrink-0 border-2 border-[#00e436] bg-[#00e436]/10 px-3 py-2 text-center">
+              <p className="text-[#00e436] text-[12px]" style={px}>{fullTeams.length}</p>
+              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>FULL</p>
+            </div>
+            <div className="shrink-0 border-2 border-[#ff77a8] bg-[#ff77a8]/10 px-3 py-2 text-center">
+              <p className="text-[#ff77a8] text-[12px]" style={px}>{readyCount}</p>
+              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>READY</p>
+            </div>
+            <div className="shrink-0 border-2 border-[#5f574f] bg-[#5f574f]/10 px-3 py-2 text-center">
+              <p className="text-[#5f574f] text-[12px]" style={px}>{waitingTeams.length}</p>
+              <p className="text-[#c2c3c7] text-[6px] mt-1" style={px}>WAITING</p>
+            </div>
+          </div>
+
+          {/* Tab switcher */}
+          <div className="flex gap-2 mb-3">
+            <button onClick={() => setTab("users")}
+              className={`flex-1 py-2 text-[8px] border-2 ${tab === "users" ? "border-[#29adff] bg-[#29adff] text-[#1d2b53]" : "border-[#29adff]/30 text-[#c2c3c7]"}`} style={px}>
+              USERS
+            </button>
+            <button onClick={() => setTab("teams")}
+              className={`flex-1 py-2 text-[8px] border-2 ${tab === "teams" ? "border-[#ff77a8] bg-[#ff77a8] text-[#1d2b53]" : "border-[#ff77a8]/30 text-[#c2c3c7]"}`} style={px}>
+              TEAMS
+            </button>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-[#29adff]" />
@@ -106,35 +167,70 @@ export function AdminPage() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>LOADING...</p>
-          ) : filtered.length === 0 ? (
-            <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO WAITLISTS</p>
-          ) : (
-            filtered.map(s => (
-              <button key={s.id} onClick={() => setSelected(s)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left border-b-2 border-[#1d2b53] transition-colors ${
-                  selected?.id === s.id ? "bg-[#1d2b53]" : "hover:bg-[#1d2b53]/60"
-                }`}>
-                <div className="w-10 h-10 border-2 border-[#ff77a8] bg-[#1d2b53] flex items-center justify-center shrink-0">
-                  {s.school_id_url ? (
-                    <img src={s.school_id_url} className="w-10 h-10 object-cover" />
-                  ) : (
+          ) : tab === "users" ? (
+            filtered.length === 0 ? (
+              <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO USERS</p>
+            ) : (
+              filtered.map(s => (
+                <button key={s.id} onClick={() => setSelected(s)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left border-b-2 border-[#1d2b53] transition-colors ${
+                    selected?.id === s.id ? "bg-[#1d2b53]" : "hover:bg-[#1d2b53]/60"
+                  }`}>
+                  <div className="w-10 h-10 border-2 border-[#ff77a8] bg-[#1d2b53] flex items-center justify-center shrink-0">
                     <span className="text-[12px] text-[#ff77a8]" style={px}>{s.name.charAt(0).toUpperCase()}</span>
-                  )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[#fff1e8] text-[9px] truncate" style={px}>{s.name}</p>
+                    <p className="text-[#c2c3c7] text-[8px] truncate mt-1" style={px}>{s.phone}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <span className={`text-[7px] px-2 py-1 border-2 ${
+                      s.status === "waiting" ? "border-[#ffec27] bg-[#ffec27]/10 text-[#ffec27]" :
+                      s.status === "matched" ? "border-[#00e436] bg-[#00e436]/10 text-[#00e436]" :
+                      "border-[#c2c3c7] bg-[#c2c3c7]/10 text-[#c2c3c7]"
+                    }`} style={px}>{s.status.toUpperCase()}</span>
+                    <span className="text-[#c2c3c7]/50 text-[7px]" style={px}>{timeAgo(s.created_at)}</span>
+                  </div>
+                </button>
+              ))
+            )
+          ) : (
+            /* Teams tab */
+            teams.length === 0 ? (
+              <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO TEAMS</p>
+            ) : (
+              teams.map(t => (
+                <div key={t.id} className="px-4 py-3 border-b-2 border-[#1d2b53]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[#29adff] text-[9px]" style={px}>{t.code}</span>
+                    <span className={`text-[7px] px-2 py-1 border-2 ${
+                      t.status === "full" ? "border-[#00e436] bg-[#00e436]/10 text-[#00e436]" :
+                      "border-[#ffec27] bg-[#ffec27]/10 text-[#ffec27]"
+                    }`} style={px}>{t.status.toUpperCase()}</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 ${t.player1_ready ? "bg-[#00e436]" : "bg-[#ffec27]"}`} />
+                      <span className="text-[#fff1e8] text-[8px]" style={px}>{t.player1_name}</span>
+                      <span className="text-[#c2c3c7] text-[7px]" style={px}>{t.player1_gender}</span>
+                    </div>
+                    {t.player2_name ? (
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 ${t.player2_ready ? "bg-[#00e436]" : "bg-[#ffec27]"}`} />
+                        <span className="text-[#fff1e8] text-[8px]" style={px}>{t.player2_name}</span>
+                        <span className="text-[#c2c3c7] text-[7px]" style={px}>{t.player2_gender}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-[#5f574f]" />
+                        <span className="text-[#5f574f] text-[8px]" style={px}>WAITING FOR P2</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[#c2c3c7]/40 text-[7px] mt-2" style={px}>{timeAgo(t.created_at)}</p>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[#fff1e8] text-[9px] truncate" style={px}>{s.name}</p>
-                  <p className="text-[#c2c3c7] text-[8px] truncate mt-1" style={px}>{s.phone}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <span className={`text-[7px] px-2 py-1 border-2 ${
-                    s.status === "waiting" ? "border-[#ffec27] bg-[#ffec27]/10 text-[#ffec27]" :
-                    s.status === "matched" ? "border-[#00e436] bg-[#00e436]/10 text-[#00e436]" :
-                    "border-[#c2c3c7] bg-[#c2c3c7]/10 text-[#c2c3c7]"
-                  }`} style={px}>{s.status.toUpperCase()}</span>
-                  <span className="text-[#c2c3c7]/50 text-[7px]" style={px}>{timeAgo(s.created_at)}</span>
-                </div>
-              </button>
-            ))
+              ))
+            )
           )}
         </div>
       </div>
