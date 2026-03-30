@@ -16,6 +16,8 @@ type PartyData = {
   slots: Slot[];
 };
 
+const px = { fontFamily: "'Press Start 2P', monospace" };
+
 const sectionVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
@@ -29,9 +31,8 @@ const API = import.meta.env.VITE_API_URL || "";
 
 function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; blurred?: boolean }) {
   const isGuy = slot.role === "guy";
-  const accent = isGuy ? "#3b82f6" : "#ec4899";
-  const accentDim = isGuy ? "rgba(59,130,246,0.15)" : "rgba(236,72,153,0.15)";
-  const accentMid = isGuy ? "rgba(59,130,246,0.3)" : "rgba(236,72,153,0.3)";
+  const accent = isGuy ? "#29adff" : "#ff77a8";
+  const accentDark = isGuy ? "#1a6faa" : "#aa4070";
 
   return (
     <motion.div
@@ -40,40 +41,38 @@ function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; b
       style={{ width: "100%" }}
       onClick={() => !slot.filled && onJoin()}
     >
-      {/* Card body — tall vertical */}
+      {/* Card body — square pixel style */}
       <div
-        className="relative flex-1 flex flex-col items-center justify-center overflow-hidden transition-all duration-300"
+        className="relative flex-1 flex flex-col items-center justify-center"
         style={{
           minHeight: 320,
-          background: slot.filled
-            ? `linear-gradient(180deg, ${accentDim} 0%, rgba(0,0,0,0.6) 100%)`
-            : "rgba(255,255,255,0.03)",
-          border: slot.filled ? `1px solid ${accentMid}` : "1px dashed rgba(255,255,255,0.08)",
-          clipPath: "polygon(10% 0%, 90% 0%, 100% 4%, 100% 96%, 90% 100%, 10% 100%, 0% 96%, 0% 4%)",
+          background: slot.filled ? "#1d2b53" : "#0d0d1a",
+          border: slot.filled ? `4px solid ${accent}` : "4px dashed #c2c3c7",
+          boxShadow: slot.filled ? `4px 4px 0 ${accentDark}` : "4px 4px 0 #0a0a12",
         }}
       >
         {/* Top accent line */}
         {slot.filled && (
-          <div className="absolute top-0 left-[10%] right-[10%] h-[2px]" style={{ background: accent }} />
+          <div className="absolute top-0 left-0 right-0 h-[4px]" style={{ background: accent }} />
         )}
 
         {slot.filled ? (
           blurred ? (
             <>
               {/* Big question mark */}
-              <span className="text-[72px] sm:text-[80px] font-bold select-none" style={{ color: "rgba(255,255,255,0.12)", textShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}>?</span>
+              <span className="text-[48px] sm:text-[56px] font-bold select-none" style={{ ...px, color: "rgba(255,255,255,0.15)" }}>?</span>
             </>
           ) : (
             <>
               {/* Big emoji avatar */}
-              <div
-                className="text-[64px] sm:text-[72px] mb-2 select-none"
-                style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
-              >
+              <div className="text-[64px] sm:text-[72px] mb-2 select-none">
                 {isGuy ? "🧑" : "👩"}
               </div>
               {/* Ready badge */}
-              <div className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{ background: accentMid, color: accent }}>
+              <div
+                className="px-3 py-1 text-[8px] font-bold uppercase tracking-[0.2em] mb-1"
+                style={{ ...px, background: accent, color: "#0d0d1a", boxShadow: `2px 2px 0 ${accentDark}` }}
+              >
                 ready
               </div>
             </>
@@ -82,45 +81,47 @@ function SlotCard({ slot, onJoin, blurred }: { slot: Slot; onJoin: () => void; b
           <>
             {/* Empty plus icon */}
             <div
-              className="w-14 h-14 rounded-lg flex items-center justify-center transition-all group-hover:scale-110"
-              style={{ border: `2px dashed rgba(255,255,255,0.1)` }}
+              className="w-14 h-14 flex items-center justify-center"
+              style={{ border: "2px dashed #c2c3c7" }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c2c3c7" strokeWidth="2" strokeLinecap="square">
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </div>
-            <p className="text-white/15 text-[12px] mt-3 uppercase tracking-widest font-semibold">invite</p>
+            <p className="text-[8px] mt-3 uppercase tracking-widest" style={{ ...px, color: "#c2c3c7" }}>invite</p>
           </>
         )}
       </div>
 
       {/* Bottom banner / nameplate */}
       <div
-        className="relative py-3 text-center transition-all duration-300"
+        className="relative py-3 text-center"
         style={{
-          background: slot.filled
-            ? `linear-gradient(180deg, ${accentMid} 0%, transparent 100%)`
-            : "transparent",
+          background: slot.filled ? "#1d2b53" : "transparent",
+          borderLeft: slot.filled ? `4px solid ${accent}` : "none",
+          borderRight: slot.filled ? `4px solid ${accent}` : "none",
+          borderBottom: slot.filled ? `4px solid ${accent}` : "none",
+          boxShadow: slot.filled ? `4px 4px 0 ${accentDark}` : "none",
         }}
       >
         {slot.filled ? (
           <>
-            <p className="text-white font-bold text-[15px] sm:text-[17px] tracking-wide">
+            <p className="text-[10px] sm:text-[11px] tracking-wide" style={{ ...px, color: "#fff1e8" }}>
               {blurred ? "? ? ?" : slot.name}
             </p>
-            <p className="text-white/25 text-[10px] font-mono uppercase tracking-[0.15em] mt-0.5">
+            <p className="text-[7px] uppercase tracking-[0.15em] mt-1" style={{ ...px, color: "#c2c3c7" }}>
               {blurred ? "mystery" : slot.is_host ? "matched" : "joined"}
             </p>
           </>
         ) : (
-          <p className="text-white/10 text-[13px]">empty slot</p>
+          <p className="text-[8px]" style={{ ...px, color: "#c2c3c7" }}>empty slot</p>
         )}
       </div>
 
-      {/* Bottom diamond ornament */}
+      {/* Bottom pixel ornament */}
       {slot.filled && (
-        <div className="flex justify-center -mt-1">
-          <div className="w-4 h-4 rotate-45 border border-white/10" style={{ background: accentDim }} />
+        <div className="flex justify-center mt-1">
+          <div className="w-3 h-3" style={{ background: accent, boxShadow: `2px 2px 0 ${accentDark}` }} />
         </div>
       )}
     </motion.div>
@@ -142,35 +143,40 @@ function JoinModal({ role, onClose, onSubmit, submitting }: { role: "guy" | "gir
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={px}
       onClick={onClose}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/80" />
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="relative bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-sm"
+        className="relative p-8 w-full max-w-sm"
+        style={{ background: "#1d2b53", border: "4px solid #29adff", boxShadow: "6px 6px 0 #1a6faa" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-white font-bold text-[24px] mb-1">join the party</h3>
-        <p className="text-white/40 text-[14px] mb-6">you're joining as {role === "guy" ? "his" : "her"} +1</p>
+        <h3 className="text-[14px] mb-1" style={{ color: "#ffec27" }}>join the party</h3>
+        <p className="text-[8px] mb-6" style={{ color: "#c2c3c7" }}>you're joining as {role === "guy" ? "his" : "her"} +1</p>
 
         <div className="space-y-3">
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="your name"
-            className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
+            className="w-full px-4 py-3 text-[10px] placeholder:text-[#c2c3c7] focus:outline-none"
+            style={{ ...px, background: "#1d2b53", border: "4px solid #29adff", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
           <div>
             <input type="tel" value={phone} onChange={(e) => setPhone(fmt(e.target.value))} placeholder="phone"
-              className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
-            <p className="text-[11px] text-white/15 mt-1 ml-1">iMessage required</p>
+              className="w-full px-4 py-3 text-[10px] placeholder:text-[#c2c3c7] focus:outline-none"
+              style={{ ...px, background: "#1d2b53", border: "4px solid #29adff", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
+            <p className="text-[7px] mt-1 ml-1" style={{ color: "#c2c3c7" }}>iMessage required</p>
           </div>
           <button
             onClick={() => { if (name.trim() && phone.trim()) onSubmit(name.trim(), phone.trim()); }}
             disabled={submitting}
-            className="w-full py-3 rounded-lg bg-white text-black font-semibold text-[14px] hover:bg-white/90 active:scale-[0.98] transition disabled:opacity-50"
+            className="w-full py-3 text-[10px] font-bold uppercase tracking-wider active:translate-y-[2px] disabled:opacity-50"
+            style={{ ...px, background: "#00e436", color: "#0d0d1a", border: "4px solid #00e436", boxShadow: "4px 4px 0 #00802a" }}
           >
-            {submitting ? <div className="w-4 h-4 mx-auto border-2 border-black/20 border-t-black rounded-full animate-spin" /> : "I'm in"}
+            {submitting ? ". . ." : "I'm in"}
           </button>
         </div>
 
-        <button onClick={onClose} className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition text-[20px]">&times;</button>
+        <button onClick={onClose} className="absolute top-3 right-4 text-[16px] hover:opacity-80" style={{ color: "#ff004d" }}>&times;</button>
       </motion.div>
     </motion.div>
   );
@@ -318,8 +324,8 @@ export function PartyPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ ...px, background: "#0d0d1a" }}>
+        <p className="text-[10px] animate-pulse" style={{ color: "#ffec27" }}>loading...</p>
       </div>
     );
   }
@@ -327,30 +333,30 @@ export function PartyPage() {
   // No code provided — show start/join landing
   if (!code) {
     return (
-      <div className="min-h-screen relative">
-        <div className="fixed inset-0 z-0">
-          <img src="/bg.jpg" alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 backdrop-blur-[12px] bg-black/50" />
-        </div>
-        <nav className="fixed top-0 w-full z-50 border-b border-white/5">
+      <div className="min-h-screen relative" style={{ ...px, background: "#0d0d1a" }}>
+        <nav className="fixed top-0 w-full z-50" style={{ borderBottom: "4px solid #1d2b53" }}>
           <div className="max-w-4xl mx-auto px-6 h-14 flex items-center">
-            <button onClick={() => navigate("/")} className="text-white font-bold text-[18px] tracking-[-0.03em]">bubl.</button>
+            <button onClick={() => navigate("/")} className="text-[14px] tracking-wide" style={{ ...px, color: "#ffec27" }}>bubl.</button>
           </div>
         </nav>
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
-          <h1 className="text-[48px] sm:text-[64px] font-bold tracking-[-0.04em] text-white leading-[0.95] mb-3">double date</h1>
-          <p className="text-white/40 text-[16px] sm:text-[18px] mb-12">2v2 — every match brings a friend</p>
+          <h1 className="text-[24px] sm:text-[32px] leading-[1.3] mb-3" style={{ color: "#fff1e8" }}>
+            double date
+          </h1>
+          <p className="text-[8px] sm:text-[10px] mb-12" style={{ color: "#c2c3c7" }}>2v2 -- every match brings a friend</p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
             <button
               onClick={() => setShowCreate(true)}
-              className="flex-1 py-4 rounded-xl bg-white text-black font-semibold text-[15px] hover:bg-white/90 active:scale-[0.97] transition"
+              className="flex-1 py-4 text-[10px] uppercase tracking-wider active:translate-y-[2px]"
+              style={{ ...px, background: "#ffec27", color: "#0d0d1a", border: "4px solid #ffec27", boxShadow: "4px 4px 0 #aa9e1a" }}
             >
               start lobby
             </button>
             <button
               onClick={() => setShowJoinCode(true)}
-              className="flex-1 py-4 rounded-xl border border-white/15 text-white font-semibold text-[15px] hover:bg-white/5 active:scale-[0.97] transition"
+              className="flex-1 py-4 text-[10px] uppercase tracking-wider active:translate-y-[2px]"
+              style={{ ...px, background: "transparent", color: "#29adff", border: "4px solid #29adff", boxShadow: "4px 4px 0 #1a6faa" }}
             >
               join lobby
             </button>
@@ -360,49 +366,71 @@ export function PartyPage() {
         {/* Create lobby modal */}
         {showCreate && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowCreate(false)}>
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-              <h3 className="text-white font-bold text-[24px] mb-1">start a lobby</h3>
-              <p className="text-white/40 text-[14px] mb-6">enter both matched people to create the party</p>
+            <div className="absolute inset-0 bg-black/80" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="relative p-8 w-full max-w-sm"
+              style={{ background: "#1d2b53", border: "4px solid #29adff", boxShadow: "6px 6px 0 #1a6faa" }}
+              onClick={e => e.stopPropagation()}>
+              <h3 className="text-[12px] mb-1" style={{ color: "#ffec27" }}>start a lobby</h3>
+              <p className="text-[7px] mb-6" style={{ color: "#c2c3c7" }}>enter both matched people to create the party</p>
               <div className="space-y-4">
                 <div>
-                  <p className="text-blue-400 text-[11px] font-semibold uppercase tracking-widest mb-2">his side</p>
+                  <p className="text-[8px] uppercase tracking-widest mb-2" style={{ color: "#29adff" }}>his side</p>
                   <input type="text" value={createData.guyName} onChange={e => setCreateData(d => ({ ...d, guyName: e.target.value }))} placeholder="name"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5 mb-2" />
+                    className="w-full px-4 py-3 text-[10px] placeholder:text-[#c2c3c7] focus:outline-none mb-2"
+                    style={{ ...px, background: "#1d2b53", border: "4px solid #29adff", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
                   <input type="tel" value={createData.guyPhone} onChange={e => setCreateData(d => ({ ...d, guyPhone: fmt(e.target.value) }))} placeholder="phone"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
+                    className="w-full px-4 py-3 text-[10px] placeholder:text-[#c2c3c7] focus:outline-none"
+                    style={{ ...px, background: "#1d2b53", border: "4px solid #29adff", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
                 </div>
                 <div>
-                  <p className="text-pink-400 text-[11px] font-semibold uppercase tracking-widest mb-2">her side</p>
+                  <p className="text-[8px] uppercase tracking-widest mb-2" style={{ color: "#ff77a8" }}>her side</p>
                   <input type="text" value={createData.girlName} onChange={e => setCreateData(d => ({ ...d, girlName: e.target.value }))} placeholder="name"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5 mb-2" />
+                    className="w-full px-4 py-3 text-[10px] placeholder:text-[#c2c3c7] focus:outline-none mb-2"
+                    style={{ ...px, background: "#1d2b53", border: "4px solid #ff77a8", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
                   <input type="tel" value={createData.girlPhone} onChange={e => setCreateData(d => ({ ...d, girlPhone: fmt(e.target.value) }))} placeholder="phone"
-                    className="w-full px-4 py-3 rounded-lg border border-white/10 text-[15px] text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition bg-white/5" />
+                    className="w-full px-4 py-3 text-[10px] placeholder:text-[#c2c3c7] focus:outline-none"
+                    style={{ ...px, background: "#1d2b53", border: "4px solid #ff77a8", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
                 </div>
                 <div>
-                  <p className="text-white/40 text-[11px] font-semibold uppercase tracking-widest mb-2">which one are you?</p>
+                  <p className="text-[7px] uppercase tracking-widest mb-2" style={{ color: "#c2c3c7" }}>which one are you?</p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setCreateData(d => ({ ...d, iAm: "guy" }))}
-                      className={`flex-1 py-2.5 rounded-lg text-[14px] font-semibold transition ${createData.iAm === "guy" ? "bg-blue-500/20 border border-blue-500/40 text-blue-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}
+                      className="flex-1 py-2.5 text-[8px] active:translate-y-[2px]"
+                      style={{
+                        ...px,
+                        background: createData.iAm === "guy" ? "#29adff" : "transparent",
+                        color: createData.iAm === "guy" ? "#0d0d1a" : "#29adff",
+                        border: "4px solid #29adff",
+                        boxShadow: createData.iAm === "guy" ? "4px 4px 0 #1a6faa" : "none",
+                      }}
                     >
                       i'm the guy
                     </button>
                     <button
                       onClick={() => setCreateData(d => ({ ...d, iAm: "girl" }))}
-                      className={`flex-1 py-2.5 rounded-lg text-[14px] font-semibold transition ${createData.iAm === "girl" ? "bg-pink-500/20 border border-pink-500/40 text-pink-400" : "border border-white/10 text-white/30 hover:text-white/50"}`}
+                      className="flex-1 py-2.5 text-[8px] active:translate-y-[2px]"
+                      style={{
+                        ...px,
+                        background: createData.iAm === "girl" ? "#ff77a8" : "transparent",
+                        color: createData.iAm === "girl" ? "#0d0d1a" : "#ff77a8",
+                        border: "4px solid #ff77a8",
+                        boxShadow: createData.iAm === "girl" ? "4px 4px 0 #aa4070" : "none",
+                      }}
                     >
                       i'm the girl
                     </button>
                   </div>
                 </div>
-                {createError && <p className="text-red-400 text-[13px] text-center">{createError}</p>}
+                {createError && <p className="text-[8px] text-center" style={{ color: "#ff004d" }}>{createError}</p>}
                 <button onClick={handleCreate} disabled={creating}
-                  className="w-full py-3 rounded-lg bg-white text-black font-semibold text-[14px] hover:bg-white/90 active:scale-[0.98] transition disabled:opacity-50">
-                  {creating ? <div className="w-4 h-4 mx-auto border-2 border-black/20 border-t-black rounded-full animate-spin" /> : "create party"}
+                  className="w-full py-3 text-[10px] uppercase tracking-wider active:translate-y-[2px] disabled:opacity-50"
+                  style={{ ...px, background: "#00e436", color: "#0d0d1a", border: "4px solid #00e436", boxShadow: "4px 4px 0 #00802a" }}>
+                  {creating ? ". . ." : "create party"}
                 </button>
               </div>
-              <button onClick={() => setShowCreate(false)} className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition text-[20px]">&times;</button>
+              <button onClick={() => setShowCreate(false)} className="absolute top-3 right-4 text-[16px] hover:opacity-80" style={{ color: "#ff004d" }}>&times;</button>
             </motion.div>
           </motion.div>
         )}
@@ -410,19 +438,24 @@ export function PartyPage() {
         {/* Join with code modal */}
         {showJoinCode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setShowJoinCode(false)}>
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
-              <h3 className="text-white font-bold text-[24px] mb-1">join a lobby</h3>
-              <p className="text-white/40 text-[14px] mb-6">enter your party code</p>
+            <div className="absolute inset-0 bg-black/80" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="relative p-8 w-full max-w-sm"
+              style={{ background: "#1d2b53", border: "4px solid #29adff", boxShadow: "6px 6px 0 #1a6faa" }}
+              onClick={e => e.stopPropagation()}>
+              <h3 className="text-[12px] mb-1" style={{ color: "#ffec27" }}>join a lobby</h3>
+              <p className="text-[7px] mb-6" style={{ color: "#c2c3c7" }}>enter your party code</p>
               <div className="space-y-3">
                 <input type="text" value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6))} placeholder="XXXXXX"
-                  className="w-full px-4 py-4 rounded-lg border border-white/10 text-[24px] text-white placeholder:text-white/15 focus:outline-none focus:border-white/25 transition bg-white/5 text-center font-mono tracking-[0.3em]" />
+                  className="w-full px-4 py-4 text-[16px] text-center tracking-[0.3em] placeholder:text-[#c2c3c7] focus:outline-none"
+                  style={{ ...px, background: "#1d2b53", border: "4px solid #29adff", color: "#fff1e8", boxShadow: "inset 2px 2px 0 #0d0d1a" }} />
                 <button onClick={() => { if (joinCode.length >= 4) navigate(`/party/${joinCode}`); }}
-                  className="w-full py-3 rounded-lg bg-white text-black font-semibold text-[14px] hover:bg-white/90 active:scale-[0.98] transition">
+                  className="w-full py-3 text-[10px] uppercase tracking-wider active:translate-y-[2px]"
+                  style={{ ...px, background: "#00e436", color: "#0d0d1a", border: "4px solid #00e436", boxShadow: "4px 4px 0 #00802a" }}>
                   join
                 </button>
               </div>
-              <button onClick={() => setShowJoinCode(false)} className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition text-[20px]">&times;</button>
+              <button onClick={() => setShowJoinCode(false)} className="absolute top-3 right-4 text-[16px] hover:opacity-80" style={{ color: "#ff004d" }}>&times;</button>
             </motion.div>
           </motion.div>
         )}
@@ -433,15 +466,13 @@ export function PartyPage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen relative">
-        <div className="fixed inset-0 z-0">
-          <img src="/bg.jpg" alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 backdrop-blur-[12px] bg-black/50" />
-        </div>
+      <div className="min-h-screen relative" style={{ ...px, background: "#0d0d1a" }}>
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
-          <h1 className="text-[32px] font-bold text-white mb-2">party not found</h1>
-          <p className="text-white/40 text-[16px] mb-8">{error}</p>
-          <button onClick={() => navigate("/")} className="px-8 py-3 rounded-full bg-white text-black font-semibold text-[14px]">
+          <h1 className="text-[16px] mb-4" style={{ color: "#ff004d" }}>party not found</h1>
+          <p className="text-[8px] mb-8" style={{ color: "#c2c3c7" }}>{error}</p>
+          <button onClick={() => navigate("/")}
+            className="px-8 py-3 text-[10px] uppercase tracking-wider active:translate-y-[2px]"
+            style={{ ...px, background: "#ffec27", color: "#0d0d1a", border: "4px solid #ffec27", boxShadow: "4px 4px 0 #aa9e1a" }}>
             back to bubl
           </button>
         </div>
@@ -450,92 +481,57 @@ export function PartyPage() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      <div className="fixed inset-0 z-0">
-        <img src="/bg.jpg" alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 backdrop-blur-[12px] bg-black/50" />
+    <div className="min-h-screen relative" style={{ ...px, background: "#0d0d1a" }}>
+      {/* Pixel star decorations */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {[
+          { top: "8%", left: "5%", size: 3 },
+          { top: "15%", left: "80%", size: 2 },
+          { top: "25%", left: "20%", size: 2 },
+          { top: "35%", left: "90%", size: 3 },
+          { top: "50%", left: "10%", size: 2 },
+          { top: "60%", left: "75%", size: 3 },
+          { top: "70%", left: "40%", size: 2 },
+          { top: "85%", left: "60%", size: 2 },
+          { top: "92%", left: "15%", size: 3 },
+        ].map((star, i) => (
+          <div key={i} className="absolute animate-pulse" style={{ top: star.top, left: star.left, width: star.size, height: star.size, background: "#fff1e8" }} />
+        ))}
       </div>
 
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5">
+      <nav className="fixed top-0 w-full z-50" style={{ borderBottom: "4px solid #1d2b53", background: "#0d0d1a" }}>
         <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="text-white font-bold text-[18px] tracking-[-0.03em]">bubl.</button>
+          <button onClick={() => navigate("/")} className="text-[14px] tracking-wide" style={{ ...px, color: "#ffec27" }}>bubl.</button>
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[12px] text-white/30 tracking-wider">{party?.code}</span>
-            <div className={`w-2 h-2 rounded-full ${allFilled ? "bg-green-500" : "bg-yellow-500"} animate-pulse`} />
+            <span className="text-[8px] tracking-wider" style={{ ...px, color: "#c2c3c7" }}>{party?.code}</span>
+            <div className="w-3 h-3 animate-pulse" style={{ background: allFilled ? "#00e436" : "#ffec27" }} />
           </div>
         </div>
       </nav>
 
       <div className="relative z-10 pt-24 pb-20 px-5 sm:px-6">
         <div className="relative max-w-2xl mx-auto">
-        {/* Tape strips on corners — outside clip-path so they're visible */}
-        <div className="absolute -top-3 -left-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(-15deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-        <div className="absolute -top-3 -right-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(12deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-        <div className="absolute -bottom-3 -left-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(10deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
-        <div className="absolute -bottom-3 -right-2 z-30" style={{ width: 70, height: 24, background: "rgba(255,255,255,0.3)", transform: "rotate(-8deg)", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", backdropFilter: "blur(1px)" }} />
 
         <motion.div
           variants={sectionVariants} initial="hidden" animate="visible"
-          className="relative px-10 sm:px-14 py-12"
+          className="relative px-8 sm:px-12 py-12"
           style={{
-            background: "#1a2236",
-            boxShadow: "4px 6px 30px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.03)",
-            transform: "rotate(-0.3deg)",
-            clipPath: "polygon(0% 0.5%, 1.5% 0%, 3% 0.8%, 5% 0.2%, 7% 0.6%, 10% 0%, 12% 0.4%, 15% 0.1%, 18% 0.7%, 20% 0%, 25% 0.3%, 30% 0%, 35% 0.5%, 40% 0.1%, 50% 0.4%, 60% 0%, 65% 0.3%, 70% 0.1%, 75% 0.6%, 80% 0%, 85% 0.4%, 90% 0.1%, 93% 0.5%, 95% 0%, 97% 0.3%, 99% 0%, 100% 0.6%, 100% 5%, 99.5% 8%, 100% 12%, 99.6% 16%, 100% 20%, 99.5% 25%, 100% 30%, 99.7% 35%, 100% 40%, 99.5% 45%, 100% 50%, 99.6% 55%, 100% 60%, 99.5% 65%, 100% 70%, 99.7% 75%, 100% 80%, 99.5% 85%, 100% 90%, 99.6% 95%, 100% 99%, 99% 100%, 97% 99.5%, 95% 100%, 93% 99.6%, 90% 100%, 85% 99.5%, 80% 100%, 75% 99.6%, 70% 100%, 65% 99.5%, 60% 100%, 50% 99.6%, 40% 100%, 35% 99.5%, 30% 100%, 25% 99.4%, 20% 100%, 15% 99.6%, 10% 100%, 7% 99.5%, 5% 100%, 3% 99.6%, 1.5% 100%, 0% 99.5%, 0% 95%, 0.4% 90%, 0% 85%, 0.5% 80%, 0% 75%, 0.3% 70%, 0% 65%, 0.5% 60%, 0% 55%, 0.4% 50%, 0% 45%, 0.5% 40%, 0% 35%, 0.3% 30%, 0% 25%, 0.5% 20%, 0% 16%, 0.4% 12%, 0% 8%, 0.5% 5%)",
+            background: "#1d2b53",
+            border: "4px solid #29adff",
+            boxShadow: "8px 8px 0 #0a0a12",
           }}
         >
-          {/* Notebook holes on left side */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 pointer-events-none z-10">
-            {[12, 25, 38, 50, 62, 75, 88].map(pct => (
-              <div key={pct} className="absolute left-2" style={{
-                top: `${pct}%`,
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                background: "rgba(0,0,0,0.7)",
-                boxShadow: "inset 0 1px 3px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03)",
-              }} />
-            ))}
-          </div>
-
-          {/* Lined paper lines */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ opacity: 0.06 }}>
-            {Array.from({ length: 30 }, (_, i) => 24 + i * 24).map(y => (
-              <div key={y} className="absolute left-10 right-4" style={{ top: y, height: 1, background: "#8ba8d4" }} />
-            ))}
-          </div>
-
-          {/* Red margin line */}
-          <div className="absolute top-0 bottom-0 pointer-events-none" style={{ left: 36, width: 1, background: "rgba(196,107,107,0.15)" }} />
-
-          {/* Crumple / wrinkle overlays */}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: `
-              linear-gradient(127deg, transparent 30%, rgba(255,255,255,0.015) 32%, transparent 34%),
-              linear-gradient(237deg, transparent 45%, rgba(0,0,0,0.04) 47%, transparent 49%),
-              linear-gradient(352deg, transparent 60%, rgba(255,255,255,0.012) 62%, transparent 64%),
-              linear-gradient(78deg, transparent 20%, rgba(0,0,0,0.03) 22%, transparent 24%),
-              linear-gradient(190deg, transparent 70%, rgba(255,255,255,0.02) 72%, transparent 74%)
-            `,
-          }} />
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: `
-              radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 60%, rgba(0,0,0,0.03) 0%, transparent 40%),
-              radial-gradient(ellipse at 40% 80%, rgba(255,255,255,0.015) 0%, transparent 45%)
-            `,
-          }} />
 
           <motion.div variants={itemVariants} className="text-center mb-12">
-            <h1 className="text-[40px] sm:text-[56px] font-bold tracking-[-0.04em] text-white leading-[0.95]">
+            <h1 className="text-[20px] sm:text-[28px] leading-[1.4]" style={{ color: "#fff1e8" }}>
               double date
             </h1>
-            <p className="mt-3 text-white/40 text-[16px] sm:text-[18px]">
-              2v2 &middot; every match brings a friend
+            <p className="mt-3 text-[8px] sm:text-[9px]" style={{ color: "#c2c3c7" }}>
+              2v2 -- every match brings a friend
             </p>
           </motion.div>
 
-          {/* Valorant-style 4-card row: guys | VS | girls */}
+          {/* 4-card row: guys | VS | girls */}
           <motion.div variants={sectionVariants} className="flex items-center gap-3 sm:gap-5 mb-10">
             {/* Guys side */}
             <div className="flex-1 flex gap-3 sm:gap-4">
@@ -546,11 +542,11 @@ export function PartyPage() {
 
             {/* VS divider */}
             <div className="flex flex-col items-center gap-2 px-1">
-              <div className="w-px h-8 bg-white/10" />
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 flex items-center justify-center bg-white/5">
-                <span className="text-white/25 font-bold text-[12px] sm:text-[14px]">VS</span>
+              <div className="w-1 h-8" style={{ background: "#c2c3c7" }} />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center" style={{ border: "4px solid #ffec27", background: "#0d0d1a", boxShadow: "3px 3px 0 #aa9e1a" }}>
+                <span className="text-[8px] sm:text-[10px]" style={{ ...px, color: "#ffec27" }}>VS</span>
               </div>
-              <div className="w-px h-8 bg-white/10" />
+              <div className="w-1 h-8" style={{ background: "#c2c3c7" }} />
             </div>
 
             {/* Girls side */}
@@ -563,44 +559,45 @@ export function PartyPage() {
 
           <motion.div variants={itemVariants} className="text-center mb-8">
             {allFilled ? (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-6 py-4">
-                <p className="text-green-400 font-semibold text-[16px]">party's full — let's go</p>
-                <p className="text-green-400/50 text-[13px] mt-1">match details drop thursday 9–11am</p>
+              <div className="px-6 py-4" style={{ background: "#0d0d1a", border: "4px solid #00e436", boxShadow: "4px 4px 0 #00802a" }}>
+                <p className="text-[9px]" style={{ color: "#00e436" }}>party's full -- let's go</p>
+                <p className="text-[7px] mt-2" style={{ color: "#c2c3c7" }}>match details drop thursday 9-11am</p>
               </div>
             ) : (
-              <div className="bg-white/5 border border-white/10 rounded-xl px-6 py-4">
-                <p className="text-white/60 text-[15px]">
-                  {slots.filter(s => !s.filled).length} slot{slots.filter(s => !s.filled).length > 1 ? "s" : ""} left — share the link
+              <div className="px-6 py-4" style={{ background: "#0d0d1a", border: "4px solid #c2c3c7", boxShadow: "4px 4px 0 #0a0a12" }}>
+                <p className="text-[8px]" style={{ color: "#c2c3c7" }}>
+                  {slots.filter(s => !s.filled).length} slot{slots.filter(s => !s.filled).length > 1 ? "s" : ""} left -- share the link
                 </p>
               </div>
             )}
           </motion.div>
 
           {joinError && (
-            <p className="text-red-400 text-[13px] text-center mb-4">{joinError}</p>
+            <p className="text-[8px] text-center mb-4" style={{ color: "#ff004d" }}>{joinError}</p>
           )}
 
           <motion.div variants={itemVariants} className="flex flex-col items-center gap-4">
-            <p className="font-mono text-[40px] sm:text-[56px] font-bold tracking-[0.25em] text-white/15 select-all">{party?.code}</p>
+            <p className="text-[24px] sm:text-[32px] tracking-[0.25em] select-all" style={{ ...px, color: "#29adff" }}>{party?.code}</p>
             <button
               onClick={copyLink}
-              className="px-8 py-3 rounded-full bg-white text-black font-semibold text-[14px] hover:bg-white/90 active:scale-[0.97] transition"
+              className="px-8 py-3 text-[9px] uppercase tracking-wider active:translate-y-[2px]"
+              style={{ ...px, background: "#ffec27", color: "#0d0d1a", border: "4px solid #ffec27", boxShadow: "4px 4px 0 #aa9e1a" }}
             >
               {copied ? "copied!" : "copy invite link"}
             </button>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="mt-16 border-t border-white/5 pt-10">
-            <p className="text-white/30 text-[13px] uppercase tracking-widest font-semibold mb-6 text-center">how it works</p>
+          <motion.div variants={itemVariants} className="mt-16 pt-10" style={{ borderTop: "4px solid #29adff" }}>
+            <p className="text-[8px] uppercase tracking-widest mb-6 text-center" style={{ color: "#ffec27" }}>how it works</p>
             <div className="grid sm:grid-cols-3 gap-6 text-center">
               {[
                 { step: "01", text: "you get matched with someone" },
                 { step: "02", text: "both of you invite a friend to fill the party" },
-                { step: "03", text: "thursday hits — double date time" },
+                { step: "03", text: "thursday hits -- double date time" },
               ].map((s) => (
                 <div key={s.step}>
-                  <span className="font-mono text-[11px] text-white/15">{s.step}</span>
-                  <p className="text-white/40 text-[14px] mt-2 leading-relaxed">{s.text}</p>
+                  <span className="text-[10px]" style={{ ...px, color: "#ff004d" }}>{s.step}</span>
+                  <p className="text-[7px] mt-2 leading-relaxed" style={{ color: "#c2c3c7" }}>{s.text}</p>
                 </div>
               ))}
             </div>

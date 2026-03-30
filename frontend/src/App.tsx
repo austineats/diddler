@@ -9,6 +9,9 @@ import { SignupPage } from "./pages/SignupPage";
 import { FormPage } from "./pages/FormPage";
 import { AdminPage } from "./pages/AdminPage";
 import { PartyPage } from "./pages/PartyPage";
+import { InvitePage } from "./pages/InvitePage";
+import { JoinPage } from "./pages/JoinPage";
+import { SignInPage } from "./pages/SignInPage";
 import "./index.css";
 
 export default function App() {
@@ -23,6 +26,9 @@ export default function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/form" element={<FormPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/invite/:code" element={<InvitePage />} />
+        <Route path="/join/:code" element={<JoinPage />} />
+        <Route path="/signin" element={<SignInPage />} />
         <Route path="/party" element={<PartyPage />} />
         <Route path="/party/:code" element={<PartyPage />} />
         <Route path="*" element={<NotFoundPage />} />

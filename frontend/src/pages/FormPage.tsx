@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { Check, X } from "lucide-react";
 import { motion } from "motion/react";
 
+const px = { fontFamily: "'Press Start 2P', monospace" };
+
 const ETHNICITY_OPTIONS = [
   "American Indian", "Black/African Descent", "White", "East Asian",
   "South Asian", "Middle Eastern", "Pacific Islander", "South East Asian",
@@ -117,16 +119,19 @@ export function FormPage() {
     } catch { setError("couldn't connect — try again"); setSubmitting(false); }
   };
 
+  /* ─── Success state ─── */
   if (done) {
     return (
-      <div className="min-h-screen relative">
-        <div className="fixed inset-0 z-0"><img src="/bg.jpg" alt="" className="w-full h-full object-cover" /><div className="absolute inset-0 backdrop-blur-[12px] bg-black/40" /></div>
-        <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
+      <div className="min-h-screen bg-[#0d0d1a]" style={px}>
+        <div className="flex items-center justify-center min-h-screen px-6">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-            <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6"><Check className="w-10 h-10 text-white" /></div>
-            <h1 className="text-[36px] font-bold text-white tracking-tight">you're in</h1>
-            <p className="text-white/50 mt-2 text-[16px]">bubl will text you on wednesday with your match</p>
-            <p className="text-white/20 mt-8 text-[13px]">you can close this page</p>
+            <div className="w-20 h-20 border-4 border-[#00e436] bg-[#1d2b53] flex items-center justify-center mx-auto mb-6"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
+              <Check className="w-10 h-10 text-[#00e436]" />
+            </div>
+            <h1 className="text-[20px] sm:text-[28px] font-bold text-[#00e436] tracking-tight leading-relaxed">YOU'RE IN</h1>
+            <p className="text-[#c2c3c7] mt-4 text-[9px] leading-relaxed">bubl will text you on<br />wednesday with your match</p>
+            <p className="text-[#c2c3c7]/40 mt-8 text-[8px]">you can close this page</p>
           </motion.div>
         </div>
       </div>
@@ -134,28 +139,39 @@ export function FormPage() {
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
-      <div className="fixed inset-0 z-0">
-        <img src="/bg.jpg" alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 backdrop-blur-[12px] bg-black/40" />
+    <div className="min-h-screen bg-[#0d0d1a]" style={px}>
+
+      {/* Pixel star decorations */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        {[...Array(40)].map((_, i) => (
+          <div key={i} className="absolute bg-[#fff1e8]"
+            style={{
+              width: i % 3 === 0 ? 3 : 2,
+              height: i % 3 === 0 ? 3 : 2,
+              top: `${(i * 2.5) % 100}%`,
+              left: `${(i * 7.3 + 13) % 100}%`,
+              opacity: 0.15 + (i % 5) * 0.1,
+            }}
+          />
+        ))}
       </div>
 
       <div className="relative z-10">
         {/* ─── Section 1: Basics ─── */}
-        <section className="min-h-screen flex flex-col justify-center px-6 py-20">
+        <section className="min-h-screen flex flex-col justify-center px-4 py-20">
           <div className="max-w-lg mx-auto w-full">
-            <h1 className="text-[36px] sm:text-[48px] font-bold text-white tracking-tight mb-2 text-center">
-              bubl. your <span className="text-pink-400">basics</span>
+            <h1 className="text-[16px] sm:text-[22px] font-bold text-[#fff1e8] tracking-tight mb-2 text-center leading-relaxed">
+              bubl. your <span className="text-[#ff77a8]">basics</span>
             </h1>
-            <div className="mt-10 bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 space-y-6">
+            <div className="mt-10 border-4 border-[#29adff] bg-[#1d2b53] p-5 space-y-6"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
               <Field label="What's your name?">
                 <input value={name} onChange={e => setName(e.target.value)} placeholder="Type your answer here..."
-                  className="inp" />
+                  className="pixel-inp" />
               </Field>
               <Field label="When is your birthday?" sub="Only your age will be shown to others">
                 <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)}
-                  className="inp" />
+                  className="pixel-inp" />
               </Field>
               <Field label="What's your gender?">
                 <Pills options={["Female", "Male"]} selected={gender ? [gender] : []}
@@ -169,13 +185,13 @@ export function FormPage() {
                 <div className="flex gap-3 items-center">
                   <div className="flex items-center gap-1">
                     <input value={heightFt} onChange={e => setHeightFt(e.target.value.replace(/\D/g, "").slice(0, 1))}
-                      className="inp w-16 text-center" placeholder="5" inputMode="numeric" />
-                    <span className="text-white/40 text-[14px]">ft</span>
+                      className="pixel-inp w-16 text-center" placeholder="5" inputMode="numeric" />
+                    <span className="text-[#c2c3c7] text-[9px]">ft</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <input value={heightIn} onChange={e => setHeightIn(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                      className="inp w-16 text-center" placeholder="11" inputMode="numeric" />
-                    <span className="text-white/40 text-[14px]">in</span>
+                      className="pixel-inp w-16 text-center" placeholder="11" inputMode="numeric" />
+                    <span className="text-[#c2c3c7] text-[9px]">in</span>
                   </div>
                 </div>
               </Field>
@@ -184,12 +200,13 @@ export function FormPage() {
         </section>
 
         {/* ─── Section 2: Hobbies ─── */}
-        <section className="px-6 py-20">
+        <section className="px-4 py-20">
           <div className="max-w-lg mx-auto w-full">
-            <div className="bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 space-y-6">
+            <div className="border-4 border-[#29adff] bg-[#1d2b53] p-5 space-y-6"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
               <Field label="Share your hobbies and interests">
                 <textarea value={hobbies} onChange={e => setHobbies(e.target.value)} rows={4}
-                  className="inp resize-none" placeholder={"example:\n hiking with dog\n reading feminism literature\n music (kdot, keshi, laufey)"} />
+                  className="pixel-inp resize-none" placeholder={"example:\n hiking with dog\n reading feminism literature\n music (kdot, keshi, laufey)"} />
               </Field>
               <Field label="What year are you in">
                 <RadioList options={YEAR_OPTIONS} selected={year} onSelect={setYear} />
@@ -198,7 +215,7 @@ export function FormPage() {
                 <RadioList options={[...HEARD_FROM_OPTIONS, "Other"]} selected={heardFrom} onSelect={setHeardFrom} />
                 {heardFrom === "Other" && (
                   <input value={heardOther} onChange={e => setHeardOther(e.target.value)}
-                    placeholder="Please specify..." className="inp mt-2" />
+                    placeholder="Please specify..." className="pixel-inp mt-2" />
                 )}
               </Field>
             </div>
@@ -206,12 +223,13 @@ export function FormPage() {
         </section>
 
         {/* ─── Section 3: Type ─── */}
-        <section className="px-6 py-20">
+        <section className="px-4 py-20">
           <div className="max-w-lg mx-auto w-full">
-            <h2 className="text-[36px] sm:text-[48px] font-bold text-white tracking-tight mb-2 text-center">
-              bubl. your <span className="text-pink-400">type</span>
+            <h2 className="text-[16px] sm:text-[22px] font-bold text-[#fff1e8] tracking-tight mb-2 text-center leading-relaxed">
+              bubl. your <span className="text-[#ff77a8]">type</span>
             </h2>
-            <div className="mt-10 bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 space-y-6">
+            <div className="mt-10 border-4 border-[#29adff] bg-[#1d2b53] p-5 space-y-6"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
               <Field label="What are you looking for right now?" sub="Select all that apply">
                 <Pills options={LOOKING_FOR_OPTIONS} selected={lookingFor}
                   onToggle={v => toggleMulti(lookingFor, v, setLookingFor)} />
@@ -224,8 +242,8 @@ export function FormPage() {
                 <div className="space-y-3">
                   <input type="range" min={18} max={50} value={ageRange[1]}
                     onChange={e => setAgeRange([ageRange[0], parseInt(e.target.value)])}
-                    className="w-full accent-pink-500" />
-                  <span className="text-white/40 text-[13px] bg-white/5 px-3 py-1 rounded-full">
+                    className="w-full accent-[#ff004d]" style={{ height: 8 }} />
+                  <span className="text-[#ffec27] text-[9px] border-2 border-[#ffec27] px-3 py-1 inline-block">
                     Age range: {ageRange[0]}-{ageRange[1]}+
                   </span>
                 </div>
@@ -239,10 +257,11 @@ export function FormPage() {
         </section>
 
         {/* ─── Section 4: Attraction ─── */}
-        <section className="px-6 py-20">
+        <section className="px-4 py-20">
           <div className="max-w-lg mx-auto w-full">
-            <div className="bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 space-y-6">
-              <h3 className="text-[20px] font-bold text-white">What do you find physically attractive?</h3>
+            <div className="border-4 border-[#29adff] bg-[#1d2b53] p-5 space-y-6"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
+              <h3 className="text-[11px] font-bold text-[#ffec27] leading-relaxed">What do you find physically attractive?</h3>
               <AttractionField label="Height & Build" value={heightPref} onChange={setHeightPref}
                 skip={heightPrefSkip} onSkip={setHeightPrefSkip} placeholder="5'in, athletic, broad shoulders..." />
               <AttractionField label="Facial Features" value={facePref} onChange={setFacePref}
@@ -254,19 +273,22 @@ export function FormPage() {
         </section>
 
         {/* ─── Section 5: Matching Speed ─── */}
-        <section className="px-6 py-20">
+        <section className="px-4 py-20">
           <div className="max-w-lg mx-auto w-full">
-            <div className="bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 space-y-4">
+            <div className="border-4 border-[#29adff] bg-[#1d2b53] p-5 space-y-4"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
               <Field label="How do you want bubl to match you rn" sub="Select all that apply">
                 {MATCHING_SPEED.map(s => (
                   <button key={s.label} onClick={() => setMatchSpeed(s.label)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition ${
-                      matchSpeed === s.label ? "bg-white/10 border border-white/20" : "hover:bg-white/5"
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition border-2 ${
+                      matchSpeed === s.label
+                        ? "bg-[#29adff]/20 border-[#29adff]"
+                        : "border-transparent hover:border-[#29adff]/30"
                     }`}>
-                    <span className="text-[20px]">{s.icon}</span>
+                    <span className="text-[16px]">{s.icon}</span>
                     <div>
-                      <span className="text-white text-[14px] font-semibold">{s.label}</span>
-                      <span className="text-white/40 text-[13px] ml-2">- {s.desc}</span>
+                      <span className="text-[#fff1e8] text-[9px] font-semibold">{s.label}</span>
+                      <span className="text-[#c2c3c7] text-[8px] ml-2">- {s.desc}</span>
                     </div>
                   </button>
                 ))}
@@ -276,31 +298,32 @@ export function FormPage() {
         </section>
 
         {/* ─── Section 6: Photos ─── */}
-        <section className="px-6 py-20">
+        <section className="px-4 py-20">
           <div className="max-w-lg mx-auto w-full text-center">
-            <h2 className="text-[36px] sm:text-[48px] font-bold text-white tracking-tight mb-2">
-              <span className="text-pink-400">5 pics</span> of your vibe
+            <h2 className="text-[16px] sm:text-[22px] font-bold text-[#fff1e8] tracking-tight mb-2 leading-relaxed">
+              <span className="text-[#ff77a8]">5 pics</span> of your vibe
             </h2>
-            <div className="mt-10 bg-white/[0.06] backdrop-blur-md rounded-2xl border border-white/[0.08] p-6">
-              <p className="text-white text-[15px] font-semibold text-left mb-1">Add 5 pics that show your face and vibe</p>
-              <p className="text-white/40 text-[13px] text-left mb-4">Clear face photos from different moments help bubl find better matches for you. You can swap them anytime.</p>
+            <div className="mt-10 border-4 border-[#29adff] bg-[#1d2b53] p-5"
+              style={{ boxShadow: "4px 4px 0 #0a1a30" }}>
+              <p className="text-[#fff1e8] text-[9px] font-semibold text-left mb-1 leading-relaxed">Add 5 pics that show your face and vibe</p>
+              <p className="text-[#c2c3c7] text-[8px] text-left mb-4 leading-relaxed">Clear face photos from different moments help bubl find better matches for you. You can swap them anytime.</p>
               <div className="grid grid-cols-3 gap-3">
                 {previews.map((src, i) => (
-                  <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden relative">
+                  <div key={i} className="aspect-[3/4] overflow-hidden relative border-2 border-dashed border-[#29adff]/50">
                     {src ? (
                       <div className="relative group w-full h-full">
                         <img src={src} className="w-full h-full object-cover" />
                         <button onClick={() => removePhoto(i)}
-                          className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                          <X className="w-3 h-3 text-white" />
+                          className="absolute top-1 right-1 w-6 h-6 bg-[#ff004d] border-2 border-[#ff004d] flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                          <X className="w-3 h-3 text-[#fff1e8]" />
                         </button>
                       </div>
                     ) : (
                       <button onClick={() => fileRefs.current[i]?.click()}
                         className={`w-full h-full flex items-center justify-center transition ${
-                          i === 0 ? "bg-white/10" : "border-2 border-dashed border-white/10 hover:border-white/20"
+                          i === 0 ? "bg-[#29adff]/10 border-[#29adff]" : "hover:border-[#29adff]"
                         }`}>
-                        <span className="text-white/30 text-[24px]">+</span>
+                        <span className="text-[#29adff] text-[20px]">+</span>
                       </button>
                     )}
                     <input ref={el => { fileRefs.current[i] = el; }} type="file" accept="image/*" className="hidden"
@@ -310,17 +333,71 @@ export function FormPage() {
               </div>
             </div>
 
-            <p className="text-white/30 text-[12px] mt-6">By continuing, you agree to our <span className="underline">Terms</span> & <span className="underline">Privacy</span>.</p>
+            <p className="text-[#c2c3c7]/40 text-[7px] mt-6 leading-relaxed">By continuing, you agree to our <span className="underline">Terms</span> & <span className="underline">Privacy</span>.</p>
 
-            {error && <p className="text-red-400 text-[13px] mt-3">{error}</p>}
+            {error && <p className="text-[#ff004d] text-[9px] mt-3">{error}</p>}
 
             <button onClick={submit} disabled={submitting}
-              className="w-full mt-4 py-4 rounded-full bg-white/90 text-pink-500 font-bold text-[16px] hover:bg-white active:scale-[0.98] transition disabled:opacity-50">
-              {submitting ? "Submitting..." : "Submit"}
+              className="w-full mt-4 py-4 border-4 border-[#00e436] bg-[#00e436] text-[#1d2b53] font-bold text-[10px] hover:brightness-110 active:translate-y-[2px] transition disabled:opacity-50"
+              style={{ boxShadow: "4px 4px 0 #00802a" }}>
+              {submitting ? "SUBMITTING..." : "SUBMIT"}
             </button>
           </div>
         </section>
       </div>
+
+      {/* Global pixel input styles */}
+      <style>{`
+        .pixel-inp {
+          width: 100%;
+          padding: 10px 12px;
+          border: 4px solid #29adff;
+          background: #1d2b53;
+          color: #fff1e8;
+          font-family: 'Press Start 2P', monospace;
+          font-size: 11px;
+          line-height: 1.6;
+          outline: none;
+          transition: border-color 0.15s;
+        }
+        .pixel-inp::placeholder {
+          color: #c2c3c7;
+          opacity: 0.4;
+        }
+        .pixel-inp:focus {
+          border-color: #ffec27;
+        }
+        .pixel-inp:disabled {
+          opacity: 0.3;
+        }
+        input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+          background: #1d2b53;
+          border: 2px solid #29adff;
+          height: 8px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          background: #ff004d;
+          border: 2px solid #fff1e8;
+          cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          background: #ff004d;
+          border: 2px solid #fff1e8;
+          border-radius: 0;
+          cursor: pointer;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+        }
+      `}</style>
     </div>
   );
 }
@@ -330,8 +407,8 @@ export function FormPage() {
 function Field({ label, sub, children }: { label: string; sub?: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-white text-[15px] font-semibold mb-1">{label}</p>
-      {sub && <p className="text-white/40 text-[13px] mb-3">{sub}</p>}
+      <p className="text-[#ff77a8] text-[10px] font-semibold mb-1 leading-relaxed">{label}</p>
+      {sub && <p className="text-[#c2c3c7] text-[8px] mb-3 leading-relaxed">{sub}</p>}
       {children}
     </div>
   );
@@ -342,10 +419,10 @@ function Pills({ options, selected, onToggle }: { options: string[]; selected: s
     <div className="flex flex-wrap gap-2">
       {options.map(o => (
         <button key={o} onClick={() => onToggle(o)}
-          className={`px-4 py-2 rounded-full text-[13px] transition ${
+          className={`px-3 py-2 text-[8px] transition border-2 ${
             selected.includes(o)
-              ? "bg-white/20 text-white border border-white/30"
-              : "bg-white/5 text-white/50 border border-white/[0.08] hover:border-white/20"
+              ? "bg-[#29adff] text-[#1d2b53] border-[#29adff] font-bold"
+              : "bg-transparent text-[#c2c3c7] border-dashed border-[#c2c3c7]/30 hover:border-[#29adff]"
           }`}>
           {o}
         </button>
@@ -360,12 +437,12 @@ function RadioList({ options, selected, onSelect }: { options: string[]; selecte
       {options.map(o => (
         <button key={o} onClick={() => onSelect(o)}
           className="w-full flex items-center gap-3 text-left py-2">
-          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
-            selected === o ? "border-white bg-white" : "border-white/20"
+          <div className={`w-5 h-5 border-2 flex items-center justify-center transition ${
+            selected === o ? "border-[#29adff] bg-[#29adff]" : "border-[#c2c3c7]/30"
           }`}>
-            {selected === o && <div className="w-2.5 h-2.5 rounded-full bg-black" />}
+            {selected === o && <div className="w-2.5 h-2.5 bg-[#1d2b53]" />}
           </div>
-          <span className="text-white text-[14px]">{o}</span>
+          <span className="text-[#fff1e8] text-[9px]">{o}</span>
         </button>
       ))}
     </div>
@@ -379,16 +456,21 @@ function AttractionField({ label, value, onChange, skip, onSkip, placeholder }: 
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-white text-[14px] font-semibold">{label}</span>
+        <span className="text-[#fff1e8] text-[9px] font-semibold">{label}</span>
         <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={skip} onChange={e => onSkip(e.target.checked)}
-            className="w-4 h-4 rounded bg-white/10 border-white/20 accent-pink-500" />
-          <span className="text-white/40 text-[12px]">i don't care</span>
+          <div
+            onClick={() => onSkip(!skip)}
+            className={`w-4 h-4 border-2 flex items-center justify-center cursor-pointer transition ${
+              skip ? "border-[#ff77a8] bg-[#ff77a8]" : "border-[#c2c3c7]/30"
+            }`}>
+            {skip && <div className="w-2 h-2 bg-[#1d2b53]" />}
+          </div>
+          <span className="text-[#c2c3c7] text-[7px]">i don't care</span>
         </label>
       </div>
       <textarea value={skip ? "" : value} onChange={e => onChange(e.target.value)} rows={2}
         disabled={skip} placeholder={placeholder}
-        className={`inp resize-none ${skip ? "opacity-30" : ""}`} />
+        className={`pixel-inp resize-none ${skip ? "opacity-30" : ""}`} />
     </div>
   );
 }

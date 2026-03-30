@@ -222,6 +222,37 @@ model BlindDateMatch {
   @@map("blind_date_matches")
 }
 
+model BlindDateTeam {
+  id           String    @id @default(uuid())
+  code         String    @unique          // 4-char invite code
+  player1_name String
+  player1_phone String
+  player1_gender String                   // "boy" | "girl"
+  player2_name  String?
+  player2_phone String?
+  player2_gender String?
+  status       String    @default("waiting") // "waiting" | "full" | "matched"
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@index([code])
+  @@index([status])
+  @@map("blind_date_teams")
+}
+
+model AdminActivityLog {
+  id         String   @id @default(uuid())
+  action     String                        // "signup" | "team_created" | "team_joined" | "otp_sent" | "otp_verified" | "signin"
+  actor_name String?
+  actor_phone String?
+  details    String?                       // JSON or freeform details
+  created_at DateTime @default(now())
+
+  @@index([created_at])
+  @@index([action])
+  @@map("admin_activity_logs")
+}
+
 // ---------------------------------------------------------------------------
 // Bubl — User Profiles & Stats
 // ---------------------------------------------------------------------------

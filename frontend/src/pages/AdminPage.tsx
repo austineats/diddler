@@ -15,6 +15,8 @@ interface Signup {
 
 const ADMIN_PASS = "bubl2026";
 
+const px = { fontFamily: "'Press Start 2P', monospace" };
+
 export function AdminPage() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem("bubl-admin") === "true");
   const [passInput, setPassInput] = useState("");
@@ -28,10 +30,10 @@ export function AdminPage() {
 
   if (!authed) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0d0d1a] flex items-center justify-center" style={px}>
         <div className="text-center">
-          <h1 className="text-[24px] font-bold text-white mb-1">bubl.</h1>
-          <p className="text-white/30 text-[13px] mb-6">admin access</p>
+          <h1 className="text-[20px] text-[#ff004d] mb-2" style={px}>bubl.</h1>
+          <p className="text-[#c2c3c7] text-[9px] mb-8 tracking-widest" style={px}>&lt; ADMIN ACCESS &gt;</p>
           <input
             type="password"
             value={passInput}
@@ -46,11 +48,12 @@ export function AdminPage() {
                 }
               }
             }}
-            placeholder="password"
-            className={`w-[240px] px-4 py-2.5 bg-white/5 border ${passError ? 'border-red-500/50' : 'border-white/10'} rounded-lg text-[14px] text-white text-center placeholder-white/20 focus:outline-none focus:border-white/20`}
+            placeholder="PASSWORD"
+            className={`w-[280px] px-4 py-3 border-4 ${passError ? 'border-[#ff004d]' : 'border-[#29adff]'} bg-[#1d2b53] text-white text-[11px] text-center placeholder-[#c2c3c7]/30 focus:outline-none focus:border-[#ffec27] rounded-none`}
+            style={px}
             autoFocus
           />
-          {passError && <p className="text-red-400 text-[12px] mt-2">wrong password</p>}
+          {passError && <p className="text-[#ff004d] text-[9px] mt-3" style={px}>WRONG PASSWORD</p>}
         </div>
       </div>
     );
@@ -80,54 +83,55 @@ export function AdminPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
+    <div className="min-h-screen bg-[#0d0d1a] text-[#fff1e8] flex" style={px}>
       {/* Sidebar — user list */}
-      <div className="w-[340px] border-r border-white/5 flex flex-col h-screen">
-        <div className="p-4 border-b border-white/5">
+      <div className="w-[360px] border-r-4 border-[#29adff] flex flex-col h-screen">
+        <div className="p-4 border-b-4 border-[#29adff]">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[18px] font-bold">bubl.</span>
-              <span className="text-white/30 text-[12px]">admin</span>
+            <div className="flex items-center gap-3">
+              <span className="text-[14px] text-[#ff004d]" style={px}>bubl.</span>
+              <span className="text-[#c2c3c7] text-[8px]" style={px}>ADMIN</span>
             </div>
-            <span className="text-white/30 text-[12px]">{signups.length} waitlists</span>
+            <span className="text-[#ffec27] text-[8px]" style={px}>{signups.length} WAITLISTS</span>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-white/20" />
+            <Search className="absolute left-3 top-3 w-4 h-4 text-[#29adff]" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="search waitlists..."
-              className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/8 rounded-lg text-[13px] text-white placeholder-white/20 focus:outline-none focus:border-white/15" />
+              placeholder="SEARCH..."
+              className="w-full pl-10 pr-4 py-2.5 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[11px] placeholder-[#c2c3c7]/30 focus:outline-none focus:border-[#ffec27] rounded-none"
+              style={px} />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <p className="text-center text-white/20 py-10 text-[13px]">loading...</p>
+            <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>LOADING...</p>
           ) : filtered.length === 0 ? (
-            <p className="text-center text-white/20 py-10 text-[13px]">no waitlists</p>
+            <p className="text-center text-[#c2c3c7] py-10 text-[9px]" style={px}>NO WAITLISTS</p>
           ) : (
             filtered.map(s => (
               <button key={s.id} onClick={() => setSelected(s)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition border-b border-white/[0.03] ${
-                  selected?.id === s.id ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left border-b-2 border-[#1d2b53] transition-colors ${
+                  selected?.id === s.id ? "bg-[#1d2b53]" : "hover:bg-[#1d2b53]/60"
                 }`}>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 border-2 border-[#ff77a8] bg-[#1d2b53] flex items-center justify-center shrink-0">
                   {s.school_id_url ? (
-                    <img src={s.school_id_url} className="w-10 h-10 rounded-full object-cover" />
+                    <img src={s.school_id_url} className="w-10 h-10 object-cover" />
                   ) : (
-                    <span className="text-[15px] font-bold text-pink-400">{s.name.charAt(0).toUpperCase()}</span>
+                    <span className="text-[12px] text-[#ff77a8]" style={px}>{s.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-[14px] font-medium truncate">{s.name}</p>
-                  <p className="text-white/30 text-[12px] truncate">{s.phone}</p>
+                  <p className="text-[#fff1e8] text-[9px] truncate" style={px}>{s.name}</p>
+                  <p className="text-[#c2c3c7] text-[8px] truncate mt-1" style={px}>{s.phone}</p>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    s.status === "waiting" ? "bg-yellow-500/10 text-yellow-400" :
-                    s.status === "matched" ? "bg-green-500/10 text-green-400" :
-                    "bg-white/5 text-white/30"
-                  }`}>{s.status}</span>
-                  <span className="text-white/15 text-[10px]">{timeAgo(s.created_at)}</span>
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <span className={`text-[7px] px-2 py-1 border-2 ${
+                    s.status === "waiting" ? "border-[#ffec27] bg-[#ffec27]/10 text-[#ffec27]" :
+                    s.status === "matched" ? "border-[#00e436] bg-[#00e436]/10 text-[#00e436]" :
+                    "border-[#c2c3c7] bg-[#c2c3c7]/10 text-[#c2c3c7]"
+                  }`} style={px}>{s.status.toUpperCase()}</span>
+                  <span className="text-[#c2c3c7]/50 text-[7px]" style={px}>{timeAgo(s.created_at)}</span>
                 </div>
               </button>
             ))
@@ -141,15 +145,15 @@ export function AdminPage() {
           <div className="max-w-md w-full">
             {/* Close button */}
             <button onClick={() => setSelected(null)}
-              className="mb-4 text-white/30 hover:text-white/60 transition">
+              className="mb-4 text-[#c2c3c7] hover:text-[#fff1e8] transition">
               <X className="w-5 h-5" />
             </button>
 
             {/* Profile card */}
-            <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl overflow-hidden">
+            <div className="border-4 border-[#29adff] bg-[#1d2b53] overflow-hidden">
               {/* Photo */}
               {selected.school_id_url && (
-                <div className="w-full aspect-[4/3] bg-white/[0.02]">
+                <div className="w-full aspect-[4/3] bg-[#0d0d1a] border-b-4 border-[#29adff]">
                   <img src={selected.school_id_url} className="w-full h-full object-cover" />
                 </div>
               )}
@@ -157,44 +161,46 @@ export function AdminPage() {
               {/* Info */}
               <div className="p-6 space-y-5">
                 <div>
-                  <h2 className="text-[28px] font-bold text-white">{selected.name}</h2>
-                  <p className="text-white/40 text-[14px] mt-1">{selected.phone}</p>
+                  <h2 className="text-[16px] text-[#fff1e8]" style={px}>{selected.name}</h2>
+                  <p className="text-[#c2c3c7] text-[9px] mt-2" style={px}>{selected.phone}</p>
                 </div>
 
-                <div className="h-px bg-white/5" />
+                <div className="h-[4px] bg-[#29adff]/30" />
 
-                <ProfileRow label="Status" value={
-                  <span className={`text-[13px] px-3 py-1 rounded-full ${
-                    selected.status === "waiting" ? "bg-yellow-500/10 text-yellow-400" :
-                    selected.status === "matched" ? "bg-green-500/10 text-green-400" :
-                    "bg-white/5 text-white/30"
-                  }`}>{selected.status}</span>
+                <ProfileRow label="STATUS" value={
+                  <span className={`text-[9px] px-3 py-1.5 border-2 inline-block ${
+                    selected.status === "waiting" ? "border-[#ffec27] bg-[#ffec27]/10 text-[#ffec27]" :
+                    selected.status === "matched" ? "border-[#00e436] bg-[#00e436]/10 text-[#00e436]" :
+                    "border-[#c2c3c7] bg-[#c2c3c7]/10 text-[#c2c3c7]"
+                  }`} style={px}>{selected.status.toUpperCase()}</span>
                 } />
-                <ProfileRow label="Gender" value={<span className="text-white/70 text-[14px]">{selected.gender || "—"}</span>} />
-                <ProfileRow label="Looking for" value={<span className="text-white/70 text-[14px]">{selected.looking_for || "—"}</span>} />
-                <ProfileRow label="Hobbies" value={
+                <ProfileRow label="GENDER" value={<span className="text-[#fff1e8]/70 text-[9px]" style={px}>{selected.gender || "---"}</span>} />
+                <ProfileRow label="LOOKING FOR" value={<span className="text-[#fff1e8]/70 text-[9px]" style={px}>{selected.looking_for || "---"}</span>} />
+                <ProfileRow label="HOBBIES" value={
                   Array.isArray(selected.hobbies) && selected.hobbies.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2">
                       {selected.hobbies.map(h => (
-                        <span key={h} className="text-[12px] px-2.5 py-1 rounded-full bg-white/5 text-white/50">{h}</span>
+                        <span key={h} className="text-[8px] px-2.5 py-1.5 border-2 border-[#ff77a8] bg-[#ff77a8]/10 text-[#ff77a8]" style={px}>{h}</span>
                       ))}
                     </div>
-                  ) : <span className="text-white/30 text-[14px]">—</span>
+                  ) : <span className="text-[#c2c3c7] text-[9px]" style={px}>---</span>
                 } />
-                <ProfileRow label="Signed up" value={
-                  <span className="text-white/50 text-[13px]">{new Date(selected.created_at).toLocaleString()}</span>
+                <ProfileRow label="SIGNED UP" value={
+                  <span className="text-[#c2c3c7] text-[8px]" style={px}>{new Date(selected.created_at).toLocaleString()}</span>
                 } />
 
                 <button onClick={() => removeSignup(selected.id)}
-                  className="w-full mt-2 py-2.5 rounded-xl bg-red-500/10 text-red-400 text-[13px] font-medium hover:bg-red-500/20 transition">
-                  Remove from waitlist
+                  className="w-full mt-2 py-3 border-4 border-[#ff004d] bg-[#ff004d]/10 text-[#ff004d] text-[9px] hover:bg-[#ff004d]/25 transition"
+                  style={px}>
+                  REMOVE FROM WAITLIST
                 </button>
               </div>
             </div>
           </div>
         ) : (
           <div className="text-center">
-            <p className="text-white/15 text-[15px]">select a user to view their profile</p>
+            <p className="text-[#c2c3c7]/40 text-[9px]" style={px}>SELECT A USER TO</p>
+            <p className="text-[#c2c3c7]/40 text-[9px] mt-2" style={px}>VIEW THEIR PROFILE</p>
           </div>
         )}
       </div>
@@ -205,7 +211,7 @@ export function AdminPage() {
 function ProfileRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-white/30 text-[11px] uppercase tracking-wider mb-1.5">{label}</p>
+      <p className="text-[#29adff] text-[8px] tracking-wider mb-2" style={{ fontFamily: "'Press Start 2P', monospace" }}>{label}</p>
       {value}
     </div>
   );
