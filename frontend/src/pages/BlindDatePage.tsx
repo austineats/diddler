@@ -155,7 +155,7 @@ function PixelStars() {
 function PhoneMockup() {
   return (
     <div className="w-[280px] sm:w-[340px] shrink-0">
-      <img src="/bubl. iphone ui.jpeg" className="w-full rounded-[16px]" alt="bubl iMessage preview" />
+      <img src="/IMG_4250.jpeg" className="w-full rounded-[16px]" alt="bubl iMessage preview" />
     </div>
   );
 }
@@ -510,7 +510,7 @@ export function BlindDatePage() {
               <div className="lg:pt-8">
                 <p className="text-[#ff77a8] text-[9px] sm:text-[11px] mb-4 sm:mb-5">&lt; NO APP NEEDED &gt;</p>
                 <h2 className="text-[16px] sm:text-[28px] lg:text-[34px] text-[#fff1e8] leading-[1.7] mb-4 sm:mb-5">
-                  bubl lives in<br />your texts.
+                  bubl lives in your texts.
                 </h2>
                 <p className="text-[#c2c3c7] text-[9px] sm:text-[11px] leading-[2.2] max-w-sm">
                   We text you. You reply yes. We reveal your match. 30 seconds, never leave iMessage.
