@@ -72,4 +72,11 @@ app.listen(port, "0.0.0.0", async () => {
   } catch (e) {
     console.warn("[Bubl] Failed to start iMessage runtime:", e instanceof Error ? e.message : e);
   }
+
+  try {
+    const { startScheduler } = await import("./lib/imessage/scheduler.js");
+    startScheduler();
+  } catch (e) {
+    console.warn("[Bubl] Failed to start scheduler:", e instanceof Error ? e.message : e);
+  }
 });
