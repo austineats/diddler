@@ -187,9 +187,9 @@ bublRouter.get("/card/:phone", async (req, res) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${profile.name} — bubl</title>
-  <meta property="og:title" content="${profile.name} — bubl">
-  <meta property="og:description" content="${profile.bio || "on bubl"}">
+  <title>${profile.name} — ditto</title>
+  <meta property="og:title" content="${profile.name} — ditto">
+  <meta property="og:description" content="${profile.bio || "on ditto"}">
   ${mainPhoto ? `<meta property="og:image" content="${mainPhoto}">` : ""}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -217,7 +217,7 @@ bublRouter.get("/card/:phone", async (req, res) => {
       ${profile.bio ? `<p class="bio">${profile.bio}</p>` : ""}
       ${interests.length ? `<div class="tags">${interests.map(i => `<span class="tag">${i}</span>`).join("")}</div>` : ""}
     </div>
-    <div class="footer"><span>bubl.</span></div>
+    <div class="footer"><span>ditto</span></div>
   </div>
 </body>
 </html>`);

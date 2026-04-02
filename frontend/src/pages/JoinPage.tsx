@@ -13,17 +13,17 @@ function PixelSelect({ value, onChange, placeholder, options, className = "" }: 
   return (
     <div ref={ref} className={`relative ${className}`}>
       <button type="button" onClick={() => setOpen(!open)}
-        className="w-full px-3 sm:px-4 border-4 border-[#29adff] bg-[#1d2b53] text-left text-[11px] focus:outline-none focus:border-[#ffec27] h-[48px] flex items-center justify-between" style={px}>
-        <span className={`text-[9px] sm:text-[11px] ${value ? "text-white" : "text-[#29adff]/40"}`}>
+        className="w-full px-3 sm:px-4 border-4 border-[#6366f1] bg-[#1c2444] text-left text-[11px] focus:outline-none focus:border-[#ffec27] h-[48px] flex items-center justify-between" style={px}>
+        <span className={`text-[9px] sm:text-[11px] ${value ? "text-white" : "text-[#6366f1]/40"}`}>
           {value ? options.find(o => o.value === value)?.label || value : placeholder}
         </span>
-        <span className="text-[#29adff] text-[8px]">{open ? "▲" : "▼"}</span>
+        <span className="text-[#6366f1] text-[8px]">{open ? "▲" : "▼"}</span>
       </button>
       {open && (
-        <div className="absolute z-50 w-full mt-1 border-4 border-[#29adff] bg-[#1d2b53] max-h-[200px] overflow-y-auto" style={{ boxShadow: "4px 4px 0 #1a6b99" }}>
+        <div className="absolute z-50 w-full mt-1 border-4 border-[#6366f1] bg-[#1c2444] max-h-[200px] overflow-y-auto" style={{ boxShadow: "4px 4px 0 #3730a3" }}>
           {options.map(opt => (
             <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`w-full px-3 py-2.5 text-left text-[9px] sm:text-[11px] min-h-[40px] ${value === opt.value ? "bg-[#29adff] text-[#1d2b53]" : "text-white hover:bg-[#29adff]/20"}`} style={px}>
+              className={`w-full px-3 py-2.5 text-left text-[9px] sm:text-[11px] min-h-[40px] ${value === opt.value ? "bg-[#6366f1] text-[#1c2444]" : "text-white hover:bg-[#6366f1]/20"}`} style={px}>
               {opt.label}
             </button>
           ))}
@@ -61,7 +61,7 @@ export function JoinPage() {
       return;
     }
     const ageNum = parseInt(age);
-    if (isNaN(ageNum) || ageNum < 14 || ageNum > 18) { setError("bubl. is currently only reserved for highschoolers."); return; }
+    if (isNaN(ageNum) || ageNum < 14 || ageNum > 18) { setError("ditto is currently only for highschoolers."); return; }
     setFormState("submitting");
     const fd = new FormData();
     fd.append("name", name.trim());
@@ -85,12 +85,12 @@ export function JoinPage() {
   };
 
   const inputClass =
-    "w-full px-3 sm:px-4 py-3 border-4 border-[#29adff] bg-[#1d2b53] text-white text-[11px] placeholder:text-[#29adff]/40 focus:outline-none focus:border-[#ffec27] h-[48px]";
+    "w-full px-3 sm:px-4 py-3 border-4 border-[#6366f1] bg-[#1c2444] text-white text-[11px] placeholder:text-[#6366f1]/40 focus:outline-none focus:border-[#ffec27] h-[48px]";
 
   return (
     <div className="min-h-screen relative overflow-x-hidden" style={px}>
       {/* Background */}
-      <div className="fixed inset-0 z-0" style={{ background: "#0d0d1a" }} />
+      <div className="fixed inset-0 z-0" style={{ background: "#111827" }} />
       <div
         className="fixed inset-0 z-[1] pointer-events-none opacity-[0.04]"
         style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, #000 2px, #000 4px)" }}
@@ -102,14 +102,14 @@ export function JoinPage() {
 
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Nav */}
-        <nav className="border-b-4 border-[#29adff] bg-[#1d2b53]/95">
+        <nav className="border-b-4 border-[#6366f1] bg-[#1c2444]/95">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
-            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[14px] sm:text-[18px]">bubl.</button>
+            <button onClick={() => navigate("/")} className="text-[#ffffff] text-[14px] sm:text-[18px]">ditto</button>
             <div className="flex items-center gap-2 sm:gap-4">
-              <button onClick={() => navigate("/signin")} className="text-[#c2c3c7] text-[7px] sm:text-[9px] hover:text-[#ffec27] transition-none">
+              <button onClick={() => navigate("/signin")} className="text-[#cbd5e1] text-[7px] sm:text-[9px] hover:text-[#ffec27] transition-none">
                 &gt;&gt; [ SIGN IN ]
               </button>
-              <span className="text-[#5f574f] text-[7px] sm:text-[9px]">|</span>
+              <span className="text-[#64748b] text-[7px] sm:text-[9px]">|</span>
               <span className="text-[#ffec27] text-[7px] sm:text-[9px]">&lt; JOIN &gt;</span>
             </div>
           </div>
@@ -119,22 +119,22 @@ export function JoinPage() {
         <div className="flex-1 flex items-center justify-center px-4 sm:px-5 py-8 sm:py-12">
           <div
             className="w-full max-w-md p-5 sm:p-10"
-            style={{ border: "4px solid #29adff", background: "#1d2b53", boxShadow: "4px 4px 0 #1a6b99" }}
+            style={{ border: "4px solid #6366f1", background: "#1c2444", boxShadow: "4px 4px 0 #3730a3" }}
           >
             {formState === "success" ? (
               <div className="text-center">
                 <div
                   className="w-16 h-16 mx-auto mb-6 flex items-center justify-center text-[24px]"
-                  style={{ border: "4px solid #00e436", background: "#1d2b53" }}
+                  style={{ border: "4px solid #00e436", background: "#1c2444" }}
                 >
                   <span className="text-[#00e436]">&#x2714;</span>
                 </div>
                 <h2 className="text-[18px] text-[#00e436] mb-4">TEAM JOINED!</h2>
-                <p className="text-[#c2c3c7] text-[9px] leading-[2.2] mb-2">
+                <p className="text-[#cbd5e1] text-[9px] leading-[2.2] mb-2">
                   You and {invitedBy} are now teammates.
                 </p>
-                <p className="text-[#5f574f] text-[8px] leading-[2] mb-6">
-                  bubl will find your match and text you both on Thursday!
+                <p className="text-[#64748b] text-[8px] leading-[2] mb-6">
+                  ditto will plan your double date and text you both on Wednesday!
                 </p>
                 <p
                   className="text-[#ffec27] text-[7px] uppercase"
@@ -145,8 +145,8 @@ export function JoinPage() {
               </div>
             ) : (
               <>
-                <p className="text-[#ff77a8] text-[8px] sm:text-[10px] mb-2 sm:mb-3 text-center">&lt; TEAMMATE INVITE &gt;</p>
-                <p className="text-[#29adff] text-[8px] sm:text-[9px] text-center mb-3 sm:mb-4 leading-[2] break-words">
+                <p className="text-[#ec4899] text-[8px] sm:text-[10px] mb-2 sm:mb-3 text-center">&lt; TEAMMATE INVITE &gt;</p>
+                <p className="text-[#6366f1] text-[8px] sm:text-[9px] text-center mb-3 sm:mb-4 leading-[2] break-words">
                   {invitedBy} invited you to be their teammate!
                 </p>
                 <h2 className="text-[16px] sm:text-[28px] text-center mb-6 sm:mb-8 text-[#ffec27]">
@@ -179,7 +179,7 @@ export function JoinPage() {
                       { value: "University High School", label: "University High School" },
                     ]} />
 
-                  {error && <p className="text-[11px] text-[#ff004d] text-center">! {error}</p>}
+                  {error && <p className="text-[11px] text-[#ffffff] text-center">! {error}</p>}
 
                   <button
                     onClick={submit}
@@ -188,7 +188,7 @@ export function JoinPage() {
                     style={{
                       border: "4px solid #00e436",
                       background: "#00e436",
-                      color: "#1d2b53",
+                      color: "#1c2444",
                       boxShadow: "4px 4px 0 #008751",
                     }}
                   >

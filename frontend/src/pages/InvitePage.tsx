@@ -36,17 +36,17 @@ const BOY_NAMES = [
 
 /* ─── Player slot ─── */
 function PixelPlayer({ name, filled, color, ready, onInvite, inviteCopied }: { name?: string; filled: boolean; color: "blue" | "pink"; ready?: boolean; onInvite?: () => void; inviteCopied?: boolean }) {
-  const c = color === "blue" ? "#29adff" : "#ff77a8";
-  const cDark = color === "blue" ? "#1a6b99" : "#993d64";
+  const c = color === "blue" ? "#6366f1" : "#ec4899";
+  const cDark = color === "blue" ? "#3730a3" : "#9d174d";
 
   return (
     <div className="flex flex-col items-center gap-2 sm:gap-3 w-[100px] sm:w-[140px]">
       <div
         className="w-full aspect-[3/4] flex items-center justify-center p-2"
         style={{
-          border: `4px solid ${filled ? c : "#5f574f"}`,
+          border: `4px solid ${filled ? c : "#64748b"}`,
           borderStyle: filled ? "solid" : "dashed",
-          background: filled ? "rgba(41,173,255,0.08)" : "#0d0d1a",
+          background: filled ? "rgba(41,173,255,0.08)" : "#111827",
           boxShadow: filled ? `4px 4px 0 ${cDark}` : "none",
         }}
       >
@@ -63,7 +63,7 @@ function PixelPlayer({ name, filled, color, ready, onInvite, inviteCopied }: { n
             style={{
               border: `3px solid ${inviteCopied ? "#00e436" : c}`,
               background: inviteCopied ? "#00e436" : c,
-              color: "#1d2b53",
+              color: "#1c2444",
               boxShadow: `2px 2px 0 ${inviteCopied ? "#008751" : cDark}`,
             }}
           >
@@ -74,9 +74,9 @@ function PixelPlayer({ name, filled, color, ready, onInvite, inviteCopied }: { n
       <div
         className="w-full py-2 text-center text-[8px] sm:text-[9px]"
         style={{
-          border: `4px solid ${filled ? c : "#5f574f"}`,
+          border: `4px solid ${filled ? c : "#64748b"}`,
           background: filled ? c : "transparent",
-          color: filled ? "#1d2b53" : "#5f574f",
+          color: filled ? "#1c2444" : "#64748b",
           boxShadow: filled ? `3px 3px 0 ${cDark}` : "none",
         }}
       >
@@ -91,8 +91,8 @@ function PixelPlayer({ name, filled, color, ready, onInvite, inviteCopied }: { n
 /* ─── TBD match slot with spinning name ─── */
 function TbdPlayer({ index, matchGender }: { index: number; matchGender: "girl" | "boy" }) {
   const names = matchGender === "girl" ? GIRL_NAMES : BOY_NAMES;
-  const c = matchGender === "girl" ? "#ff004d" : "#29adff";
-  const cDark = matchGender === "girl" ? "#7e2553" : "#1a6b99";
+  const c = matchGender === "girl" ? "#ffffff" : "#6366f1";
+  const cDark = matchGender === "girl" ? "#9d174d" : "#3730a3";
   const [idx, setIdx] = useState(() => (index * 11) % names.length);
 
   useEffect(() => {
@@ -108,7 +108,7 @@ function TbdPlayer({ index, matchGender }: { index: number; matchGender: "girl" 
         className="w-full aspect-[3/4] flex items-center justify-center"
         style={{
           border: `4px solid ${c}`,
-          background: "#0d0d1a",
+          background: "#111827",
           boxShadow: `4px 4px 0 ${cDark}`,
         }}
       >
@@ -132,9 +132,9 @@ function VsBadge() {
       className="px-3 py-2 text-[14px] sm:text-[18px] text-[#ffec27] self-center shrink-0"
       style={{
         border: "4px solid #ffec27",
-        background: "#1d2b53",
-        boxShadow: "4px 4px 0 #998d17",
-        textShadow: "2px 2px 0 #998d17",
+        background: "#1c2444",
+        boxShadow: "4px 4px 0 #3730a3",
+        textShadow: "2px 2px 0 #3730a3",
       }}
     >
       VS
@@ -154,7 +154,7 @@ export function InvitePage() {
   const navigate = useNavigate();
 
   // Load initial data from sessionStorage (creator) or start empty (joiner)
-  const stored = code ? sessionStorage.getItem(`bubl-invite-${code}`) : null;
+  const stored = code ? sessionStorage.getItem(`ditto-invite-${code}`) : null;
   const initial = stored ? JSON.parse(stored) : null;
 
   const [team, setTeam] = useState<TeamData>({
@@ -208,7 +208,7 @@ export function InvitePage() {
 
   if (!loaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ ...px, background: "#0d0d1a" }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ ...px, background: "#111827" }}>
         <p className="text-[#ffec27] text-[9px] sm:text-[11px] text-center" style={{ animation: "blink-pixel 1s step-end infinite" }}>
           LOADING...
         </p>
@@ -219,7 +219,7 @@ export function InvitePage() {
   return (
     <div className="min-h-screen relative overflow-x-hidden" style={px}>
       {/* Background */}
-      <div className="fixed inset-0 z-0" style={{ background: "#0d0d1a" }} />
+      <div className="fixed inset-0 z-0" style={{ background: "#111827" }} />
       {/* Scanlines */}
       <div
         className="fixed inset-0 z-[1] pointer-events-none opacity-[0.04]"
@@ -233,14 +233,14 @@ export function InvitePage() {
 
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Nav */}
-        <nav className="border-b-4 border-[#29adff] bg-[#1d2b53]/95">
+        <nav className="border-b-4 border-[#6366f1] bg-[#1c2444]/95">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
-            <button onClick={() => navigate("/")} className="text-[#ff004d] text-[14px] sm:text-[18px]">bubl.</button>
+            <button onClick={() => navigate("/")} className="text-[#ffffff] text-[14px] sm:text-[18px]">ditto</button>
             <div className="flex items-center gap-2 sm:gap-4">
-              <button onClick={() => navigate("/signin")} className="text-[#c2c3c7] text-[7px] sm:text-[9px] hover:text-[#ffec27] transition-none">
+              <button onClick={() => navigate("/signin")} className="text-[#cbd5e1] text-[7px] sm:text-[9px] hover:text-[#ffec27] transition-none">
                 &gt;&gt; [ SIGN IN ]
               </button>
-              <span className="text-[#5f574f] text-[7px] sm:text-[9px]">|</span>
+              <span className="text-[#64748b] text-[7px] sm:text-[9px]">|</span>
               <span className="text-[#ffec27] text-[7px] sm:text-[9px]">&lt; PARTY UP &gt;</span>
             </div>
           </div>
@@ -251,8 +251,8 @@ export function InvitePage() {
 
           {/* Title */}
           <div className="text-center">
-            <p className="text-[#ff77a8] text-[9px] sm:text-[10px] mb-3">&lt; DOUBLE DATE MODE &gt;</p>
-            <h1 className="text-[16px] sm:text-[28px] lg:text-[34px] text-[#fff1e8] leading-[1.6]">
+            <p className="text-[#ec4899] text-[9px] sm:text-[10px] mb-3">&lt; DOUBLE DATE MODE &gt;</p>
+            <h1 className="text-[16px] sm:text-[28px] lg:text-[34px] text-[#ffffff] leading-[1.6]">
               {teamFull ? (
                 <span className="text-[#ffec27]">ready up</span>
               ) : (
@@ -266,9 +266,9 @@ export function InvitePage() {
             className="px-4 sm:px-5 py-2 text-[8px] sm:text-[13px]"
             style={{
               border: `4px solid ${teamFull ? "#00e436" : "#ffec27"}`,
-              background: "#1d2b53",
+              background: "#1c2444",
               color: teamFull ? "#00e436" : "#ffec27",
-              boxShadow: `4px 4px 0 ${teamFull ? "#008751" : "#998d17"}`,
+              boxShadow: `4px 4px 0 ${teamFull ? "#008751" : "#3730a3"}`,
             }}
           >
             [ {playerCount} / 2 ] PLAYERS JOINED
@@ -294,26 +294,26 @@ export function InvitePage() {
           </div>
 
           {/* Message */}
-          <p className="text-[#c2c3c7] text-[7px] sm:text-[10px] text-center leading-[2] sm:leading-[2.2] max-w-xs sm:max-w-sm px-2 break-words">
+          <p className="text-[#cbd5e1] text-[7px] sm:text-[10px] text-center leading-[2] sm:leading-[2.2] max-w-xs sm:max-w-sm px-2 break-words">
             {teamFull
-              ? "Both teammates are in! bubl will find your match and text you on Thursday."
-              : "Invite your friend to join your team. Once both slots are filled, bubl will find your match!"
+              ? "Both teammates are in! ditto will plan your double date and text you on Wednesday."
+              : "Invite your friend to join your team. Once both slots are filled, ditto will find your match!"
             }
           </p>
 
           {/* Buttons */}
           {teamFull ? (
             <a
-              href="sms:textbubl@icloud.com&body=bubl i've signed up!"
+              href="sms:textditto@icloud.com&body=ditto i've signed up!"
               className="px-6 sm:px-8 py-3 sm:py-4 text-[9px] sm:text-[13px] active:translate-x-[2px] active:translate-y-[2px] inline-block text-center"
               style={{
                 border: "4px solid #00e436",
                 background: "#00e436",
-                color: "#1d2b53",
+                color: "#1c2444",
                 boxShadow: "4px 4px 0 #008751",
               }}
             >
-              &gt; READY UP — TEXT BUBL
+              &gt; READY UP — TEXT DITTO
             </a>
           ) : (
             <button
@@ -322,8 +322,8 @@ export function InvitePage() {
               style={{
                 border: "4px solid #ffec27",
                 background: copied ? "#00e436" : "#ffec27",
-                color: "#1d2b53",
-                boxShadow: copied ? "4px 4px 0 #008751" : "4px 4px 0 #998d17",
+                color: "#1c2444",
+                boxShadow: copied ? "4px 4px 0 #008751" : "4px 4px 0 #3730a3",
               }}
             >
               {copied ? "LINK COPIED!" : "> INVITE FRIEND"}
@@ -332,10 +332,10 @@ export function InvitePage() {
 
           {/* Status text */}
           <p
-            className="text-[#5f574f] text-[7px] sm:text-[8px] uppercase"
+            className="text-[#64748b] text-[7px] sm:text-[8px] uppercase"
             style={{ animation: "blink-pixel 1.5s step-end infinite" }}
           >
-            {teamFull ? "text bubl to ready up..." : "waiting for player 2..."}
+            {teamFull ? "text ditto to ready up..." : "waiting for player 2..."}
           </p>
         </div>
       </div>

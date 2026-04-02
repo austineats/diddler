@@ -100,7 +100,7 @@ export function SignupPage() {
 
       <nav className="fixed top-0 w-full z-50 border-b-4 border-[#29adff] bg-[#1d2b53]/95 backdrop-blur-sm">
         <div className="max-w-lg mx-auto px-6 h-14 flex items-center justify-between">
-          <span className="text-[#ff77a8] text-[14px]">bubl.</span>
+          <span className="text-[#ff77a8] text-[14px]">ditto</span>
           <span className="text-[#ffec27] text-[10px]">
             {step === "info" ? "[1/3]" : step === "photos" ? "[2/3]" : step === "interests" ? "[3/3]" : "[OK]"}
           </span>
@@ -296,7 +296,7 @@ export function SignupPage() {
             </div>
             <h1 className="text-[16px] text-[#00e436] leading-relaxed">YOU'RE IN</h1>
             <p className="text-[#c2c3c7] mt-4 text-[9px] leading-relaxed">
-              BUBL WILL TEXT YOU ON<br />WEDNESDAY WITH YOUR MATCH
+              DITTO WILL TEXT YOU ON<br />WEDNESDAY WITH YOUR DATE
             </p>
             <p className="text-[#c2c3c7]/40 mt-6 text-[8px]">
               YOU CAN CLOSE THIS PAGE NOW

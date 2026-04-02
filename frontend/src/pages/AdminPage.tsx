@@ -133,7 +133,7 @@ function timeAgo(date: string): string {
 }
 
 export function AdminPage() {
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem("bubl-admin") === "true");
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem("ditto-admin") === "true");
   const [passInput, setPassInput] = useState("");
   const [passError, setPassError] = useState(false);
 
@@ -142,6 +142,8 @@ export function AdminPage() {
   const [activity, setActivity] = useState<Activity[]>([]);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [analytics, setAnalytics] = useState({ totalVisits: 0, todayVisits: 0, weekVisits: 0, activeLastHour: 0 });
+  const [liveCount, setLiveCount] = useState(0);
+  const [liveVisitors, setLiveVisitors] = useState<{ path: string | null; ip: string | null; secondsAgo: number }[]>([]);
 
   const [tab, setTab] = useState<"dashboard" | "users" | "guys" | "girls" | "teams" | "logs" | "visits">("dashboard");
   const [teamFilter, setTeamFilter] = useState<string | null>(null);
@@ -156,18 +158,31 @@ export function AdminPage() {
   useEffect(() => { if (authed) load(); }, [authed]);
   useEffect(() => { setPage(1); setExpandedId(null); }, [tab, teamFilter, visitFilter, search]);
 
+  // Poll live visitors every 5s
+  useEffect(() => {
+    if (!authed) return;
+    const poll = () => {
+      fetch("/api/blind-date/admin/live").then(r => r.json()).then(d => {
+        if (d.ok) { setLiveCount(d.count); setLiveVisitors(d.visitors); }
+      }).catch(() => {});
+    };
+    poll();
+    const interval = setInterval(poll, 5000);
+    return () => clearInterval(interval);
+  }, [authed]);
+
   if (!authed) {
     return (
       <div className="min-h-screen bg-[#2c3e50] flex items-center justify-center font-['Open_Sans',sans-serif]">
         <div className="bg-white rounded p-8 w-80 shadow-lg">
-          <h1 className="text-xl font-bold text-[#2c3e50] mb-1">bubl. admin</h1>
+          <h1 className="text-xl font-bold text-[#2c3e50] mb-1">ditto admin</h1>
           <p className="text-[#999] text-sm mb-5">Sign in to continue</p>
           <input
             type="password" value={passInput} autoFocus
             onChange={e => { setPassInput(e.target.value); setPassError(false); }}
             onKeyDown={e => {
               if (e.key === "Enter") {
-                if (passInput === ADMIN_PASS) { sessionStorage.setItem("bubl-admin", "true"); setAuthed(true); }
+                if (passInput === ADMIN_PASS) { sessionStorage.setItem("ditto-admin", "true"); setAuthed(true); }
                 else setPassError(true);
               }
             }}
@@ -177,7 +192,7 @@ export function AdminPage() {
           {passError && <p className="text-[#e74c3c] text-xs mt-2">Wrong password</p>}
           <button
             onClick={() => {
-              if (passInput === ADMIN_PASS) { sessionStorage.setItem("bubl-admin", "true"); setAuthed(true); }
+              if (passInput === ADMIN_PASS) { sessionStorage.setItem("ditto-admin", "true"); setAuthed(true); }
               else setPassError(true);
             }}
             className="w-full mt-4 py-2.5 bg-[#1abc9c] hover:bg-[#16a085] text-white rounded text-sm font-semibold"
@@ -352,9 +367,9 @@ export function AdminPage() {
   ];
 
   const statCards2 = [
+    { label: "Live Now", value: liveCount, bg: liveCount > 0 ? "bg-[#e74c3c]" : "bg-[#95a5a6]", icon: <><Eye className="w-6 h-6 text-white/80" />{liveCount > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-white rounded-full animate-pulse" />}</>, isLive: true },
     { label: "Full Teams", value: fullTeams.length, bg: "bg-[#2ecc71]", icon: <UserCheck className="w-6 h-6 text-white/80" /> },
     { label: "Ready", value: readyTeams.length, bg: "bg-[#9b59b6]", icon: <Clock className="w-6 h-6 text-white/80" /> },
-    { label: "Active (1h)", value: analytics.activeLastHour, bg: "bg-[#e67e22]", icon: <Eye className="w-6 h-6 text-white/80" /> },
     { label: "Today Visits", value: analytics.todayVisits, bg: "bg-[#1abc9c]", icon: <Globe className="w-6 h-6 text-white/80" /> },
   ];
 
@@ -364,7 +379,7 @@ export function AdminPage() {
       {/* Sidebar */}
       <div className={`${SIDEBAR_W} bg-[#2c3e50] min-h-screen flex-shrink-0 flex flex-col ${sidebarOpen ? "" : "hidden"}`}>
         <div className="px-5 py-4 flex items-center gap-2">
-          <span className="text-white text-lg font-bold">bubl.</span>
+          <span className="text-white text-lg font-bold">ditto</span>
           <span className="text-[#1abc9c] text-lg font-light">Admin</span>
         </div>
 
@@ -425,7 +440,7 @@ export function AdminPage() {
                tab === "teams" ? "Teams" :
                tab === "logs" ? "Activity Log" : "Visits"}
             </h1>
-            <span className="text-[12px] text-[#999]">bubl. admin / {tab}</span>
+            <span className="text-[12px] text-[#999]">ditto admin / {tab}</span>
           </div>
 
           {loading ? (
@@ -448,7 +463,7 @@ export function AdminPage() {
               {/* Stat Cards Row 2 */}
               <div className="grid grid-cols-4 gap-4 mb-5">
                 {statCards2.map(s => (
-                  <div key={s.label} className={`${s.bg} rounded p-4 text-white flex items-center justify-between`}>
+                  <div key={s.label} className={`${s.bg} rounded p-4 text-white flex items-center justify-between relative`}>
                     <div>
                       <p className="text-[28px] font-bold leading-none">{s.value}</p>
                       <p className="text-[12px] text-white/70 mt-1">{s.label}</p>
@@ -507,7 +522,10 @@ export function AdminPage() {
               <div className="bg-white rounded shadow-sm mb-5">
                 <div className="px-4 py-3 border-b border-[#eee] flex items-center justify-between">
                   <h3 className="text-[14px] font-semibold text-[#333]">Today's Traffic <span className="font-normal text-[#999]">— Hourly</span></h3>
-                  <span className="text-[11px] text-[#999]">{analytics.todayVisits} visits today &middot; {analytics.activeLastHour} active last hour</span>
+                  <span className="text-[11px] text-[#999]">
+                    {liveCount > 0 && <><span className="inline-block w-1.5 h-1.5 bg-[#e74c3c] rounded-full animate-pulse mr-1" /><b className="text-[#e74c3c]">{liveCount} live</b> &middot; </>}
+                    {analytics.todayVisits} visits today &middot; {analytics.activeLastHour} active last hour
+                  </span>
                 </div>
                 <div className="p-4" style={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
@@ -521,6 +539,31 @@ export function AdminPage() {
                   </ResponsiveContainer>
                 </div>
               </div>
+
+              {/* Live Visitors */}
+              {liveCount > 0 && (
+                <div className="bg-white rounded shadow-sm mb-5">
+                  <div className="px-4 py-3 border-b border-[#eee] flex items-center justify-between">
+                    <h3 className="text-[14px] font-semibold text-[#333] flex items-center gap-2">
+                      <span className="w-2 h-2 bg-[#e74c3c] rounded-full animate-pulse" />
+                      Live Visitors
+                      <span className="font-normal text-[#999]">— {liveCount} online now</span>
+                    </h3>
+                  </div>
+                  <div className="divide-y divide-[#f5f5f5]">
+                    {liveVisitors.map((v, i) => (
+                      <div key={i} className="px-4 py-2.5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="w-2 h-2 bg-[#2ecc71] rounded-full" />
+                          <span className="text-[13px] text-[#333] font-medium">{v.path || "/"}</span>
+                          {v.ip && <span className="text-[11px] text-[#bbb] font-mono">{v.ip}</span>}
+                        </div>
+                        <span className="text-[11px] text-[#ccc]">{v.secondsAgo < 5 ? "just now" : `${v.secondsAgo}s ago`}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Recent Activity + Recent Signups side by side */}
               <div className="grid grid-cols-2 gap-4">

@@ -195,10 +195,10 @@ function buildSystemPrompt(
     if (team.status === "full") context += ` Both slots filled — match can happen once both ready up!`;
   }
   if (!user) {
-    context += `\nThis person is NOT signed up. They need to go to bubl.buzz to join.`;
+    context += `\nThis person is NOT signed up. They need to sign up on the site to join.`;
   }
 
-  return `You are bubl — a friendly Gen-Z matchmaker that sets up double dates every Thursday via iMessage.
+  return `You are ditto — a friendly Gen-Z matchmaker that plans real dates every Wednesday via iMessage.
 
 HOW YOU TEXT:
 - Like a real friend who's genuinely funny. Not a brand. Not corporate. A real person
@@ -211,24 +211,25 @@ HOW YOU TEXT:
 - Use their name sparingly, not every message
 - Always steer back to getting them to complete signup/onboarding/invite their friend after the joke
 
-HOW BUBL WORKS:
+HOW DITTO WORKS:
 - Sign up with a friend (teammate) for double dates
-- Every Thursday bubl matches two teams together
+- Every Wednesday ditto matches two teams and plans the date
 - All via iMessage — no app needed
-- Users "ready up" by texting bubl after signing up
+- Users "ready up" by texting ditto after signing up
 - Both teammates must join before matching begins
-- Invite link: bubl.buzz
 
 CONTEXT:${context}
 
 RULES:
 - If they mention signing up or being ready, hype them up
 - If asking about their match, build excitement without making up details
-- If not signed up, warmly push them to bubl.buzz
+- If not signed up, warmly push them to sign up on the site
 - If teammate hasn't joined, remind them to share the invite
-- Never say "I'm an AI/bot" — you ARE bubl, a matchmaker
+- Never say "I'm an AI/bot" — you ARE ditto, a matchmaker
 - NEVER repeat the same response you already sent
 - If someone keeps asking the same fun/silly question, you can play along ONCE then redirect. Don't keep entertaining it
+- If the conversation feels like it's going in circles or the person is clearly messing with you, just stop engaging. Reply with something like "aight im out ✌️" or "bro text me when you actually wanna sign up" and leave it
+- If messages seem automated or you're getting rapid-fire nonsense, don't reply at all
 - NEVER answer questions about AI, LLMs, coding, software, tech architecture, prompt engineering etc. You're a matchmaker, you don't know what any of that is. Just deflect with something like "bro i just set up dates i don't know what that means 😭"
 - CRITICAL: Keep replies UNDER 15 words. One sentence. That's it. Like a real text message
 - Think of how you'd reply to a friend in 3 seconds. That short
@@ -276,7 +277,7 @@ async function generateReply(
 
     return messages;
   } catch (e) {
-    console.error("[bubl] LLM error:", e);
+    console.error("[ditto] LLM error:", e);
     const firstName = user?.name?.split(" ")[0] || "";
     return [firstName ? `hey ${firstName}! 💜 give me one sec` : "hey! 💜 give me one sec"];
   }
@@ -297,7 +298,7 @@ async function processMessages(sender: string) {
     ? texts[0]
     : texts.map((t, i) => `(${i + 1}) ${t}`).join("\n");
 
-  console.log(`[bubl] Processing ${texts.length} msg(s) from ${sender}: "${combinedText}"`);
+  console.log(`[ditto] Processing ${texts.length} msg(s) from ${sender}: "${combinedText}"`);
 
   await startTyping(sender);
 
@@ -317,7 +318,7 @@ async function processMessages(sender: string) {
 
     // Reply with code directly — user initiated so it delivers
     await sdk.message(lastMsg).ifFromOthers().replyText(`your sign in code is: ${code}`).execute();
-    console.log(`[bubl] → ${sender}: OTP code sent`);
+    console.log(`[ditto] → ${sender}: OTP code sent`);
     logActivity("otp_sent", firstName || undefined, normalized, "OTP via iMessage (user-initiated)");
     await stopTyping(sender);
     return; // Don't run LLM for sign-in requests
@@ -340,7 +341,7 @@ async function processMessages(sender: string) {
     .ifFromOthers()
     .replyText(replies[0])
     .execute();
-  console.log(`[bubl] → ${sender}: "${replies[0]}"`);
+  console.log(`[ditto] → ${sender}: "${replies[0]}"`);
 
   await stopTyping(sender);
 
@@ -350,14 +351,40 @@ async function processMessages(sender: string) {
     await sleep(500);
     try {
       await sendContactCard(sender);
-      console.log(`[bubl] Sent contact card to ${sender}`);
+      console.log(`[ditto] Sent contact card to ${sender}`);
     } catch (e) {
-      console.warn(`[bubl] Contact card failed:`, e);
+      console.warn(`[ditto] Contact card failed:`, e);
     }
   }
 }
 
 // ─── Main agent ───
+
+// Addresses the bot should never reply to (itself, testing loops, etc.)
+const BLOCKED_SENDERS = new Set(
+  (process.env.BLOCKED_SENDERS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean)
+);
+
+// Detect conversation loops — if bot and user keep exchanging similar messages
+const recentExchanges = new Map<string, { count: number; lastTime: number }>();
+const LOOP_THRESHOLD = 6; // messages in window
+const LOOP_WINDOW = 60_000; // 1 minute
+
+function isLooping(sender: string): boolean {
+  const now = Date.now();
+  const entry = recentExchanges.get(sender);
+  if (!entry || now - entry.lastTime > LOOP_WINDOW) {
+    recentExchanges.set(sender, { count: 1, lastTime: now });
+    return false;
+  }
+  entry.count++;
+  entry.lastTime = now;
+  if (entry.count >= LOOP_THRESHOLD) {
+    recentExchanges.set(sender, { count: 0, lastTime: now }); // reset after triggering
+    return true;
+  }
+  return false;
+}
 
 export async function startBublAgent() {
   await sdk.startWatching({
@@ -369,7 +396,19 @@ export async function startBublAgent() {
       const text = (msg.text || "").trim();
       if (!text) return;
 
-      console.log(`[bubl] ← ${sender} [${msg.guid}]: "${text}"`);
+      // Block self-messages and known test accounts
+      if (BLOCKED_SENDERS.has(sender.toLowerCase())) {
+        console.log(`[ditto] Blocked sender ${sender}, ignoring`);
+        return;
+      }
+
+      // Detect rapid-fire loops (bot talking to mirror / spam)
+      if (isLooping(sender)) {
+        console.log(`[ditto] Loop detected with ${sender}, going silent`);
+        return;
+      }
+
+      console.log(`[ditto] ← ${sender} [${msg.guid}]: "${text}"`);
 
       // Read receipt immediately
       await sendReadReceipt(sender);
@@ -387,10 +426,10 @@ export async function startBublAgent() {
       if (existing) clearTimeout(existing);
 
       pendingTimers.set(sender, setTimeout(() => {
-        processMessages(sender).catch(e => console.error("[bubl] Process error:", e));
+        processMessages(sender).catch(e => console.error("[ditto] Process error:", e));
       }, REPLY_DELAY));
     },
   });
 
-  console.log("[bubl] Agent active — listening for iMessages");
+  console.log("[ditto] Agent active — listening for iMessages");
 }

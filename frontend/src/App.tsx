@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
+const VISITOR_ID = Math.random().toString(36).slice(2) + Date.now().toString(36);
+
 function TrackPageView() {
   const location = useLocation();
   useEffect(() => {
@@ -14,6 +16,21 @@ function TrackPageView() {
       }),
     }).catch(() => {});
   }, [location.pathname]);
+
+  // Heartbeat for live visitor tracking
+  useEffect(() => {
+    const ping = () => {
+      fetch("/api/blind-date/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId: VISITOR_ID, path: location.pathname }),
+      }).catch(() => {});
+    };
+    ping();
+    const interval = setInterval(ping, 30_000);
+    return () => clearInterval(interval);
+  }, [location.pathname]);
+
   return null;
 }
 
@@ -29,6 +46,7 @@ import { PartyPage } from "./pages/PartyPage";
 import { InvitePage } from "./pages/InvitePage";
 import { JoinPage } from "./pages/JoinPage";
 import { SignInPage } from "./pages/SignInPage";
+import { DoublesPage } from "./pages/DoublesPage";
 import "./index.css";
 
 export default function App() {
@@ -47,6 +65,7 @@ export default function App() {
         <Route path="/invite/:code" element={<InvitePage />} />
         <Route path="/join/:code" element={<JoinPage />} />
         <Route path="/signin" element={<SignInPage />} />
+        <Route path="/doubles" element={<DoublesPage />} />
         <Route path="/party" element={<PartyPage />} />
         <Route path="/party/:code" element={<PartyPage />} />
         <Route path="*" element={<NotFoundPage />} />

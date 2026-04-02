@@ -23,12 +23,12 @@ async function logActivity(action: string, actor_name?: string, actor_phone?: st
   }
 }
 
-/** Pick a random bubl reply */
-function bublWaitingReply(name: string): string {
+/** Pick a random ditto reply */
+function dittoWaitingReply(name: string): string {
   const replies = [
-    `lets gooo ${name}!! 🔥 im curating your match rn but i can only match you once your friend has joined. send them the invite link!`,
+    `lets gooo ${name}!! 🔥 im planning your date rn but i can only match you once your friend has joined. send them the invite link!`,
     `yooo ${name}! 🎮 you're in the queue! once your teammate joins i'll start finding your match. tell them to hurry up lol`,
-    `${name}!! welcome to bubl 💜 im getting everything ready but i need your friend to sign up first — share that invite link!`,
+    `${name}!! welcome to ditto 💜 im getting everything ready but i need your friend to sign up first — share that invite link!`,
     `ayy ${name} 🫶 signed up and locked in! waiting on your teammate to join so i can start the matchmaking magic ✨`,
     `${name}! 🎯 you're on the list. get your friend to join through your invite link and i'll find you the perfect double date!`,
   ];
@@ -139,7 +139,7 @@ blindDateRouter.post("/signup", upload.none(), async (req, res) => {
         console.log(`[BlindDate] ${name} joined team ${inviteCode}`);
         logActivity("team_joined", name.trim(), normalized, `Joined team ${inviteCode} (with ${team.player1_name})`);
 
-        // Don't send unsolicited iMessage — would get screened if they haven't texted bubl yet
+        // Don't send unsolicited iMessage — would get screened if they haven't texted ditto yet
         // The lobby page polls and updates automatically
       }
     } else {
@@ -351,6 +351,44 @@ blindDateRouter.get("/admin/teams", async (_req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Live visitors — in-memory heartbeat tracking
+// ---------------------------------------------------------------------------
+
+const liveVisitors = new Map<string, { lastSeen: number; path: string | null; ip: string | null }>();
+
+// Clean stale entries every 30s
+setInterval(() => {
+  const cutoff = Date.now() - 60_000; // 60s timeout
+  for (const [id, v] of liveVisitors) {
+    if (v.lastSeen < cutoff) liveVisitors.delete(id);
+  }
+}, 30_000);
+
+blindDateRouter.post("/heartbeat", (req, res) => {
+  const visitorId = req.body.visitorId;
+  if (!visitorId) return res.json({ ok: false });
+  const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || null;
+  liveVisitors.set(visitorId, {
+    lastSeen: Date.now(),
+    path: req.body.path || null,
+    ip,
+  });
+  return res.json({ ok: true });
+});
+
+blindDateRouter.get("/admin/live", (_req, res) => {
+  const cutoff = Date.now() - 60_000;
+  const active: { path: string | null; ip: string | null; secondsAgo: number }[] = [];
+  for (const [, v] of liveVisitors) {
+    if (v.lastSeen >= cutoff) {
+      active.push({ path: v.path, ip: v.ip, secondsAgo: Math.round((Date.now() - v.lastSeen) / 1000) });
+    }
+  }
+  return res.json({ ok: true, count: active.length, visitors: active });
+});
+
+// ---------------------------------------------------------------------------
 // POST /analytics — track page views
 // ---------------------------------------------------------------------------
 
@@ -418,7 +456,7 @@ blindDateRouter.get("/admin/activity", async (_req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// POST /ready — user texts "i've signed up", bubl replies
+// POST /ready — user texts "i've signed up", ditto replies
 // ---------------------------------------------------------------------------
 
 blindDateRouter.post("/ready", async (req, res) => {
@@ -450,7 +488,7 @@ blindDateRouter.post("/ready", async (req, res) => {
     if (team && team.status === "full") {
       reply = `${signup.name}!! both you and your teammate are locked in 🔥 im finding your match now. sit tight, match drop coming soon 👀`;
     } else {
-      reply = bublWaitingReply(signup.name);
+      reply = dittoWaitingReply(signup.name);
     }
 
     sendIMessage(normalized, reply)
@@ -519,8 +557,8 @@ blindDateRouter.post("/send-otp", async (req, res) => {
     const code = String(Math.floor(1000 + Math.random() * 9000));
     otpStore.set(normalized, { code, expires: Date.now() + 5 * 60 * 1000 }); // 5 min
 
-    // Send OTP via bubl iMessage
-    sendIMessage(normalized, `your bubl verification code is: ${code}`)
+    // Send OTP via ditto iMessage
+    sendIMessage(normalized, `your ditto verification code is: ${code}`)
       .catch(e => console.warn("[OTP] iMessage send failed:", e));
     console.log(`[OTP] Code for ${normalized}: ${code}`);
     logActivity("otp_sent", signup.name, normalized, "OTP requested");

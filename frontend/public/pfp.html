@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f1628;
+    position: relative;
+    font-family: 'Press Start 2P', monospace;
+    image-rendering: pixelated;
+  }
+
+  /* Scanline grid */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px
+      ),
+      repeating-linear-gradient(
+        90deg, transparent, transparent 3px,
+        rgba(255,255,255,0.008) 3px, rgba(255,255,255,0.008) 4px
+      );
+    pointer-events: none;
+  }
+
+  .logo {
+    font-size: 160px;
+    color: #FF0050;
+    letter-spacing: 6px;
+    text-shadow: 4px 4px 0 rgba(255,0,80,0.2);
+    position: relative;
+    z-index: 1;
+    padding-right: 6px;
+    text-align: center;
+  }
+
+  /* Cyan line top */
+  .line-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: #00c8ff;
+    box-shadow: 0 0 20px rgba(0,200,255,0.4);
+    z-index: 1;
+  }
+
+  /* Cyan line bottom */
+  .line-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: #00c8ff;
+    box-shadow: 0 0 20px rgba(0,200,255,0.4);
+    z-index: 1;
+  }
+
+  /* Pixel dots */
+  .pixel-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    z-index: 2;
+  }
+  .dot-yellow { background: #e8e44a; }
+  .dot-pink { background: #FF0050; }
+  .dot-cyan { background: #00c8ff; }
+</style>
+</head>
+<body>
+  <div class="line-top"></div>
+  <div class="line-bottom"></div>
+
+  <div class="pixel-dot dot-yellow" style="top: 80px; left: 90px;"></div>
+  <div class="pixel-dot dot-cyan" style="top: 120px; right: 140px;"></div>
+  <div class="pixel-dot dot-pink" style="bottom: 100px; right: 80px;"></div>
+  <div class="pixel-dot dot-yellow" style="bottom: 140px; left: 160px;"></div>
+
+  <div class="logo">bubl.</div>
+</body>
+</html>

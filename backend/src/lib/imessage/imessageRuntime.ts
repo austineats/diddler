@@ -121,9 +121,44 @@ export async function stopIMessageRuntime(): Promise<void> {
 /**
  * Handle a single incoming iMessage.
  */
+// Blocked senders — never reply to these (prevents self-loops, test accounts)
+const BLOCKED_SENDERS = new Set(
+  (process.env.BLOCKED_SENDERS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean)
+);
+
+// Loop detection — silence rapid-fire conversations
+const loopTracker = new Map<string, { count: number; lastTime: number }>();
+function isLooping(sender: string): boolean {
+  const now = Date.now();
+  const entry = loopTracker.get(sender);
+  if (!entry || now - entry.lastTime > 60_000) {
+    loopTracker.set(sender, { count: 1, lastTime: now });
+    return false;
+  }
+  entry.count++;
+  entry.lastTime = now;
+  if (entry.count >= 6) {
+    loopTracker.set(sender, { count: 0, lastTime: now });
+    return true;
+  }
+  return false;
+}
+
 async function handleIMessage(agentId: string, msg: IMessage): Promise<void> {
   const userPhone = msg.sender; // phone number or email
   const body = msg.text ?? "";
+
+  // Block self-messages and known test accounts
+  if (BLOCKED_SENDERS.has(userPhone.toLowerCase())) {
+    console.log(`[iMessage] Blocked sender ${userPhone}, ignoring`);
+    return;
+  }
+
+  // Detect rapid-fire loops
+  if (isLooping(userPhone)) {
+    console.log(`[iMessage] Loop detected with ${userPhone}, going silent`);
+    return;
+  }
 
   console.log(`[iMessage] From ${userPhone}: "${body.slice(0, 50)}"`);
 

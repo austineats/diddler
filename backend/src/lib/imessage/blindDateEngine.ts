@@ -140,104 +140,104 @@ export async function handleBlindDateRedirect(
   userPhone: string,
   text: string,
 ): Promise<boolean> {
-  // Check if user has a signup
-  const signup = await prisma.blindDateSignup.findUnique({
-    where: { phone: userPhone },
-  });
-
-  if (!signup) return false; // not signed up at all — let normal agent handle
-
-  // If they're already matched or revealed, don't redirect
-  if (signup.status === "matched") return false;
-
-  // Check if they have a full team with both players ready
-  const team = await prisma.blindDateTeam.findFirst({
-    where: {
-      OR: [{ player1_phone: userPhone }, { player2_phone: userPhone }],
-    },
-  });
-
-  const hasFullTeam = team && team.status === "full";
-  const isReady = team && (
-    (team.player1_phone === userPhone && team.player1_ready) ||
-    (team.player2_phone === userPhone && team.player2_ready)
-  );
-
-  // If they have a full team and are ready, they're just waiting for a match — don't redirect
-  if (hasFullTeam && isReady) return false;
-
-  // They need to do something — generate a witty redirect
   const baseUrl = process.env.BASE_URL || "https://ara-malarial-poisedly.ngrok-free.dev";
-  const firstName = signup.name.split(" ")[0].toLowerCase();
   const trimmed = text.trim();
 
-  // Determine what they need to do
+  // Check if user has a signup
+  let signup: { name: string; status: string; phone: string } | null = null;
+  try {
+    signup = await prisma.blindDateSignup.findUnique({
+      where: { phone: userPhone },
+      select: { name: true, status: true, phone: true },
+    });
+  } catch (e) {
+    console.warn("[BlindDate] Signup lookup failed:", e);
+  }
+
+  // If they're already matched — let them through
+  if (signup?.status === "matched") return false;
+
+  // Check team status if signed up
+  let team: { code: string; status: string; player1_phone: string; player1_ready: boolean; player2_phone: string | null; player2_ready: boolean } | null = null;
+  if (signup) {
+    try {
+      team = await prisma.blindDateTeam.findFirst({
+        where: { OR: [{ player1_phone: userPhone }, { player2_phone: userPhone }] },
+        select: { code: true, status: true, player1_phone: true, player1_ready: true, player2_phone: true, player2_ready: true },
+      });
+    } catch (e) {
+      console.warn("[BlindDate] Team lookup failed:", e);
+    }
+  }
+
+  // If they have a full team and are ready — waiting for match, let through
+  if (signup && team?.status === "full") {
+    const isReady = (team.player1_phone === userPhone && team.player1_ready) ||
+      (team.player2_phone === userPhone && team.player2_ready);
+    if (isReady) return false;
+  }
+
+  // Everyone else gets redirected — figure out what they need
+  let firstName = "bestie";
   let action: string;
   let link: string;
-  if (!team) {
+
+  if (!signup) {
+    // Not signed up at all
+    action = "sign up for ditto first";
+    link = `${baseUrl}/signup`;
+  } else if (!team) {
+    firstName = signup.name.split(" ")[0].toLowerCase();
     action = "create or join a team";
     link = `${baseUrl}/signup`;
   } else if (team.status === "waiting") {
+    firstName = signup.name.split(" ")[0].toLowerCase();
     action = "get your teammate to join";
     link = `${baseUrl}/invite/${team.code}`;
-  } else if (!isReady) {
-    action = "mark yourself as ready";
-    link = `${baseUrl}/signup`;
   } else {
-    action = "finish setting up";
+    firstName = signup.name.split(" ")[0].toLowerCase();
+    action = "mark yourself as ready";
     link = `${baseUrl}/signup`;
   }
 
+  // Generate witty redirect via LLM
   try {
     const client = getRawLLMClient();
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      max_tokens: 150,
+      max_tokens: 120,
       temperature: 0.9,
       messages: [
         {
           role: "system",
-          content: `You are bubl's AI matchmaker for college blind dates. You talk in all lowercase, casual texting style. You're witty, funny, and a little sassy.
+          content: `You are ditto's AI matchmaker for blind dates. You plan dates, not just matches.
 
-The user "${firstName}" texted you but they haven't finished setting up for miit (the blind date event). They need to: ${action}.
+Someone texted you but they haven't finished setting up. ${signup ? `Their name is ${firstName}.` : "They haven't even signed up yet."} They need to: ${action}.
 
-Your job:
-1. Briefly acknowledge what they said in a funny/witty way (1 sentence max)
-2. Redirect them back to finishing their setup
+Write a reply that:
+1. Acknowledges what they said in a funny/witty way (reference their actual words)
+2. Ties it back to the blind date — like "before we talk about X you gotta finish signing up"
+3. Is playful and teasing, like roasting a friend
 
-Rules:
-- All lowercase, no periods at end of sentences
-- Be playful and teasing, like a friend roasting them
-- Always tie their message back to the blind date
-- Never actually help with their request — always redirect
-- Keep it to 2-3 short sentences max
-- Don't use the word "onboarding"
-- Reference their actual message content`,
+Style: all lowercase, no periods, casual texting, max 2 sentences. No emojis unless it really fits. Don't say "onboarding" or "setup process". Be creative — don't repeat the same redirect phrasing.`,
         },
-        {
-          role: "user",
-          content: trimmed || "hi",
-        },
+        { role: "user", content: trimmed || "hi" },
       ],
     });
 
-    let reply = response.choices[0]?.message?.content?.trim() || "";
-
-    // Append the link on a new line
-    if (reply) {
-      reply += `\n\nfinish setting up here: ${link}`;
-    } else {
-      reply = `hey ${firstName} you still gotta ${action} before i can help with anything else\n\nlock in real quick: ${link}`;
-    }
+    const wittyPart = response.choices[0]?.message?.content?.trim() || "";
+    const reply = wittyPart
+      ? `${wittyPart}\n\nlock in here real quick: ${link}`
+      : `hey ${firstName} you gotta ${action} before i can do anything for you\n\nlock in here: ${link}`;
 
     await sendIMessage(userPhone, reply);
-    console.log(`[BlindDate] Redirect sent to ${userPhone}: needs to ${action}`);
+    console.log(`[BlindDate] Redirect to ${userPhone}: ${action}`);
   } catch (e) {
-    // Fallback if LLM fails
-    console.warn("[BlindDate] Redirect LLM failed, using fallback:", e);
+    // Fallback — no LLM needed
+    console.warn("[BlindDate] Redirect LLM failed:", e);
     await sendIMessage(
       userPhone,
-      `hey ${firstName} you gotta ${action} first before we can chat\n\nlock in here: ${link}`,
+      `hey ${firstName} you gotta ${action} before we can chat\n\nlock in here: ${link}`,
     );
   }
 
