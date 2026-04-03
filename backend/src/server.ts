@@ -18,6 +18,7 @@ import setupRouter from "./routes/setup.js";
 import { blindDateRouter } from "./routes/blindDate.js";
 import { bublRouter } from "./routes/bublProfiles.js";
 import { partyRouter } from "./routes/party.js";
+import { instagramRouter } from "./routes/instagram.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);
@@ -43,6 +44,7 @@ app.use("/setup", setupRouter);
 app.use("/api/blind-date", blindDateRouter);
 app.use("/api/bubl", bublRouter);
 app.use("/api/party", partyRouter);
+app.use("/api/instagram", instagramRouter);
 
 // Serve frontend static files
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -66,17 +68,18 @@ app.get("*", (_req, res) => {
 app.listen(port, "0.0.0.0", async () => {
   console.log(`Bubl API running on http://localhost:${port}`);
 
-  try {
-    const { startIMessageRuntime } = await import("./lib/imessage/imessageRuntime.js");
-    await startIMessageRuntime();
-  } catch (e) {
-    console.warn("[Bubl] Failed to start iMessage runtime:", e instanceof Error ? e.message : e);
-  }
+  // iMessage runtime disabled — using Instagram DM bot instead
+  // try {
+  //   const { startIMessageRuntime } = await import("./lib/imessage/imessageRuntime.js");
+  //   await startIMessageRuntime();
+  // } catch (e) {
+  //   console.warn("[Bubl] Failed to start iMessage runtime:", e instanceof Error ? e.message : e);
+  // }
 
-  try {
-    const { startScheduler } = await import("./lib/imessage/scheduler.js");
-    startScheduler();
-  } catch (e) {
-    console.warn("[Bubl] Failed to start scheduler:", e instanceof Error ? e.message : e);
-  }
+  // try {
+  //   const { startScheduler } = await import("./lib/imessage/scheduler.js");
+  //   startScheduler();
+  // } catch (e) {
+  //   console.warn("[Bubl] Failed to start scheduler:", e instanceof Error ? e.message : e);
+  // }
 });
